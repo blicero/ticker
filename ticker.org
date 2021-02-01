@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-01 12:36:00 krylon>
+# Time-stamp: <2021-02-01 13:13:44 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -12,9 +12,30 @@
   classifier to automatically suggest ratings, as well as filtering news items
   based on suggested ratings.
 ** Clocktable
+   #+BEGIN: clocktable :scope file :maxlevel 20
+   #+CAPTION: Clock summary at [2021-02-01 Mo 13:13]
+   | Headline             | Time   |      |      |
+   |----------------------+--------+------+------|
+   | *Total time*         | *0:24* |      |      |
+   |----------------------+--------+------+------|
+   | Ticker               | 0:24   |      |      |
+   | \_  Components [0/2] |        | 0:24 |      |
+   | \_    Feed [0/2]     |        |      | 0:24 |
+   #+END:
+
 ** Questions
-** Components
-*** Feed
+** Components [0/2]
+   :PROPERTIES:
+   :COOKIE_DATA: todo recursive
+   :VISIBILITY: children
+  :END:
+*** Feed [0/2]
+    :LOGBOOK:
+    CLOCK: [2021-02-01 Mo 12:46]--[2021-02-01 Mo 13:10] =>  0:24
+    :END:
+**** MEDITATE URL
+     Is there an advantage to representing the URL as a *net.URL object?
+**** TODO Fetching
 *** Database
 *** Web interface
 ** Tedious tasks
