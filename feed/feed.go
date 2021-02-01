@@ -2,13 +2,14 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 13:09:53 krylon>
+// Time-stamp: <2021-02-01 15:50:36 krylon>
 
 // Package feed provides the basic data type and logic to represent and interact
 // with RSS feeds.
 package feed
 
 import (
+	"errors"
 	"log"
 	"ticker/common"
 	"ticker/logdomain"
@@ -16,6 +17,9 @@ import (
 
 	"github.com/SlyMarbo/rss"
 )
+
+// ErrInactive indicates that a Feed is not active.
+var ErrInactive = errors.New("feed is not active")
 
 // Feed represents an RSS feed.
 type Feed struct {
@@ -36,7 +40,7 @@ func New(id int64, name, url string, interval time.Duration, active bool) (*Feed
 		ID:       id,
 		Name:     name,
 		URL:      url,
-		Interval: Interval,
+		Interval: interval,
 		Active:   active,
 	}
 
@@ -64,6 +68,10 @@ func (f *Feed) Fetch() (*rss.Feed, error) {
 		fd  *rss.Feed
 	)
 
+	if !f.Active {
+		return nil, ErrInactive
+	}
+
 	if f.rfeed != nil {
 		fd = f.rfeed
 	} else if fd, err = rss.Fetch(f.URL); err != nil {
@@ -72,8 +80,20 @@ func (f *Feed) Fetch() (*rss.Feed, error) {
 			f.URL,
 			err.Error())
 		return nil, err
+	} else {
+		f.rfeed = fd
+		f.LastUpdate = time.Now()
 	}
 
-	f.rfeed = fd
+	if f.IsDue() {
+		if err = fd.Update(); err != nil {
+			f.log.Printf("[ERROR] Cannot update %s (%s): %s\n",
+				f.Name,
+				f.URL,
+				err.Error())
+			return nil, err
+		}
+	}
 
+	return fd, nil
 } // func (f *Feed) Fetch() (*rss.Feed, error)
