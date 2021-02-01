@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 10:15:23 krylon>
+// Time-stamp: <2021-02-01 15:40:23 krylon>
 
 // Package common contain definitions used throughout the application
 package common
@@ -18,8 +18,8 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"ticker/logdomain"
 	"time"
-	"vm/logdomain"
 
 	"github.com/hashicorp/logutils"
 	uuid "github.com/odeke-em/go-uuid"
