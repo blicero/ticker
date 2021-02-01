@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 09:16:14 krylon>
+// Time-stamp: <2021-02-01 10:21:42 krylon>
 
 // Package logdomain provides constants to identify the different
 // "areas" of the application that perform logging.
@@ -16,11 +16,13 @@ type ID uint8
 // These constants identify the various logging domains.
 const (
 	Common ID = iota
+	Feed
 )
 
 // AllDomains returns a slice of all the known log sources.
 func AllDomains() []ID {
 	return []ID{
 		Common,
+		Feed,
 	}
 } // func AllDomains() []ID
