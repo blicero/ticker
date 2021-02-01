@@ -1,0 +1,17 @@
+*~
+*#
+.*
+*_string.go
+*_gen.go
+*ffjson.go
+*templates.go
+build
+build_templates
+*.log
+*TAGS*
+pepper
+bak.*
+*.bak
+zettelkasten
+vm
+ticker
