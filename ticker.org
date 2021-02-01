@@ -1,0 +1,20 @@
+# -*- mode: org; fill-column: 78; -*-
+# Time-stamp: <2021-02-01 12:36:00 krylon>
+#
+#+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
+#+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
+#+TODO: MEDITATE(m) PLANNING(p) | FAILED(f) CANCELLED(c) SUSPENDED(s)
+#+PRIORITIES: A G D
+
+* Ticker
+  Ticker is an RSS/Atom reader with a builtin archive and web interface.
+  It supports tagging news items, and rating news items, with a bayesian
+  classifier to automatically suggest ratings, as well as filtering news items
+  based on suggested ratings.
+** Clocktable
+** Questions
+** Components
+*** Feed
+*** Database
+*** Web interface
+** Tedious tasks
