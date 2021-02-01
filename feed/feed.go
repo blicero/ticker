@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 09:57:38 krylon>
+// Time-stamp: <2021-02-01 10:37:08 krylon>
 
 // Package feed provides the basic data type and logic to represent and interact
 // with RSS feeds.
@@ -22,5 +22,10 @@ type Feed struct {
 
 // IsDue returns true if the Feed is due for a refresh.
 func (f *Feed) IsDue() bool {
-	return !f.LastUpdate.Add(f.Interval).After(time.Now())
+	return !f.Next().After(time.Now())
 } // func (f *Feed) IsDue() bool
+
+// Next returns the Timestamp when the Feed is next due for a refresh.
+func (f *Feed) Next() time.Time {
+	return f.LastUpdate.Add(f.Interval)
+} // func (f *Feed) Next() time.Time
