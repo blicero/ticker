@@ -2,7 +2,9 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 09:18:40 krylon>
+// Time-stamp: <2021-02-01 10:15:50 krylon>
+
+// +build ignore
 
 package main
 
@@ -27,8 +29,6 @@ import (
 
 	"github.com/hashicorp/logutils"
 )
-
-// +build ignore
 
 const logFile = "./dbg.build.log"
 const lintCommand = "mygolint"
@@ -58,13 +58,17 @@ var candidates = map[string][]string{
 		"logdomain",
 		"common",
 	},
-	"test": []string{},
+	"test": []string{
+		"feed",
+	},
 	"vet": []string{
 		"common",
+		"feed",
 		"logdomain",
 	},
 	"lint": []string{
 		"common",
+		"feed",
 		"logdomain",
 	},
 }
@@ -215,7 +219,7 @@ This flag is not case-sensitive.`, strings.Join(orderedSteps, ", ")))
 	if steps["build"] {
 		var output []byte
 
-		dbg.Println("[INFO] Building vm\n")
+		dbg.Println("[INFO] Building ticker\n")
 
 		// Put aside a possibly existing binary
 		if err = backupExecutable(); err != nil {
@@ -228,7 +232,7 @@ This flag is not case-sensitive.`, strings.Join(orderedSteps, ", ")))
 		var sWorkerCnt = strconv.FormatInt(int64(workerCnt), 10)
 		var cmd = exec.Command("go", "build", "-v", "-p", sWorkerCnt)
 		if output, err = cmd.CombinedOutput(); err != nil {
-			dbg.Printf("[ERROR] Error building vm: %s\n%s\n",
+			dbg.Printf("[ERROR] Error building ticker: %s\n%s\n",
 				err.Error(),
 				output)
 			os.Exit(1)
@@ -331,7 +335,7 @@ func worker(n int, op string, pkgq <-chan string, errq chan<- error, wg *sync.Wa
 	defer wg.Done()
 
 	for folder := range pkgq {
-		pkg = "vm/" + folder
+		pkg = "ticker/" + folder
 		dbg.Printf("[TRACE] Worker %d call %s on %s\n",
 			n,
 			op,
@@ -422,7 +426,7 @@ func initLog(min string) error {
 		writer io.Writer
 		// Trailing space because Logger does not seem to insert one
 		// between fields of the line.
-		logName = "vm.build "
+		logName = "ticker.build "
 	)
 
 	// fmt.Printf("Creating Logger with minLevel = %q\n",
