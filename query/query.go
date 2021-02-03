@@ -2,9 +2,9 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 16:44:47 krylon>
+// Time-stamp: <2021-02-02 19:40:41 krylon>
 
-//go:generate string -type=ID
+//go:generate stringer -type=ID
 
 // Package query provides symbolic constants to identify SQL queries.
 package query
@@ -13,6 +13,7 @@ type ID uint8
 
 const (
 	FeedAdd ID = iota
+	FeedGetAll
 	FeedGetByID
 	FeedSetTimestamp
 )

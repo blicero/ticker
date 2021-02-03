@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 15:40:23 krylon>
+// Time-stamp: <2021-02-01 18:03:50 krylon>
 
 // Package common contain definitions used throughout the application
 package common
@@ -111,6 +111,9 @@ var BaseDir = filepath.Join(
 // LogPath is the filename of the log file.
 var LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppName)))
 
+// DbPath is the filename of the database.
+var DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
+
 // InitApp performs some basic preparations for the application to run.
 // Currently, this means creating the BaseDir folder.
 func InitApp() error {
@@ -139,6 +142,7 @@ func SetBaseDir(path string) error {
 
 	BaseDir = path
 	LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppName)))
+	DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
 
 	var (
 		err error

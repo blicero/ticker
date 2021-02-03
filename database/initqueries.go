@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 16:58:25 krylon>
+// Time-stamp: <2021-02-01 17:12:45 krylon>
 
 package database
 
@@ -11,9 +11,10 @@ var initQueries = []string{
 CREATE TABLE feed (
     id			INTEGER PRIMARY KEY,
     name		TEXT NOT NULL,
-    addr		TEXT UNIQUE NOT NULL,
+    url  		TEXT UNIQUE NOT NULL,
     refresh_interval    INTEGER NOT NULL,
     refresh_timestamp   INTEGER NOT NULL DEFAULT 0,
+    active              INTEGER NOT NULL DEFAULT 1,
 
     CONSTRAINT interval_positive CHECK (refresh_interval > 0)
 )
