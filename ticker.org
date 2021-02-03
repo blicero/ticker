@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-01 13:13:44 krylon>
+# Time-stamp: <2021-02-02 19:14:36 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -31,11 +31,19 @@
   :END:
 *** Feed [0/2]
     :LOGBOOK:
+    CLOCK: [2021-02-01 Mo 15:27]--[2021-02-01 Mo 16:29] =>  1:02
     CLOCK: [2021-02-01 Mo 12:46]--[2021-02-01 Mo 13:10] =>  0:24
     :END:
 **** MEDITATE URL
      Is there an advantage to representing the URL as a *net.URL object?
 **** TODO Fetching
-*** Database
+*** Database [0/0]
+    :LOGBOOK:
+    CLOCK: [2021-02-02 Di 18:50]
+    CLOCK: [2021-02-02 Di 07:53]--[2021-02-02 Di 07:59] =>  0:06
+    CLOCK: [2021-02-01 Mo 16:30]--[2021-02-01 Mo 20:40] =>  4:10
+    :END:
+    Is there any reason /not/ to use good old SQLite?
+    I don't think so.
 *** Web interface
 ** Tedious tasks
