@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-02 20:36:08 krylon>
+// Time-stamp: <2021-02-03 20:06:16 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -672,10 +672,11 @@ EXEC_QUERY:
 		if err = rows.Scan(&f.ID, &f.Name, &f.URL, &interval, &stamp, &f.Active); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n", err.Error())
 			return nil, err
+		} else if stamp != 0 {
+			f.LastUpdate = time.Unix(stamp, 0)
 		}
 
 		f.Interval = time.Second * time.Duration(interval)
-		f.LastUpdate = time.Unix(stamp, 0)
 
 		list = append(list, f)
 	}

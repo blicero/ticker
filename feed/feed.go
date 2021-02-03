@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 15:50:36 krylon>
+// Time-stamp: <2021-02-03 19:57:35 krylon>
 
 // Package feed provides the basic data type and logic to represent and interact
 // with RSS feeds.
@@ -10,6 +10,7 @@ package feed
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"ticker/common"
 	"ticker/logdomain"
@@ -50,6 +51,16 @@ func New(id int64, name, url string, interval time.Duration, active bool) (*Feed
 
 	return f, nil
 } // func New(name, url string, interval time.Duration, active bool) (*Feed, error)
+
+func (f *Feed) String() string {
+	return fmt.Sprintf("Feed{ ID: %d, Name: %q, URL: %q, Interval: %s, LastUpdate: %s, Active: %t }",
+		f.ID,
+		f.Name,
+		f.URL,
+		f.Interval,
+		f.LastUpdate.Format(common.TimestampFormat),
+		f.Active)
+} // func (f *Feed) String() string
 
 // IsDue returns true if the Feed is due for a refresh.
 func (f *Feed) IsDue() bool {
