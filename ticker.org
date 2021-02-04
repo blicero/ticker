@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-02 19:14:36 krylon>
+# Time-stamp: <2021-02-04 10:03:19 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,14 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-02-01 Mo 13:13]
-   | Headline             | Time   |      |      |
-   |----------------------+--------+------+------|
-   | *Total time*         | *0:24* |      |      |
-   |----------------------+--------+------+------|
-   | Ticker               | 0:24   |      |      |
-   | \_  Components [0/2] |        | 0:24 |      |
-   | \_    Feed [0/2]     |        |      | 0:24 |
+   #+CAPTION: Clock summary at [2021-02-04 Do 10:03]
+   | Headline             | Time    |       |       |
+   |----------------------+---------+-------+-------|
+   | *Total time*         | *12:07* |       |       |
+   |----------------------+---------+-------+-------|
+   | Ticker               | 12:07   |       |       |
+   | \_  Components [0/2] |         | 12:07 |       |
+   | \_    Feed [0/2]     |         |       |  1:26 |
+   | \_    Database [0/0] |         |       | 10:41 |
    #+END:
 
 ** Questions
@@ -39,7 +40,9 @@
 **** TODO Fetching
 *** Database [0/0]
     :LOGBOOK:
-    CLOCK: [2021-02-02 Di 18:50]
+    CLOCK: [2021-02-04 Do 09:18]--[2021-02-04 Do 10:03] =>  0:45
+    CLOCK: [2021-02-03 Mi 19:24]--[2021-02-03 Mi 23:04] =>  3:40
+    CLOCK: [2021-02-02 Di 18:50]--[2021-02-02 Di 20:50] =>  2:00
     CLOCK: [2021-02-02 Di 07:53]--[2021-02-02 Di 07:59] =>  0:06
     CLOCK: [2021-02-01 Mo 16:30]--[2021-02-01 Mo 20:40] =>  4:10
     :END:
