@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-04 09:56:46 krylon>
+// Time-stamp: <2021-02-04 18:29:03 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -818,3 +818,82 @@ EXEC_QUERY:
 	status = true
 	return nil
 } // func (db *Database) FeedSetTimestamp(f *feed.Feed, stamp time.Time) error
+
+// FeedDelete deletes the Feed with the given ID from the database.
+func (db *Database) FeedDelete(id int64) error {
+	const qid = query.FeedDelete
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+	var (
+		cnt int64
+		res sql.Result
+	)
+
+EXEC_QUERY:
+	if res, err = stmt.Exec(id); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		db.log.Printf("[ERROR] Cannot update timestamp for Feed %d: %s\n",
+			id,
+			err.Error())
+		return err
+	} else if cnt, err = res.RowsAffected(); err != nil {
+		db.log.Printf("[ERROR] Cannot query number of rows affected: %s\n",
+			err.Error())
+		return err
+	} else if cnt != 1 {
+		err = fmt.Errorf("Unexpected number of rows affected: %d (expected 1)",
+			cnt)
+		db.log.Printf("[ERROR] %s\n", err.Error())
+		return err
+	}
+
+	status = true
+	return nil
+} // func (db *Database) FeedDelete(id int64) error

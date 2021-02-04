@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-04 09:20:20 krylon>
+// Time-stamp: <2021-02-04 13:19:40 krylon>
 
 package database
 
@@ -38,4 +38,5 @@ UPDATE feed
 SET refresh_timestamp = ?
 WHERE id = ?
 `,
+	query.FeedDelete: "DELETE FROM feed WHERE id = ?",
 }

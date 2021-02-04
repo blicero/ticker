@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-04 10:02:22 krylon>
+// Time-stamp: <2021-02-04 18:28:18 krylon>
 
 package database
 
@@ -143,3 +143,40 @@ Got:      %s
 		}
 	}
 } // func TestFeedSetTimestamp(t *testing.T)
+
+func TestFeedDelete(t *testing.T) {
+	if db == nil {
+		t.SkipNow()
+	}
+
+	var err error
+
+	for _, f := range list {
+		if err = db.FeedDelete(f.ID); err != nil {
+			t.Fatalf("Error deleting Feed %s (%d): %s",
+				f.Name,
+				f.ID,
+				err.Error())
+		}
+	}
+
+	var feeds []feed.Feed
+
+	if feeds, err = db.FeedGetAll(); err != nil {
+		t.Fatalf("Error getting all Feeds from database: %s",
+			err.Error())
+	} else if len(feeds) != 0 {
+		t.Fatalf("FeedGetAll returned unexpected number of Feeds after deleting all Feeds: %d (expected 0)",
+			len(feeds))
+	}
+
+	for _, f := range list {
+		f.ID = 0
+
+		if err = db.FeedAdd(f); err != nil {
+			t.Fatalf("Error re-adding Feed %s: %s",
+				f.Name,
+				err.Error())
+		}
+	}
+} // func TestFeedDelete(t *testing.T)
