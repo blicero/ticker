@@ -2,13 +2,14 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-03 19:59:25 krylon>
+// Time-stamp: <2021-02-04 10:02:22 krylon>
 
 package database
 
 import (
 	"testing"
 	"ticker/feed"
+	"time"
 )
 
 func TestFeedAdd(t *testing.T) {
@@ -72,3 +73,73 @@ Expected:       %s
 		}
 	}
 } // func TestFeedGetAll(t *testing.T)
+
+func TestFeedGetByID(t *testing.T) {
+	if db == nil {
+		t.SkipNow()
+	}
+
+	for _, r := range list {
+		var (
+			err error
+			f   *feed.Feed
+		)
+
+		if f, err = db.FeedGetByID(r.ID); err != nil {
+			t.Errorf("Cannot get Feed %s by ID (%d): %s",
+				r.Name,
+				r.ID,
+				err.Error())
+		} else if f == nil {
+			t.Errorf("Did not find Feed %s by ID (%d)",
+				r.Name,
+				r.ID)
+		} else if !feedEqual(r, f) {
+			t.Errorf(`Feed %s as returned by FeedGetByID does not equal reference Feed:
+Expected: %s
+Got:      %s
+`,
+				r.Name,
+				r,
+				f)
+		}
+	}
+} // func TestFeedGetByID(t *testing.T)
+
+func TestFeedSetTimestamp(t *testing.T) {
+	if db == nil {
+		t.SkipNow()
+	}
+
+	for _, r := range list {
+		var (
+			err error
+			f   *feed.Feed
+			now = time.Now()
+		)
+
+		if err = db.FeedSetTimestamp(r, now); err != nil {
+			t.Errorf("Cannot set Timestamp for Feed %s (%d): %s",
+				r.Name,
+				r.ID,
+				err.Error())
+		} else if f, err = db.FeedGetByID(r.ID); err != nil {
+			t.Errorf("Cannot get Feed %s by ID (%d): %s",
+				r.Name,
+				r.ID,
+				err.Error())
+		} else if f == nil {
+			t.Errorf("Did not find Feed %s by ID (%d)",
+				r.Name,
+				r.ID)
+		} else if !feedEqual(r, f) {
+			t.Errorf(`Feed %s as returned by FeedGetByID does not equal reference Feed:
+Expected: %s
+Got:      %s
+`,
+				r.Name,
+				r,
+				f)
+		}
+	}
+} // func TestFeedSetTimestamp(t *testing.T)

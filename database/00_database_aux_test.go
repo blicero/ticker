@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 03. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-03 19:50:07 krylon>
+// Time-stamp: <2021-02-04 10:01:59 krylon>
 
 package database
 
@@ -17,6 +17,6 @@ func feedEqual(f1, f2 *feed.Feed) bool {
 		f1.Name == f2.Name &&
 		f1.URL == f2.URL &&
 		f1.Interval == f2.Interval &&
-		f1.LastUpdate.Equal(f2.LastUpdate) &&
+		f1.LastUpdate.Unix() == f2.LastUpdate.Unix() &&
 		f1.Active == f2.Active
 } // func feedEqual(f1, f2 *feed.Feed) bool
