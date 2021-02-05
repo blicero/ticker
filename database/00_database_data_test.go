@@ -19,7 +19,7 @@ var db *Database
 // However, I am going to use only RSS feeds by German public broadcast
 // stations, since I already support them by paying Rundfunkgebühren.
 
-var list = []*feed.Feed{
+var testFeeds = []*feed.Feed{
 	&feed.Feed{
 		Name:     "Tagesschau",
 		URL:      "http://www.tagesschau.de/xml/rss2",

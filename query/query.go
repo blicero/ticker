@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-04 13:19:15 krylon>
+// Time-stamp: <2021-02-04 21:25:35 krylon>
 
 //go:generate stringer -type=ID
 
@@ -17,4 +17,6 @@ const (
 	FeedGetByID
 	FeedSetTimestamp
 	FeedDelete
+	ItemAdd
+	ItemGetRecent
 )

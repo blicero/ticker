@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-04 18:28:18 krylon>
+// Time-stamp: <2021-02-04 18:56:43 krylon>
 
 package database
 
@@ -17,7 +17,7 @@ func TestFeedAdd(t *testing.T) {
 		t.SkipNow()
 	}
 
-	for _, f := range list {
+	for _, f := range testFeeds {
 		var err error
 
 		if err = db.FeedAdd(f); err != nil {
@@ -43,15 +43,15 @@ func TestFeedGetAll(t *testing.T) {
 
 	if feeds, err = db.FeedGetAll(); err != nil {
 		t.Fatalf("Cannot get all Feeds: %s", err.Error())
-	} else if len(feeds) != len(list) {
+	} else if len(feeds) != len(testFeeds) {
 		t.Fatalf("FeedGetAll returned an unexpected number of Feeds: %d (expected %d)",
 			len(feeds),
-			len(list))
+			len(testFeeds))
 	}
 
-	var ref = make(map[int64]*feed.Feed, len(list))
+	var ref = make(map[int64]*feed.Feed, len(testFeeds))
 
-	for _, f := range list {
+	for _, f := range testFeeds {
 		ref[f.ID] = f
 	}
 
@@ -79,7 +79,7 @@ func TestFeedGetByID(t *testing.T) {
 		t.SkipNow()
 	}
 
-	for _, r := range list {
+	for _, r := range testFeeds {
 		var (
 			err error
 			f   *feed.Feed
@@ -111,7 +111,7 @@ func TestFeedSetTimestamp(t *testing.T) {
 		t.SkipNow()
 	}
 
-	for _, r := range list {
+	for _, r := range testFeeds {
 		var (
 			err error
 			f   *feed.Feed
@@ -151,7 +151,7 @@ func TestFeedDelete(t *testing.T) {
 
 	var err error
 
-	for _, f := range list {
+	for _, f := range testFeeds {
 		if err = db.FeedDelete(f.ID); err != nil {
 			t.Fatalf("Error deleting Feed %s (%d): %s",
 				f.Name,
@@ -170,7 +170,7 @@ func TestFeedDelete(t *testing.T) {
 			len(feeds))
 	}
 
-	for _, f := range list {
+	for _, f := range testFeeds {
 		f.ID = 0
 
 		if err = db.FeedAdd(f); err != nil {
@@ -178,5 +178,14 @@ func TestFeedDelete(t *testing.T) {
 				f.Name,
 				err.Error())
 		}
+	}
+
+	if feeds, err = db.FeedGetAll(); err != nil {
+		t.Fatalf("Error getting all Feeds from database: %s",
+			err.Error())
+	} else if len(feeds) != len(testFeeds) {
+		t.Fatalf("FeedGetAll returned unexpected number of Feeds after deleting all Feeds: %d (expected %d)",
+			len(feeds),
+			len(testFeeds))
 	}
 } // func TestFeedDelete(t *testing.T)

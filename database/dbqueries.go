@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-04 13:19:40 krylon>
+// Time-stamp: <2021-02-04 22:53:22 krylon>
 
 package database
 
@@ -39,4 +39,21 @@ SET refresh_timestamp = ?
 WHERE id = ?
 `,
 	query.FeedDelete: "DELETE FROM feed WHERE id = ?",
+	query.ItemAdd: `
+INSERT INTO item (feed_id, link, title, description, timestamp)
+VALUES           (      ?,    ?,     ?,           ?,         ?)
+`,
+	query.ItemGetRecent: `
+SELECT
+    id,
+    feed_id,
+    link,
+    title,
+    description,
+    timestamp,
+    rating
+FROM item
+ORDER BY timestamp DESC
+LIMIT ?
+`,
 }
