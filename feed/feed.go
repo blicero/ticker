@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-03 19:57:35 krylon>
+// Time-stamp: <2021-02-05 21:24:02 krylon>
 
 // Package feed provides the basic data type and logic to represent and interact
 // with RSS feeds.
@@ -72,8 +72,8 @@ func (f *Feed) Next() time.Time {
 	return f.LastUpdate.Add(f.Interval)
 } // func (f *Feed) Next() time.Time
 
-// Fetch fetches a Feed.
-func (f *Feed) Fetch() (*rss.Feed, error) {
+// FetchRaw fetches a Feed.
+func (f *Feed) FetchRaw() (*rss.Feed, error) {
 	var (
 		err error
 		fd  *rss.Feed
@@ -107,4 +107,54 @@ func (f *Feed) Fetch() (*rss.Feed, error) {
 	}
 
 	return fd, nil
-} // func (f *Feed) Fetch() (*rss.Feed, error)
+} // func (f *Feed) FetchRaw() (*rss.Feed, error)
+
+// Fetch fetches a Feed.
+func (f *Feed) Fetch() ([]Item, error) {
+	var (
+		err error
+		fd  *rss.Feed
+	)
+
+	if !f.Active {
+		return nil, ErrInactive
+	}
+
+	if f.rfeed != nil {
+		fd = f.rfeed
+	} else if fd, err = rss.Fetch(f.URL); err != nil {
+		f.log.Printf("[ERROR] Error fetching %s (%s): %s\n",
+			f.Name,
+			f.URL,
+			err.Error())
+		return nil, err
+	} else {
+		f.rfeed = fd
+		f.LastUpdate = time.Now()
+	}
+
+	if f.IsDue() {
+		if err = fd.Update(); err != nil {
+			f.log.Printf("[ERROR] Cannot update %s (%s): %s\n",
+				f.Name,
+				f.URL,
+				err.Error())
+			return nil, err
+		}
+	}
+
+	var items = make([]Item, len(fd.Items))
+
+	for idx, item := range fd.Items {
+		items[idx] = Item{
+			FeedID:      f.ID,
+			URL:         item.Link,
+			Title:       item.Title,
+			Description: item.Content,
+			Timestamp:   item.Date,
+		}
+	}
+
+	return items, nil
+	//return fd, nil
+} // func (f *Feed) Fetch() ([]Item, error)
