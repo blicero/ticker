@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-05 12:55:09 krylon>
+// Time-stamp: <2021-02-07 14:25:53 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1042,3 +1042,125 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) ItemGetRecent(limit int) ([]feed.Item, error)
+
+// ItemGetByID fetches an Item by its ID.
+func (db *Database) ItemGetByID(id int64) (*feed.Item, error) {
+	const qid = query.ItemGetByID
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(id); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var (
+			stamp  int64
+			rating *float64
+			item   = &feed.Item{ID: id}
+		)
+
+		if err = rows.Scan(
+			&item.FeedID,
+			&item.URL,
+			&item.Title,
+			&item.Description,
+			&stamp,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan Row for Item %d: %s\n",
+				id,
+				err.Error())
+			return nil, err
+		} else if rating != nil {
+			item.Rating = *rating
+		}
+
+		item.Timestamp = time.Unix(stamp, 0)
+
+		return item, nil
+	}
+
+	return nil, nil
+} // func (db *Database) ItemGetByID(id int64) (*feed.Item, error)
+
+// ItemGetByURL fetches an Item by its URL.
+func (db *Database) ItemGetByURL(uri string) (*feed.Item, error) {
+	const qid = query.ItemGetByURL
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(uri); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var (
+			stamp  int64
+			rating *float64
+			item   = &feed.Item{URL: uri}
+		)
+
+		if err = rows.Scan(
+			&item.ID,
+			&item.FeedID,
+			&item.Title,
+			&item.Description,
+			&stamp,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan Row for Item %s: %s\n",
+				uri,
+				err.Error())
+			return nil, err
+		} else if rating != nil {
+			item.Rating = *rating
+		}
+
+		item.Timestamp = time.Unix(stamp, 0)
+
+		return item, nil
+	}
+
+	return nil, nil
+} // func (db *Database) ItemGetByURL(uri string) (*feed.Item, error)
