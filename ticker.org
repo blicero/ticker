@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-06 18:47:56 krylon>
+# Time-stamp: <2021-02-07 22:15:24 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -56,5 +56,10 @@
     :END:
     Is there any reason /not/ to use good old SQLite?
     I don't think so.
+*** Reader [0/0]
+    :LOGBOOK:
+    CLOCK: [2021-02-07 So 17:45]--[2021-02-07 So 22:15] =>  4:30
+    CLOCK: [2021-02-07 So 11:46]--[2021-02-07 So 15:46] =>  4:00
+    :END:
 *** Web interface
 ** Tedious tasks
