@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 07. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-07 17:56:41 krylon>
+// Time-stamp: <2021-02-08 19:38:30 krylon>
 
 package reader
 
@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"ticker/common"
 	"time"
-	"vm/common"
 )
 
 func TestMain(m *testing.M) {
@@ -25,6 +25,11 @@ func TestMain(m *testing.M) {
 		fmt.Printf("Cannot set base directory to %s: %s\n",
 			baseDir,
 			err.Error())
+		os.Exit(1)
+	} else if err = prepareDatabase(); err != nil {
+		fmt.Printf("ERROR preparing database: %s\n",
+			err.Error())
+		fmt.Printf(">>> TEST DIRECTORY: %s\n", baseDir)
 		os.Exit(1)
 	} else if result = m.Run(); result == 0 {
 		// If any test failed, we keep the test directory (and the

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-07 18:27:58 krylon>
+// Time-stamp: <2021-02-08 20:36:42 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -89,11 +89,15 @@ func (r *Reader) Loop() error {
 	}()
 
 	for r.Active() {
+		r.log.Println("[TRACE] Reader Loop calling refresh.")
+
 		if err := r.refresh(); err != nil {
 			r.log.Printf("[ERROR] Failed to refresh Feeds: %s\n",
 				err.Error())
 			return err
 		}
+
+		time.Sleep(checkDelay)
 	}
 
 	return nil
@@ -135,9 +139,25 @@ func (r *Reader) refresh() error {
 			len(items))
 
 		for _, i := range items {
+			var ref *feed.Item
 			r.log.Printf("[TRACE] Process Item %s (%s)\n",
 				i.Title,
 				i.URL)
+			if ref, err = r.db.ItemGetByURL(i.URL); err != nil {
+				r.log.Printf("[ERROR] Cannot check if Item %s is in databse: %s\n",
+					i.URL,
+					err.Error())
+				return err
+			} else if ref != nil {
+				continue
+			}
+
+			if err = r.db.ItemAdd(&i); err != nil {
+				r.log.Printf("[ERROR] Cannot save Item %q to database: %s\n",
+					i.Title,
+					err.Error())
+				return err
+			}
 		}
 	}
 

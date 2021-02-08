@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 07. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-07 18:27:37 krylon>
+// Time-stamp: <2021-02-08 13:37:14 krylon>
 
 package reader
 
