@@ -1,0 +1,46 @@
+{{ define "link_type_detail" }}
+{{/* Time-stamp: <2020-05-25 22:15:47 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    Links of type {{ .Type.Name }}
+
+    <table>
+      <thead>
+        <tr>
+          <th style="text-align: left">Source</th>
+          <th>{{ nbsp 5 }}</th>
+          <th style="text-align: left">Links to</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{ range .Connected }}
+        <tr>
+          <td style="text-align: left">
+            <a href="/note/{{ (index . 0).ID }}">
+              {{ (index . 0).Title }}
+            </a>
+          </td>
+
+          <td>{{ nbsp 5 }}</td>
+
+          <td style="text-align: right">
+            <a href="/note/{{ (index . 1).ID }}">
+              {{ (index . 1).Title }}
+            </a>
+          </td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+
+    {{ template "footer" . }}
+  </body>
+</html>
+
+{{ end }}

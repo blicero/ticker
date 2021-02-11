@@ -1,0 +1,13 @@
+{{ define "link_type_form" }}
+{{/* Time-stamp: <2020-06-12 22:27:38 krylon> */}}
+<div class="link_type_form">
+  <input type="hidden" name="id" id="id" value="0" />
+  <input type="button" value="Cancel" onclick="link_type_form_clear();" />
+  &nbsp;
+  <input type="button" value="Save" onclick="link_type_form_save();" />
+  <br />
+  <input type="text" name="name" placeholder="Name" id="lnk_type_name" />
+  <br />
+  <input type="text" name="description" placeholder="Description", id="lnk_type_desc" />
+</div>
+{{ end }}

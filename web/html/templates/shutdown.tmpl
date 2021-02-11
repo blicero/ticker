@@ -1,0 +1,14 @@
+{{ define "shutdown" }}
+{{/* Time-stamp: <2020-05-12 20:38:22 krylon> */}}
+{{ if .Success }}
+    <div class="important">
+      The server has shut down.<br />
+      Have a nice day!
+    </div>
+    {{ else }}
+    <div class="error important">
+      Shuttin down the server failed:<br />
+      {{ .Message }}
+    </div>
+    {{ end }}
+{{ end }}

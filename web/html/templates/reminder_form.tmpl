@@ -1,0 +1,76 @@
+{{ define "reminder_form" }}
+{{/* Time-stamp: <2020-06-12 21:21:31 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <script>
+     var reminder = {{ .Reminder.JSON }};
+     
+     function reminder_edit_cancel() {
+       $("#reminder_title")[0].value = reminder.Title;
+       $("#reminder_date")[0].value = reminder.Date;
+       $("#reminder_time")[0].value = reminder.Time;
+       $("#reminder_body")[0].value = reminder.Body;
+     }
+     
+     function reminder_edit_submit() {
+       const reminderUpdateURL = "/ajax/reminder/update";
+       var data = {
+         ID: {{ .Reminder.ID }},
+         Title: $("#reminder_title")[0].value,
+         Body: $("#reminder_body")[0].value,
+         Timestamp: $("#reminder_date")[0].value + " " + $("#reminder_time")[0].value,
+       };
+
+       var req = $.post(
+         reminderUpdateURL,
+         data,
+         function(res) {
+           if (!res.Status) {
+             console.log(res.Message);
+             postMessage(new Date(), "ERROR", res.Message);
+           }
+         },
+         "json"
+       ).fail(function() {
+         var msg = "Error updating Reminder {{ .Reminder.Title }}";
+         console.log(msg);
+         postMessage(new Date(), "ERROR", msg);
+         alert(msg);
+       });
+     }
+    </script>
+
+    <table class="horizontal">
+      <caption>Edit Reminder {{ .Reminder.Title }}</caption>
+      <tbody>
+        <tr>
+          <th>Title:</th>
+          <td><input type="text" id="reminder_title" value="{{ .Reminder.Title }}" /></td>
+        </tr>
+        <tr>
+          <th>Date:</th>
+          <td>
+            <input type="date" id="reminder_date" value="{{ .Reminder.Date }}" />
+            <input type="time" id="reminder_time" value="{{ .Reminder.Time }}" />
+          </td>
+        </tr>
+        <tr>
+          <th>Body:</th>
+          <td><input type="text" id="reminder_body" value="{{ .Reminder.Body }}" /></td>
+        </tr>
+        <tr>
+          <th><input type="button" value="Cancel" onclick="reminder_edit_cancel();" /></th>
+          <td><input type="button" value="Submit" onclick="reminder_edit_submit();" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    {{ template "footer" . }}
+  </body>
+</html>
+{{ end }}

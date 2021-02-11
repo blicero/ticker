@@ -1,0 +1,20 @@
+{{ define "footer" }}
+{{/* Time-stamp: <2020-05-12 18:37:32 krylon> */}}
+<hr />
+<div class="footer">
+  <footer>
+    {{ app_string }}<br />
+    &copy; 2020
+    {{ if (gt current_year "2020") }}
+    - {{ current_year }}
+    {{ end }}
+    <a href="mailto:walkenhorst.benjamin@gmail.com">
+      Benjamin Walkenhorst
+    </a>
+    {{ if .Debug }}
+    <br />
+    Template rendered on <time>{{ now }}</time>
+    {{ end }}
+  </footer>
+</div>
+{{ end }}

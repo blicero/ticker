@@ -1,0 +1,142 @@
+{{ define "intro" }}
+{{/* Time-stamp: <2020-06-20 15:28:34 krylon> */}}
+<h1 id="page_title">{{ .Title }}</h1>
+<hr />
+
+{{ if .Debug }}
+<script>
+ $(document).ready(function() {
+   if (!settings.beacon.active) {
+     $("#beacon")[0].innerHTML = "Beacon is suspended";
+   }
+ });
+</script>
+
+<div class="debug">
+  {{ app_string }} running on {{ hostname }} (built on {{ app_build }})<br />
+  Template rendered on <time>{{ now }}</time><br />
+  <div id="beacon" class="debug" onclick="beaconToggle();">
+  </div>
+</div>
+{{ end }}
+
+{{ template "menu" . }}
+<p>
+  &nbsp;
+</p>
+<details id="intro_details">
+  <table id="intro">
+    <tbody>
+      <tr>
+        <td>
+          Message loop active:&nbsp;
+          <input
+          type="checkbox"
+          id="msg_check_switch"
+          name="doCheck"
+          value="doCheck"
+          onchange="toggleCheckMessages();"
+          checked />
+          <script>
+           if ({{ .Debug }}) {
+             $(document).ready(function() {
+               if (settings.messages.queryEnabled == null ||
+                   settings.messages.queryEnabled == undefined) {
+                 saveSetting("messages", "queryEnabled", true);
+               }
+             });
+           }
+          </script>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <h2 style="text-align:center;" onclick="toggleMsgDisplayVisible();">Messages</h2>
+
+          <div id="msg_display_div">
+            <table id="msg_display_tbl" class="horizontal spaced">
+              <tr>
+                <th>Maximum number of messages to display:</th>
+                <td>
+                  <input
+                  type="number"
+                  id="max_msg_cnt"
+                  min="1"
+                  step="1"
+                  value="10"
+                  onchange="adjustMsgMaxCnt();"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>Message Query Interval (ms):</th>
+                <td>
+                  <input
+                  type="number"
+                  id="msg_check_interval"
+                  min="500"
+                  step="500"
+                  value="2500"
+                  oninput="adjustMsgCheckInterval();"
+                  />
+                </td>
+              </tr>
+            </table>
+
+            <table
+              class="spaced"
+              id="msg_tbl"
+              {{ if (eq (len .Messages) 0) }}hidden="true"{{ end }}
+              >
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Level</th>
+                  <th>Message</th>
+                  <th>
+                    <input type="button" value="Delete All" onclick="msgRowDeleteAll();" />
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody id="msg_body">
+                {{ range .Messages }}
+                <tr id="msg_{{ .Checksum }}">
+                  <td>{{ .Timestamp }}</td>
+                  <td>{{ .Level }}</td>
+                  <td>{{ .Message }}</td>
+                  <td>
+                    <input
+                    type="button"
+                    value="Delete"
+                    onclick="msgRowDelete('msg_{{ .Checksum }}');" />
+                  </td>
+                </tr>
+                {{ end }}
+              </tbody>
+            </table>
+          </div>
+        </td>
+        <td>
+          <h2 onclick="toggleRemindersVisible();">Reminders</h2>
+
+          <table id="reminder_tbl">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Timestamp</th>
+                <th>Body</th>
+                <th>Delete?</th>
+              </tr>
+            </thead>
+
+            <tbody id="reminder_list_body">
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</details>
+<hr />
+{{ end }}

@@ -1,0 +1,38 @@
+{{ define "index" }}
+{{/* Time-stamp: <2020-06-14 17:22:44 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <h2>Recently Modified Notes</h2>
+
+    <table class="notes">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Created</th>
+          <th>Modified</th>
+          <th>Revision</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{ $row_class := cycle "even" "odd"  }}
+        {{ range .Notes }}
+        <tr class="{{ $row_class.Next }}" style="background-color: {{ .HTMLColor }}">
+          <td><a href="/note/{{ .ID }}">{{ .Title }}</a></td>
+          <td>{{ fmt_time .Created  }}</td>
+          <td>{{ fmt_time .Modified }}</td>
+          <td>{{ .Revision }}</td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+
+    {{ template "footer" }}
+  </body>
+</html>
+{{ end }}

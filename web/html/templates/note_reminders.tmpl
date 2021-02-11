@@ -1,0 +1,48 @@
+{{ define "note_reminders" }}
+{{/* Time-stamp: <2020-06-19 20:24:52 krylon> */}}
+<div id="reminders">
+  <table>
+    <caption>Add Reminder</caption>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Time</th>
+        <th>Body</th>
+        <th>&nbsp;</th>
+      </tr>
+    </thead>
+
+    <tbody id="reminder_list">
+      <tr>
+        <td colspan="4">
+          <form>
+            <fieldset>
+              <input type="date" id="reminder_date" /> <input type="time" id="reminder_time" /><br />
+              <input type="text" id="reminder_title" placeholder="Title" /><br />
+              <input type="text" id="reminder_body" placeholder="Body"><br />
+              <input type="reset" value="Reset" />
+              &nbsp;
+              <input type="button" value="Add" onclick="reminder_add({{ .Note.ID }});" />
+            </fieldset>
+          </form>
+        </td>
+      </tr>
+      {{ range .Reminders }}
+      {{ if not .Cleared }}
+      <tr id="reminder_display_{{ .ID }}">
+        <td>{{ .Title }}</td>
+        <td>{{ fmt_time .Timestamp }}</td>
+        <td>{{ .Body }}</td>
+        <td>
+          <input type="button"
+                 value="Delete"
+                 onclick="reminder_delete({{ .ID }});"
+                 />
+        </td>
+      </tr>
+      {{ end }}
+      {{ end }}
+    </tbody>
+  </table>
+</div>
+{{ end }}

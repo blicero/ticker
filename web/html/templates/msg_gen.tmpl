@@ -1,0 +1,83 @@
+{{ define "msg_gen" }}
+{{/* Time-stamp: <2020-06-06 17:23:03 krylon> */}}
+<div>
+  <h2
+    style="text-align: center;"
+    onclick="toggleMsgTestDisplayVisible();">
+    Test Messages
+  </h2>
+
+  <table id="test_msg_cfg" class="horizontal">
+    <tr>
+      <th><input type="text" placeholder="Message" id="msgTestText" /></th>
+      <td>
+        &nbsp;
+        <input
+        type="button"
+        value="Post message"
+        id="msgTestButton"
+        onclick="post_test_msg();" />
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" style="text-align: center">
+        <input
+        type="button"
+        value="Generate random messages"
+        id="genMsgButton"
+        onclick="requestTestMessages();"
+        />
+      </td>
+    </tr>
+    <tr>
+      <th>Number per round:</th>
+      <td>
+        <input
+        type="number"
+        id="msg_cnt"
+        min="1"
+        step="1"
+        value="1"
+        />
+      </td>
+    </tr>
+    <tr>
+      <th>Number of rounds:</th>
+      <td>
+        <input
+        type="number"
+        id="msg_round_cnt"
+        min="1"
+        value="1"
+        />
+      </td>
+    </tr>
+    <tr>
+      <th>Delay between rounds (ms):</th>
+      <td>
+        <input
+        type="number"
+        id="msg_round_delay"
+        min="500"
+        step="500"
+        value="500"
+        />
+      </td>
+    </tr>
+    {{/*
+    <tr>
+      <th>MsgLoop active:</th>
+      <td>
+        <input
+        type="checkbox"
+        id="msg_check_switch"
+        name="doCheck"
+        value="doCheck"
+        onchange="toggleCheckMessages();"
+        checked />
+      </td>
+    </tr>
+    */}}
+  </table>
+</div>
+{{ end }}

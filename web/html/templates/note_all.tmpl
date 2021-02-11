@@ -1,0 +1,53 @@
+{{ define "note_all" }}
+{{/* Time-stamp: <2020-06-15 18:08:40 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <table class="notes">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Created</th>
+          <th>Modified</th>
+          <th>Revision</th>
+          <th>Length</th>
+          <th>&nbsp;</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{ $row_class := cycle "even" "odd"  }}
+        {{ range .Notes }}
+        <tr class="{{ $row_class.Next }}"
+            style="background-color: {{ .HTMLColor }}"
+            id="note_{{ .ID }}">
+          <td><a href="/note/{{ .ID }}">{{ .Title }}</a></td>
+          <td>{{ fmt_time .Created  }}</td>
+          <td>{{ fmt_time .Modified }}</td>
+          <td>{{ .Revision }}</td>
+          <td>
+            {{ if gt .WordCount 25 }}<i>{{ end }}
+            {{ if gt .WordCount 50 }}<b>{{ end }}
+            {{ .WordCount }} words
+            {{ if gt .WordCount 50 }}</b>{{ end }}
+            {{ if gt .WordCount 25 }}</i>{{ end }}
+          </td>
+          <td>
+            <input type="button"
+                   value="Delete"
+                   class="small"
+                   onclick="note_delete({{ .ID }});" />
+          </td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+    
+    {{ template "footer" . }}
+  </body>
+</html>
+{{ end }}

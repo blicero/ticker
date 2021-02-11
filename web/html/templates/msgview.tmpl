@@ -1,0 +1,24 @@
+{{ define "msgview" }}
+{{/* Time-stamp: <2017-05-25 20:46:48 krylon> */}}
+<div class="messages">
+<h3>Pending Messages</h3>
+<table>
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Message</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {{ $rowclass := cycle "even" "odd" }}
+    {{ range . }}
+    <tr class="{{ $rowclass.Next }}">
+      <td>{{ .StampString }}</td>
+      <td>{{ .Msg }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+</div>
+{{ end }}

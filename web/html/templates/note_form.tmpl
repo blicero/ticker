@@ -1,0 +1,57 @@
+{{ define "note_form" }}
+{{/* Time-stamp: <2020-05-30 16:38:58 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <script>
+     $(document).ready(function() {
+       // update_note_preview();
+     });
+    </script>
+
+    <table class="spaced note_edit">
+      <thead>
+        <tr>
+          <th>Editor</th>
+          <th onclick="toggle_note_preview();">Preview</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>
+            <form action="/note/create" method="post">
+              <input type="text" id="note_title" name="title" placeholder="Title" />
+              <hr />
+              <textarea
+                rows="10"
+                cols="60"
+                id="notebody"
+                name="body"
+                class="notebody"
+                oninput="onNoteChanged()"
+                >
+              </textarea>
+              <br />
+              <input type="button" value="Reset" onclick="clear_note_form();" />
+              <input type="submit" value="Save" />
+            </form>
+          </td>
+
+          <td>
+            <div id="note_preview" onclick="toggle_note_preview();">
+              <p class="placeholder">&lt; Display preview here &gt;</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    {{ template "footer" }}
+  </body>
+</html>
+{{ end }}
