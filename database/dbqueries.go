@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-07 14:24:07 krylon>
+// Time-stamp: <2021-02-11 16:12:35 krylon>
 
 package database
 
@@ -51,6 +51,7 @@ SELECT
     title,
     description,
     timestamp,
+    read,
     rating
 FROM item
 ORDER BY timestamp DESC
@@ -63,6 +64,7 @@ SELECT
     title,
     description,
     timestamp,
+    read,
     rating
 FROM item
 WHERE id = ?
@@ -74,6 +76,7 @@ SELECT
     title,
     description,
     timestamp,
+    read,
     rating
 FROM item
 WHERE link = ?

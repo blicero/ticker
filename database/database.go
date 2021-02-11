@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-07 14:25:53 krylon>
+// Time-stamp: <2021-02-11 16:23:27 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1025,6 +1025,7 @@ EXEC_QUERY:
 			&item.Title,
 			&item.Description,
 			&stamp,
+			&item.Read,
 			&rating); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
@@ -1087,6 +1088,7 @@ EXEC_QUERY:
 			&item.Title,
 			&item.Description,
 			&stamp,
+			&item.Read,
 			&rating); err != nil {
 			db.log.Printf("[ERROR] Cannot scan Row for Item %d: %s\n",
 				id,
@@ -1148,6 +1150,7 @@ EXEC_QUERY:
 			&item.Title,
 			&item.Description,
 			&stamp,
+			&item.Read,
 			&rating); err != nil {
 			db.log.Printf("[ERROR] Cannot scan Row for Item %s: %s\n",
 				uri,

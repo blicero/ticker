@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 17:12:45 krylon>
+// Time-stamp: <2021-02-11 16:12:05 krylon>
 
 package database
 
@@ -28,6 +28,7 @@ CREATE TABLE item (
     title               TEXT NOT NULL,
     description         TEXT NOT NULL,
     timestamp           INTEGER NOT NULL,
+    read                INTEGER NOT NULL DEFAULT 0,
     rating              REAL,
     
     CHECK (rating IS NULL OR (rating BETWEEN 0.0 AND 1.0)),

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-04 19:46:33 krylon>
+// Time-stamp: <2021-02-11 16:11:36 krylon>
 
 package feed
 
@@ -20,6 +20,7 @@ type Item struct {
 	Title       string
 	Description string
 	Timestamp   time.Time
+	Read        bool
 	Rating      float64
 }
 
