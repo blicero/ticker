@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-12 15:53:08 krylon>
+// Time-stamp: <2021-02-12 23:42:50 krylon>
 
 package web
 
@@ -82,11 +82,18 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	}
 
 	srv.router = mux.NewRouter()
+	srv.web.Addr = addr
+	srv.web.ErrorLog = srv.log
+	srv.web.Handler = srv.router
 
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{page:(?i)(?:index|main)?$}", srv.handleIndex)
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
+
+	if !common.Debug {
+		srv.web.SetKeepAlivesEnabled(keepAlive)
+	}
 
 	return srv, nil
 } // func Create(addr string, keepAlive bool) (*Server, error)
@@ -274,9 +281,9 @@ func (srv *Server) sendErrorMessage(w http.ResponseWriter, msg string) {
 // const success = "Success"
 
 func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
-	// srv.log.Printf("[TRACE] Handle %s from %s\n",
-	// 	r.URL,
-	// 	r.RemoteAddr)
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
 
 	var timestamp = time.Now().Format(common.TimestampFormat)
 	const appName = common.AppName + " " + common.Version

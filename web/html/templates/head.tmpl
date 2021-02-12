@@ -1,5 +1,5 @@
 {{ define "head" }}
-{{/* Time-stamp: <2021-02-12 16:01:59 krylon> */}}
+{{/* Time-stamp: <2021-02-12 23:40:47 krylon> */}}
 <head>
   <title>@{{ hostname  }} - {{ .Title }}</title>
   
@@ -23,12 +23,6 @@
   {{ if .Debug }}
   <script>
    $(document).ready(function() {
-     {{ if .IsNoteDetail }}
-     noteID = {{ .Note.ID }};
-     noteTitle = '{{ js .Note.Title }}';
-     noteBody = $("#body").innerHTML;
-     {{ end }}
-
      initSettings();
      // Start the heartbeat loop
      beaconLoop();
@@ -55,7 +49,7 @@
      window.setTimeout(function() { settings.messages.queryEnabled = true; }, 250);
      {{ end }}
 
-     window.setTimeout(reminder_get_pending, 500);
+     // window.setTimeout(reminder_get_pending, 500);
    });
   </script>
   {{ end }}

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2020-06-19 23:11:09 krylon>
+// Time-stamp: <2021-02-12 23:45:31 krylon>
 
 package web
 
@@ -15,9 +15,8 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"ticker/common"
 	"time"
-	"zettelkasten/common"
-	"zettelkasten/markup"
 )
 
 ////////////////////////////////////
@@ -44,7 +43,6 @@ var funcmap = template.FuncMap{
 	"fmt_script_args":  argsString,
 	"join":             joinStrings,
 	"escape_linebreak": escapeLinebreak,
-	"render_markdown":  renderMarkdown,
 	"nbsp":             nbsp,
 }
 
@@ -234,12 +232,6 @@ var newline = regexp.MustCompile("[\r\n]")
 func escapeLinebreak(str string) string {
 	return newline.ReplaceAllString(str, "\\n")
 } // func escapeLinebreak(str string) string
-
-func renderMarkdown(raw string) string {
-	var output = (markup.Markup(raw)).HTML()
-
-	return output
-} // func renderMarkdown(in string) string
 
 func nbsp(cnt int) string {
 	const entity = "&nbsp;"

@@ -1,4 +1,4 @@
-// Time-stamp: <2020-06-23 13:39:35 krylon>
+// Time-stamp: <2021-02-12 23:41:26 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -1432,37 +1432,37 @@ function reminder_display(r) {
     }
 } // function reminder_display(r)
 
-var fetchPending = true;
+// var fetchPending = false;
 
-function reminder_get_pending() {
-    const remURL = "/ajax/reminder/pending";
+// function reminder_get_pending() {
+//     const remURL = "/ajax/reminder/pending";
 
-    try {
-        if (fetchPending) {
-            var req = $.get(
-                remURL,
-                {},
-                function(res) {
-                    if (!res.Status) {
-                        console.log(res.Message);
-                        postMessage(new Date(), "ERROR", res.Message);
-                    } else {
-                        for (var i = 0; i < res.Reminders.length; i++) {
-                            var r = res.Reminders[i];
-                            reminder_display(r);
-                        }
-                    }
-                },
-                "json"
-            )
-                .fail(function() {
-                    var msg = "Error querying pending Reminders: " + arguments[1];
-                    console.log(msg)
-                    postMessage(new Date(), "ERROR", msg);
-                });
-        }
-    }
-    finally {
-        window.setTimeout(reminder_get_pending, 1000);
-    }
-} // function reminder_get_pending()
+//     try {
+//         if (fetchPending) {
+//             var req = $.get(
+//                 remURL,
+//                 {},
+//                 function(res) {
+//                     if (!res.Status) {
+//                         console.log(res.Message);
+//                         postMessage(new Date(), "ERROR", res.Message);
+//                     } else {
+//                         for (var i = 0; i < res.Reminders.length; i++) {
+//                             var r = res.Reminders[i];
+//                             reminder_display(r);
+//                         }
+//                     }
+//                 },
+//                 "json"
+//             )
+//                 .fail(function() {
+//                     var msg = "Error querying pending Reminders: " + arguments[1];
+//                     console.log(msg)
+//                     postMessage(new Date(), "ERROR", msg);
+//                 });
+//         }
+//     }
+//     finally {
+//         window.setTimeout(reminder_get_pending, 1000);
+//     }
+// } // function reminder_get_pending()
