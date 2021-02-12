@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-01 18:03:50 krylon>
+// Time-stamp: <2021-02-11 20:42:12 krylon>
 
 // Package common contain definitions used throughout the application
 package common
@@ -98,6 +98,10 @@ func ExpandTilde(path string) string {
 
 	return fullPath
 } // func expandTilde(path string) string
+
+// SuffixPattern is a regular expression that matches the suffix of a file name.
+// For "text.txt", it should match ".txt" and capture "txt".
+var SuffixPattern = regexp.MustCompile("([.][^.]+)$")
 
 // DoTrace causes the log level to be lowered to TRACE when set.
 var DoTrace = true

@@ -1,55 +1,11 @@
 {{ define "menu" }}
-{{/* Time-stamp: <2020-06-16 16:22:13 krylon> */}}
+{{/* Time-stamp: <2021-02-12 16:10:26 krylon> */}}
 <div class="menubar">
   <nav>
     <table>
       <tr>
         <td>
           <a href="/">Start</a>
-        </td>
-        <td>
-          &nbsp;&sdot;&nbsp;
-        </td>
-        <td>
-          <a href="/note/all">All Notes</a>
-        </td>
-        <td>
-          &nbsp;&sdot;&nbsp;
-        </td>
-        <td>
-          <a href="/note/new">Create Note</a>
-        </td>
-        <td>
-          &nbsp;&sdot;&nbsp;
-        </td>
-        <td>
-          <a href="/label/all">Labels</a>
-        </td>
-        <td>
-          &nbsp;&sdot;&nbsp;
-        </td>
-        <td>
-          <a href="/link_type/all">Link Types</a>
-        </td>
-        <td>
-          &nbsp;&sdot;&nbsp;
-        </td>
-        <td>
-          <a href="/file/all">All Files</a>
-        </td>
-        {{/*
-        <td>
-          &nbsp;&sdot;&nbsp;
-        </td>
-        <td>
-          <a href="/file/reindex">Rebuild FTS Index</a>
-        </td>
-        */}}
-        <td>
-          &nbsp;&sdot;&nbsp;
-        </td>
-        <td>
-          {{ template "search" . }}
         </td>
         <td>
           &nbsp;&sdot;&nbsp;
@@ -71,15 +27,6 @@
                  class="small"
                  value="Perform DB maintenance"
                  onclick="db_maintenance();" />
-        </td>
-        <td>
-          &nbsp;&sdot;&nbsp;
-        </td>
-        <td>
-          <input type="button"
-                 class="small"
-                 value="Clean files"
-                 onclick="fileCleanup();" />
         </td>
       </tr>
     </table>
