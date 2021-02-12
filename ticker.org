@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-08 21:16:38 krylon>
+# Time-stamp: <2021-02-12 16:34:23 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,16 +13,17 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-02-08 Mo 21:16]
-   | Headline             | Time      |         |       |
-   |----------------------+-----------+---------+-------|
-   | *Total time*         | *1d 9:34* |         |       |
-   |----------------------+-----------+---------+-------|
-   | Ticker               | 1d 9:34   |         |       |
-   | \_  Components [2/2] |           | 1d 9:34 |       |
-   | \_    Feed [2/2]     |           |         |  3:16 |
-   | \_    Database [0/0] |           |         | 18:01 |
-   | \_    Reader [0/0]   |           |         | 12:17 |
+   #+CAPTION: Clock summary at [2021-02-12 Fr 16:34]
+   | Headline             | Time       |          |       |
+   |----------------------+------------+----------+-------|
+   | *Total time*         | *1d 10:45* |          |       |
+   |----------------------+------------+----------+-------|
+   | Ticker               | 1d 10:45   |          |       |
+   | \_  Components [2/2] |            | 1d 10:45 |       |
+   | \_    Feed [2/2]     |            |          |  3:16 |
+   | \_    Database [0/0] |            |          | 18:01 |
+   | \_    Reader [0/0]   |            |          | 12:17 |
+   | \_    Web interface  |            |          |  1:11 |
    #+END:
 
 ** Questions
@@ -66,4 +67,7 @@
     CLOCK: [2021-02-07 So 11:46]--[2021-02-07 So 15:46] =>  4:00
     :END:
 *** Web interface
+    :LOGBOOK:
+    CLOCK: [2021-02-12 Fr 15:23]--[2021-02-12 Fr 16:34] =>  1:11
+    :END:
 ** Tedious tasks
