@@ -1,0 +1,39 @@
+{{ define "feed_form" }}
+{{/* Created on 13. 02. 2021 */}}
+{{/* Time-stamp: <2021-02-13 20:43:44 krylon> */}}
+<form action="/feed/subscribe" method="post">
+  <table class="horizontal">
+    <tr>
+      <th>
+        Name
+      </th>
+      <td>
+        <input type="text" name="name" id="name" placeholder="Name" />
+      </td>
+    </tr>
+    <tr>
+      <th>
+        URL
+      </th>
+      <td>
+        <input
+        type="url"
+        name="url"
+        id="url"
+        placeholder="https://www.example.com/rss"
+        required />
+      </td>
+    </tr>
+    <tr>
+      <th>Interval<br />(in minutes)</th>
+      <td>
+        <input type="number" name="interval" id="interval" min="0" max="10080" />
+      </td>
+    </tr>
+    <tr>
+      <td><input type="reset" value="Reset" /></td>
+      <td><input type="submit" value="OK" /></td>
+    </tr>
+  </table>
+</form>
+{{ end }}

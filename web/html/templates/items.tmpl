@@ -1,0 +1,26 @@
+{{ define "items" }}
+{{/* Created on 13. 02. 2021 */}}
+{{/* Time-stamp: <2021-02-13 21:30:34 krylon> */}}
+<table class="items">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Feed</th>
+      <th>Title</th>
+      <th>Summary</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {{ $class := cycle "even" "odd" }}
+    {{ range . }}
+    <tr class="{{ $class.Next }}">
+      <td>{{ fmt_time .Timestamp }}</td>
+      <td>Feed #{{ .FeedID }}</td>
+      <td>{{ .Title }}</td>
+      <td>{{ .Description }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}

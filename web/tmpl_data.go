@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-02-12 15:53:12 krylon>
+// Time-stamp: <2021-02-13 15:13:49 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -12,6 +12,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"ticker/common"
+	"ticker/feed"
 	"time"
 
 	"github.com/hashicorp/logutils"
@@ -53,6 +54,8 @@ type tmplDataBase struct {
 // nolint: unused
 type tmplDataIndex struct {
 	tmplDataBase
+	Feeds []feed.Feed
+	Items []feed.Item
 }
 
 // Local Variables:  //

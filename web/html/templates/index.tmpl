@@ -1,5 +1,5 @@
 {{ define "index" }}
-{{/* Time-stamp: <2021-02-12 16:11:30 krylon> */}}
+{{/* Time-stamp: <2021-02-13 17:26:56 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -7,7 +7,13 @@
   <body>
     {{ template "intro" . }}
 
-    <h3>Coming soon: <i>Content</i></h3>
+    <h2>Latest Headlines</h2>
+
+    {{ template "items" .Items }}
+
+    <h2>Subscriptions</h2>
+
+    {{ template "feeds" .Feeds }}
 
     {{ template "footer" }}
   </body>

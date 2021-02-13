@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-12 23:42:50 krylon>
+// Time-stamp: <2021-02-13 15:55:56 krylon>
 
 package web
 
@@ -157,7 +157,11 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
 		r.URL.EscapedPath())
 
-	const tmplName = "index"
+	const (
+		tmplName  = "index"
+		recentCnt = 20
+	)
+
 	var (
 		err  error
 		msg  string
@@ -189,6 +193,20 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	// 	srv.SendMessage(msg)
 	// 	data.Notes = make([]zettel.Zettel, 0)
 	// }
+
+	if data.Feeds, err = db.FeedGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot query all Feeds: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.Items, err = db.ItemGetRecent(recentCnt); err != nil {
+		msg = fmt.Sprintf("Cannot query all Items: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
 
 	data.Messages = srv.getMessages()
 

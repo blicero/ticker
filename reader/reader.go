@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-08 20:36:42 krylon>
+// Time-stamp: <2021-02-13 21:17:53 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -82,10 +82,16 @@ func (r *Reader) Loop() error {
 	// const maxErrCnt = 10
 	// var errCnt = 0
 
+	r.lock.Lock()
+	r.active = true
+	r.lock.Unlock()
+
 	defer func() {
 		r.lock.Lock()
 		r.active = false
 		r.lock.Unlock()
+
+		r.log.Println("[TRACE] Reader.Loop() is finished.")
 	}()
 
 	for r.Active() {
@@ -110,6 +116,10 @@ func (r *Reader) refresh() error {
 	)
 
 	r.log.Println("[TRACE] Check/Refresh Feeds")
+
+	defer func() {
+		r.log.Println("[TRACE] Reader.refresh() is finished.")
+	}()
 
 	if feeds, err = r.db.FeedGetAll(); err != nil {
 		r.log.Printf("[ERROR] Cannot get all Feeds: %s\n",
