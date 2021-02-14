@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-13 21:30:34 krylon> */}}
+{{/* Time-stamp: <2021-02-14 23:16:54 krylon> */}}
 <table class="items">
   <thead>
     <tr>
@@ -16,8 +16,12 @@
     {{ range . }}
     <tr class="{{ $class.Next }}">
       <td>{{ fmt_time .Timestamp }}</td>
-      <td>Feed #{{ .FeedID }}</td>
-      <td>{{ .Title }}</td>
+      <td><a href="/feed/{{ .FeedID }}">Feed #{{ .FeedID }}</a></td>
+      <td>
+        <a href="{{ .URL }}" target="_blank">
+          {{ .Title }}
+        </a>
+      </td>
       <td>{{ .Description }}</td>
     </tr>
     {{ end }}
