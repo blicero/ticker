@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-13 21:17:53 krylon>
+// Time-stamp: <2021-02-14 23:09:01 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -168,6 +168,13 @@ func (r *Reader) refresh() error {
 					err.Error())
 				return err
 			}
+		}
+
+		if err = r.db.FeedSetTimestamp(&f, time.Now()); err != nil {
+			r.log.Printf("[ERROR] Cannot update timestamp on Feed %s: %s\n",
+				f.Name,
+				err.Error())
+			continue
 		}
 	}
 
