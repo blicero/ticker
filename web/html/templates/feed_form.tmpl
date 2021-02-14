@@ -1,6 +1,6 @@
 {{ define "feed_form" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-13 20:43:44 krylon> */}}
+{{/* Time-stamp: <2021-02-14 22:35:42 krylon> */}}
 <form action="/feed/subscribe" method="post">
   <table class="horizontal">
     <tr>
@@ -25,9 +25,9 @@
       </td>
     </tr>
     <tr>
-      <th>Interval<br />(in minutes)</th>
+      <th>Interval<br />(in seconds)</th>
       <td>
-        <input type="number" name="interval" id="interval" min="0" max="10080" />
+        <input type="number" name="interval" id="interval" default="900" min="0" max="10080" />
       </td>
     </tr>
     <tr>

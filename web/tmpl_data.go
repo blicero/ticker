@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-02-13 15:13:49 krylon>
+// Time-stamp: <2021-02-14 21:26:50 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -42,7 +42,6 @@ func (m *message) Checksum() string {
 	return ckstr
 } // func (m *message) Checksum() string
 
-// nolint: unused
 type tmplDataBase struct {
 	Title      string
 	Messages   []message
@@ -51,10 +50,15 @@ type tmplDataBase struct {
 	URL        string
 }
 
-// nolint: unused
 type tmplDataIndex struct {
 	tmplDataBase
 	Feeds []feed.Feed
+	Items []feed.Item
+}
+
+type tmplDataFeedDetails struct {
+	tmplDataBase
+	Feed  *feed.Feed
 	Items []feed.Item
 }
 

@@ -1,0 +1,38 @@
+{{ define "feed_details" }}
+{{/* Created on 14. 02. 2021 */}}
+{{/* Time-stamp: <2021-02-14 22:14:13 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <table class="horizontal">
+      {{ $class := cycle "even" "odd" }}
+      <tr class={{ $class.Next }}">
+        <th>Name</th>
+        <td>
+          <a href="{{ .Feed.URL }}" target="_blank">
+            {{ .Feed.Name }}
+          </a>
+        </td>
+      </tr>
+      <tr class="{{ $class.Next }}">
+        <th>Update Interval</th>
+        <td>{{ .Feed.Interval }}</td>
+      </tr>
+      <tr>
+        <th>Last Update</th>
+        <td>{{ fmt_time .Feed.LastUpdate }}</td>
+      </tr>
+    </table>
+
+    <h2>Latest Headlines</h2>
+
+    {{ template "items" .Items }}
+
+    {{ template "footer" }}
+  </body>
+</html>
+{{ end }}

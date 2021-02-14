@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-13 15:55:56 krylon>
+// Time-stamp: <2021-02-14 22:22:43 krylon>
 
 package web
 
@@ -12,9 +12,11 @@ import (
 	"krylib"
 	"log"
 	"net/http"
+	"strconv"
 	"text/template"
 	"ticker/common"
 	"ticker/database"
+	"ticker/feed"
 	"ticker/logdomain"
 	"time"
 
@@ -23,7 +25,10 @@ import (
 
 //go:generate go run ./build_templates.go
 
-const defaultPoolSize = 4
+const (
+	defaultPoolSize = 4
+	recentCnt       = 20
+)
 
 // type message struct {
 // 	Timestamp time.Time
@@ -88,6 +93,10 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{page:(?i)(?:index|main)?$}", srv.handleIndex)
+
+	srv.router.HandleFunc("/feed/form", srv.handleFeedForm)
+	srv.router.HandleFunc("/feed/subscribe", srv.handleFeedSubscribe)
+	srv.router.HandleFunc("/feed/{id:(?:\\d+)$}", srv.handleFeedDetails)
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 
@@ -219,6 +228,174 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	const (
+		tmplName = "subscribe"
+	)
+
+	var (
+		err  error
+		tmpl *template.Template
+		msg  string
+		data = tmplDataIndex{
+			tmplDataBase: tmplDataBase{
+				Title: "Subscribe to Feed",
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	data.Messages = srv.getMessages()
+
+	w.Header().Set("Cache-Control", "no-cache")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err       error
+		msg, iStr string
+		f         feed.Feed
+		interval  int64
+		db        *database.Database
+	)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Could not parse form data: %s", err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	}
+
+	f.Name = r.FormValue("name")
+	f.URL = r.FormValue("url")
+	iStr = r.FormValue("interval")
+
+	if interval, err = strconv.ParseInt(iStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse interval %q: %s",
+			iStr,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	}
+
+	f.Interval = time.Second * time.Duration(interval)
+
+	if err = db.FeedAdd(&f); err != nil {
+		msg = fmt.Sprintf("Cannot add Feed %s (%s): %s",
+			f.Name,
+			f.URL,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	}
+
+	var dstURL = fmt.Sprintf("/feed/%d", f.ID)
+
+	http.Redirect(w, r, dstURL, http.StatusFound)
+} // func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const tmplName = "feed_details"
+
+	var (
+		err        error
+		msg, idStr string
+		id         int64
+		db         *database.Database
+		tmpl       *template.Template
+		data       = tmplDataFeedDetails{
+			tmplDataBase: tmplDataBase{
+				Title: "Main",
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	vars := mux.Vars(r)
+
+	idStr = vars["id"]
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse ID %q: %s",
+			idStr,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	}
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Feed, err = db.FeedGetByID(id); err != nil {
+		msg = fmt.Sprintf("Cannot query all Feeds: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.Items, err = db.ItemGetByFeed(id, recentCnt); err != nil {
+		msg = fmt.Sprintf("Cannot query all Items: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	data.Messages = srv.getMessages()
+
+	w.Header().Set("Cache-Control", "no-cache")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request)
 
 /////////////////////////////////////////
 ////////////// Other ////////////////////
