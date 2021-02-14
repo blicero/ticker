@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-14 22:51:31 krylon>
+# Time-stamp: <2021-02-14 23:43:26 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -60,6 +60,7 @@
     I don't think so.
 *** Reader [0/0]
     :LOGBOOK:
+    CLOCK: [2021-02-14 So 23:05]--[2021-02-14 So 23:43] =>  0:38
     CLOCK: [2021-02-08 Mo 20:33]--[2021-02-08 Mo 21:16] =>  0:43
     CLOCK: [2021-02-08 Mo 19:25]--[2021-02-08 Mo 19:51] =>  0:26
     CLOCK: [2021-02-08 Mo 12:58]--[2021-02-08 Mo 15:36] =>  2:38
