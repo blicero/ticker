@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-14 22:22:43 krylon>
+// Time-stamp: <2021-02-14 23:44:36 krylon>
 
 package web
 
@@ -340,7 +340,6 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 		tmpl       *template.Template
 		data       = tmplDataFeedDetails{
 			tmplDataBase: tmplDataBase{
-				Title: "Main",
 				Debug: common.Debug,
 				URL:   r.URL.String(),
 			},
@@ -385,6 +384,7 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	data.Title = data.Feed.Name
 	data.Messages = srv.getMessages()
 
 	w.Header().Set("Cache-Control", "no-cache")
