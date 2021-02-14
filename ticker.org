@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-13 21:36:05 krylon>
+# Time-stamp: <2021-02-14 22:51:31 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,17 +13,17 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-02-13 Sa 21:36]
-   | Headline             | Time       |          |       |
-   |----------------------+------------+----------+-------|
-   | *Total time*         | *1d 23:47* |          |       |
-   |----------------------+------------+----------+-------|
-   | Ticker               | 1d 23:47   |          |       |
-   | \_  Components [2/2] |            | 1d 23:47 |       |
-   | \_    Feed [2/2]     |            |          |  3:16 |
-   | \_    Database [0/0] |            |          | 18:01 |
-   | \_    Reader [0/0]   |            |          | 12:17 |
-   | \_    Web interface  |            |          | 14:13 |
+   #+CAPTION: Clock summary at [2021-02-14 So 22:51]
+   | Headline             | Time      |         |       |
+   |----------------------+-----------+---------+-------|
+   | *Total time*         | *2d 1:43* |         |       |
+   |----------------------+-----------+---------+-------|
+   | Ticker               | 2d 1:43   |         |       |
+   | \_  Components [2/2] |           | 2d 1:43 |       |
+   | \_    Feed [2/2]     |           |         |  3:16 |
+   | \_    Database [0/0] |           |         | 18:01 |
+   | \_    Reader [0/0]   |           |         | 12:17 |
+   | \_    Web interface  |           |         | 16:09 |
    #+END:
 
 ** Questions
@@ -68,6 +68,7 @@
     :END:
 *** Web interface
     :LOGBOOK:
+    CLOCK: [2021-02-14 So 20:55]--[2021-02-14 So 22:51] =>  1:56
     CLOCK: [2021-02-13 Sa 15:08]--[2021-02-13 Sa 21:35] =>  6:27
     CLOCK: [2021-02-12 Fr 19:04]--[2021-02-12 Fr 23:56] =>  4:52
     CLOCK: [2021-02-12 Fr 17:21]--[2021-02-12 Fr 19:04] =>  1:43
