@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-14 23:09:01 krylon>
+// Time-stamp: <2021-02-15 14:03:49 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -25,28 +25,34 @@ const checkDelay = time.Second // nolint: deadcode,varcheck,unused
 // Reader regularly checks the subscribed Feeds and stores any new Items in
 // the database.
 type Reader struct {
-	db     *database.Database
-	log    *log.Logger
-	active bool
-	lock   deadlock.RWMutex
+	db       *database.Database
+	log      *log.Logger
+	active   bool
+	lock     deadlock.RWMutex
+	msgQueue chan<- string
 }
 
 // New creates a new Reader.
-func New() (*Reader, error) {
+func New(q chan<- string) (*Reader, error) {
 	var (
 		err error
-		r   = new(Reader)
+		msg string
+		r   = &Reader{msgQueue: q}
 	)
 
 	if r.log, err = common.GetLogger(logdomain.Reader); err != nil {
-		fmt.Fprintf(os.Stderr, "Cannot create Logger for %s: %s\n",
+		msg = fmt.Sprintf("Cannot create Logger for %s: %s",
 			logdomain.Reader,
 			err.Error())
+		q <- msg
+		fmt.Fprintln(os.Stderr, msg)
 		return nil, err
 	} else if r.db, err = database.Open(common.DbPath); err != nil {
-		r.log.Printf("[ERROR] Cannot open database at %s: %s\n",
+		msg = fmt.Sprintf("Cannot open database at %s: %s",
 			common.DbPath,
 			err.Error())
+		r.log.Printf("[ERROR] %s\n", msg)
+		q <- msg
 		return nil, err
 	}
 
@@ -92,14 +98,17 @@ func (r *Reader) Loop() error {
 		r.lock.Unlock()
 
 		r.log.Println("[TRACE] Reader.Loop() is finished.")
+		r.msgQueue <- "Reader Loop is finished"
 	}()
 
 	for r.Active() {
 		r.log.Println("[TRACE] Reader Loop calling refresh.")
 
 		if err := r.refresh(); err != nil {
-			r.log.Printf("[ERROR] Failed to refresh Feeds: %s\n",
+			var msg = fmt.Sprintf("Failed to refresh Feeds: %s",
 				err.Error())
+			r.log.Printf("[ERROR] %s\n", msg)
+			r.msgQueue <- msg
 			return err
 		}
 
@@ -122,8 +131,10 @@ func (r *Reader) refresh() error {
 	}()
 
 	if feeds, err = r.db.FeedGetAll(); err != nil {
-		r.log.Printf("[ERROR] Cannot get all Feeds: %s\n",
+		var msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
+		r.log.Printf("[ERROR] %s\n", msg)
+		r.msgQueue <- msg
 		return err
 	}
 
@@ -138,9 +149,11 @@ func (r *Reader) refresh() error {
 				f.Next().Format(common.TimestampFormat))
 			continue
 		} else if items, err = f.Fetch(); err != nil {
-			r.log.Printf("[ERROR] Failed to refresh Feed %s: %s\n",
+			var msg = fmt.Sprintf("Failed to refresh Feed %s: %s",
 				f.Name,
 				err.Error())
+			r.log.Printf("[ERROR] %s\n", msg)
+			r.msgQueue <- msg
 			continue
 		}
 
@@ -154,26 +167,32 @@ func (r *Reader) refresh() error {
 				i.Title,
 				i.URL)
 			if ref, err = r.db.ItemGetByURL(i.URL); err != nil {
-				r.log.Printf("[ERROR] Cannot check if Item %s is in databse: %s\n",
+				var msg = fmt.Sprintf("Cannot check if Item %s is in databse: %s",
 					i.URL,
 					err.Error())
+				r.log.Printf("[ERROR] %s\n", msg)
+				r.msgQueue <- msg
 				return err
 			} else if ref != nil {
 				continue
 			}
 
 			if err = r.db.ItemAdd(&i); err != nil {
-				r.log.Printf("[ERROR] Cannot save Item %q to database: %s\n",
+				var msg = fmt.Sprintf("Cannot save Item %q to database: %s",
 					i.Title,
 					err.Error())
+				r.log.Printf("[ERROR] %s\n", msg)
+				r.msgQueue <- msg
 				return err
 			}
 		}
 
 		if err = r.db.FeedSetTimestamp(&f, time.Now()); err != nil {
-			r.log.Printf("[ERROR] Cannot update timestamp on Feed %s: %s\n",
+			var msg = fmt.Sprintf("Cannot update timestamp on Feed %s: %s",
 				f.Name,
 				err.Error())
+			r.log.Printf("[ERROR] %s\n", msg)
+			r.msgQueue <- msg
 			continue
 		}
 	}
