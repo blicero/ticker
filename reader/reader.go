@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-15 14:03:49 krylon>
+// Time-stamp: <2021-02-15 20:17:43 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -44,7 +44,7 @@ func New(q chan<- string) (*Reader, error) {
 		msg = fmt.Sprintf("Cannot create Logger for %s: %s",
 			logdomain.Reader,
 			err.Error())
-		q <- msg
+		r.sendMessage(msg)
 		fmt.Fprintln(os.Stderr, msg)
 		return nil, err
 	} else if r.db, err = database.Open(common.DbPath); err != nil {
@@ -52,12 +52,19 @@ func New(q chan<- string) (*Reader, error) {
 			common.DbPath,
 			err.Error())
 		r.log.Printf("[ERROR] %s\n", msg)
-		q <- msg
+		r.sendMessage(msg)
 		return nil, err
 	}
 
 	return r, nil
 } // func New() (*Reader, error)
+
+func (r *Reader) sendMessage(msg string) {
+	if r.msgQueue != nil {
+		msg = "Reader - " + msg
+		r.msgQueue <- msg
+	}
+} // func (r *Reader) sendMessage(msg string)
 
 // Active returns true if the Reader is still active.
 func (r *Reader) Active() bool {
@@ -98,7 +105,7 @@ func (r *Reader) Loop() error {
 		r.lock.Unlock()
 
 		r.log.Println("[TRACE] Reader.Loop() is finished.")
-		r.msgQueue <- "Reader Loop is finished"
+		r.sendMessage("Reader Loop is finished")
 	}()
 
 	for r.Active() {
@@ -108,7 +115,7 @@ func (r *Reader) Loop() error {
 			var msg = fmt.Sprintf("Failed to refresh Feeds: %s",
 				err.Error())
 			r.log.Printf("[ERROR] %s\n", msg)
-			r.msgQueue <- msg
+			r.sendMessage(msg)
 			return err
 		}
 
@@ -130,11 +137,11 @@ func (r *Reader) refresh() error {
 		r.log.Println("[TRACE] Reader.refresh() is finished.")
 	}()
 
-	if feeds, err = r.db.FeedGetAll(); err != nil {
+	if feeds, err = r.db.FeedGetDue(); err != nil {
 		var msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
 		r.log.Printf("[ERROR] %s\n", msg)
-		r.msgQueue <- msg
+		r.sendMessage(msg)
 		return err
 	}
 
@@ -153,7 +160,7 @@ func (r *Reader) refresh() error {
 				f.Name,
 				err.Error())
 			r.log.Printf("[ERROR] %s\n", msg)
-			r.msgQueue <- msg
+			r.sendMessage(msg)
 			continue
 		}
 
@@ -171,7 +178,7 @@ func (r *Reader) refresh() error {
 					i.URL,
 					err.Error())
 				r.log.Printf("[ERROR] %s\n", msg)
-				r.msgQueue <- msg
+				r.sendMessage(msg)
 				return err
 			} else if ref != nil {
 				continue
@@ -182,7 +189,7 @@ func (r *Reader) refresh() error {
 					i.Title,
 					err.Error())
 				r.log.Printf("[ERROR] %s\n", msg)
-				r.msgQueue <- msg
+				r.sendMessage(msg)
 				return err
 			}
 		}
@@ -192,7 +199,7 @@ func (r *Reader) refresh() error {
 				f.Name,
 				err.Error())
 			r.log.Printf("[ERROR] %s\n", msg)
-			r.msgQueue <- msg
+			r.sendMessage(msg)
 			continue
 		}
 	}

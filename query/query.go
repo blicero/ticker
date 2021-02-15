@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-14 21:17:24 krylon>
+// Time-stamp: <2021-02-15 18:53:52 krylon>
 
 //go:generate stringer -type=ID
 
@@ -14,6 +14,7 @@ type ID uint8
 const (
 	FeedAdd ID = iota
 	FeedGetAll
+	FeedGetDue
 	FeedGetByID
 	FeedSetTimestamp
 	FeedDelete

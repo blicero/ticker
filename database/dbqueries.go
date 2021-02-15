@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-14 21:18:56 krylon>
+// Time-stamp: <2021-02-15 18:55:51 krylon>
 
 package database
 
@@ -22,6 +22,17 @@ SELECT
      refresh_timestamp,
      active
 FROM feed
+`,
+	query.FeedGetDue: `
+SELECT
+     id,
+     name,
+     url,
+     refresh_interval,
+     refresh_timestamp,
+     active
+FROM feed
+WHERE refresh_timestamp + refresh_interval < ?
 `,
 	query.FeedGetByID: `
 SELECT

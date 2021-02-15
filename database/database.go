@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-14 21:22:46 krylon>
+// Time-stamp: <2021-02-15 19:18:57 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -684,6 +684,61 @@ EXEC_QUERY:
 
 	return list, nil
 } // func (db *Database) FeedGetAll() ([]feed.Feed, error)
+
+// FeedGetDue fetches only those Feeds that are due for a refresh.
+func (db *Database) FeedGetDue() ([]feed.Feed, error) {
+	const qid = query.FeedGetDue
+	var (
+		err  error
+		stmt *sql.Stmt
+		now  = time.Now().Unix()
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(now); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var list = make([]feed.Feed, 0, 10)
+
+	for rows.Next() {
+		var (
+			f               feed.Feed
+			interval, stamp int64
+		)
+
+		if err = rows.Scan(&f.ID, &f.Name, &f.URL, &interval, &stamp, &f.Active); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n", err.Error())
+			return nil, err
+		} else if stamp != 0 {
+			f.LastUpdate = time.Unix(stamp, 0)
+		}
+
+		f.Interval = time.Second * time.Duration(interval)
+
+		list = append(list, f)
+	}
+
+	return list, nil
+} // func (db *Database) FeedGetDue() ([]feed.Feed, error)
 
 // FeedGetByID fetches the Feed with the given ID.
 func (db *Database) FeedGetByID(id int64) (*feed.Feed, error) {
