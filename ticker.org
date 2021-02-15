@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-15 15:30:56 krylon>
+# Time-stamp: <2021-02-15 20:53:26 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,17 +13,18 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-02-15 Mo 15:30]
-   | Headline             | Time      |         |       |
-   |----------------------+-----------+---------+-------|
-   | *Total time*         | *2d 4:24* |         |       |
-   |----------------------+-----------+---------+-------|
-   | Ticker               | 2d 4:24   |         |       |
-   | \_  Components [2/2] |           | 2d 4:24 |       |
-   | \_    Feed [2/2]     |           |         |  3:16 |
-   | \_    Database [0/0] |           |         | 18:01 |
-   | \_    Reader [0/0]   |           |         | 14:58 |
-   | \_    Web interface  |           |         | 16:09 |
+   #+CAPTION: Clock summary at [2021-02-15 Mo 20:52]
+   | Headline             | Time      |         |       |      |
+   |----------------------+-----------+---------+-------+------|
+   | *Total time*         | *2d 6:36* |         |       |      |
+   |----------------------+-----------+---------+-------+------|
+   | Ticker               | 2d 6:36   |         |       |      |
+   | \_  Components [2/2] |           | 2d 6:36 |       |      |
+   | \_    Feed [2/2]     |           |         |  3:16 |      |
+   | \_    Database [0/0] |           |         | 19:27 |      |
+   | \_      Due Feeds    |           |         |       | 1:26 |
+   | \_    Reader [0/0]   |           |         | 15:44 |      |
+   | \_    Web interface  |           |         | 16:09 |      |
    #+END:
 
 ** Questions
@@ -58,8 +59,15 @@
     :END:
     Is there any reason /not/ to use good old SQLite?
     I don't think so.
+**** Due Feeds
+     :LOGBOOK:
+     CLOCK: [2021-02-15 Mo 18:51]--[2021-02-15 Mo 20:17] =>  1:26
+     :END:
+     I want a method/query to fetch only feeds that are due for a refresh.
 *** Reader [0/0]
     :LOGBOOK:
+    CLOCK: [2021-02-15 Mo 20:17]--[2021-02-15 Mo 20:52] =>  0:35
+    CLOCK: [2021-02-15 Mo 18:40]--[2021-02-15 Mo 18:51] =>  0:11
     CLOCK: [2021-02-15 Mo 13:27]--[2021-02-15 Mo 15:30] =>  2:03
     CLOCK: [2021-02-14 So 23:05]--[2021-02-14 So 23:43] =>  0:38
     CLOCK: [2021-02-08 Mo 20:33]--[2021-02-08 Mo 21:16] =>  0:43
