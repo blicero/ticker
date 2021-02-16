@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-14 23:16:54 krylon> */}}
+{{/* Time-stamp: <2021-02-16 12:42:08 krylon> */}}
 <table class="items">
   <thead>
     <tr>
@@ -13,10 +13,14 @@
 
   <tbody>
     {{ $class := cycle "even" "odd" }}
-    {{ range . }}
+    {{ $feeds := .FeedMap }}
+    {{ range .Items }}
     <tr class="{{ $class.Next }}">
       <td>{{ fmt_time .Timestamp }}</td>
-      <td><a href="/feed/{{ .FeedID }}">Feed #{{ .FeedID }}</a></td>
+      <td><a href="/feed/{{ .FeedID }}">
+        {{/* Feed #{{ .FeedID }} */}}
+        {{ (index $feeds .FeedID).Name }}
+      </a></td>
       <td>
         <a href="{{ .URL }}" target="_blank">
           {{ .Title }}

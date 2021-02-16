@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-15 18:55:51 krylon>
+// Time-stamp: <2021-02-16 13:34:31 krylon>
 
 package database
 
@@ -10,14 +10,15 @@ import "ticker/query"
 
 var dbQueries = map[query.ID]string{
 	query.FeedAdd: `
-INSERT INTO feed (name, url, refresh_interval) 
-VALUES           (   ?,   ?,                ?)
+INSERT INTO feed (name, url, homepage, refresh_interval) 
+VALUES           (   ?,   ?,        ?,                ?)
 `,
 	query.FeedGetAll: `
 SELECT
      id,
      name,
      url,
+     homepage,
      refresh_interval,
      refresh_timestamp,
      active
@@ -28,6 +29,7 @@ SELECT
      id,
      name,
      url,
+     homepage,
      refresh_interval,
      refresh_timestamp,
      active
@@ -38,6 +40,7 @@ WHERE refresh_timestamp + refresh_interval < ?
 SELECT
      name,
      url,
+     homepage,
      refresh_interval,
      refresh_timestamp,
      active
@@ -106,4 +109,6 @@ WHERE feed_id = ?
 ORDER BY timestamp DESC
 LIMIT ?
 `,
+	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
+	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",
 }

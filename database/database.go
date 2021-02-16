@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-15 19:18:57 krylon>
+// Time-stamp: <2021-02-16 13:38:45 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -603,7 +603,7 @@ func (db *Database) FeedAdd(f *feed.Feed) error {
 	var res sql.Result
 
 EXEC_QUERY:
-	if res, err = stmt.Exec(f.Name, f.URL, int64(f.Interval.Seconds())); err != nil {
+	if res, err = stmt.Exec(f.Name, f.URL, f.Homepage, int64(f.Interval.Seconds())); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
@@ -670,7 +670,7 @@ EXEC_QUERY:
 			interval, stamp int64
 		)
 
-		if err = rows.Scan(&f.ID, &f.Name, &f.URL, &interval, &stamp, &f.Active); err != nil {
+		if err = rows.Scan(&f.ID, &f.Name, &f.URL, &f.Homepage, &interval, &stamp, &f.Active); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n", err.Error())
 			return nil, err
 		} else if stamp != 0 {
@@ -725,7 +725,7 @@ EXEC_QUERY:
 			interval, stamp int64
 		)
 
-		if err = rows.Scan(&f.ID, &f.Name, &f.URL, &interval, &stamp, &f.Active); err != nil {
+		if err = rows.Scan(&f.ID, &f.Name, &f.URL, &f.Homepage, &interval, &stamp, &f.Active); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n", err.Error())
 			return nil, err
 		} else if stamp != 0 {
@@ -777,7 +777,7 @@ EXEC_QUERY:
 			stamp, interval int64
 		)
 
-		if err = rows.Scan(&fd.Name, &fd.URL, &interval, &stamp, &fd.Active); err != nil {
+		if err = rows.Scan(&fd.Name, &fd.URL, &fd.Homepage, &interval, &stamp, &fd.Active); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
@@ -1288,3 +1288,139 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) ItemGetByFeed(feedID, limit int64) ([]feed.Item, error)
+
+// ItemRatingSet sets an Item's Rating.
+func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error {
+	const qid = query.ItemAdd
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(rating, i.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot rate Item %s (%s): %s",
+				i.Title,
+				i.URL,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	i.Rating = rating
+	return nil
+} // func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error
+
+// ItemRatingClear clears an Item's Rating.
+func (db *Database) ItemRatingClear(i *feed.Item) error {
+	const qid = query.ItemAdd
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(i.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot rate Item %s (%s): %s",
+				i.Title,
+				i.URL,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	i.Rating = math.NaN()
+	return nil
+} // func (db *Database) ItemRatingClear(i *feed.Item) error

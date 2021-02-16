@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-11 16:12:05 krylon>
+// Time-stamp: <2021-02-16 13:33:28 krylon>
 
 package database
 
@@ -12,6 +12,7 @@ CREATE TABLE feed (
     id			INTEGER PRIMARY KEY,
     name		TEXT NOT NULL,
     url  		TEXT UNIQUE NOT NULL,
+    homepage            TEXT NOT NULL,
     refresh_interval    INTEGER NOT NULL,
     refresh_timestamp   INTEGER NOT NULL DEFAULT 0,
     active              INTEGER NOT NULL DEFAULT 1,

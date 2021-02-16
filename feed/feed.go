@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-05 21:24:02 krylon>
+// Time-stamp: <2021-02-16 13:33:13 krylon>
 
 // Package feed provides the basic data type and logic to represent and interact
 // with RSS feeds.
@@ -27,6 +27,7 @@ type Feed struct {
 	ID         int64
 	Name       string
 	URL        string
+	Homepage   string
 	Interval   time.Duration
 	LastUpdate time.Time
 	Active     bool

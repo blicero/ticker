@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-14 23:44:36 krylon>
+// Time-stamp: <2021-02-16 12:35:38 krylon>
 
 package web
 
@@ -217,6 +217,11 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	data.FeedMap = make(map[int64]feed.Feed, len(data.Feeds))
+	for _, f := range data.Feeds {
+		data.FeedMap[f.ID] = f
+	}
+
 	data.Messages = srv.getMessages()
 
 	w.Header().Set("Cache-Control", "no-cache")
@@ -383,6 +388,8 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 		return
 	}
+
+	data.FeedMap = map[int64]feed.Feed{id: *data.Feed}
 
 	data.Title = data.Feed.Name
 	data.Messages = srv.getMessages()

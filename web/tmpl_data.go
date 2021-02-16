@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-02-14 21:26:50 krylon>
+// Time-stamp: <2021-02-16 12:33:46 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -52,14 +52,16 @@ type tmplDataBase struct {
 
 type tmplDataIndex struct {
 	tmplDataBase
-	Feeds []feed.Feed
-	Items []feed.Item
+	FeedMap map[int64]feed.Feed
+	Feeds   []feed.Feed
+	Items   []feed.Item
 }
 
 type tmplDataFeedDetails struct {
 	tmplDataBase
-	Feed  *feed.Feed
-	Items []feed.Item
+	FeedMap map[int64]feed.Feed
+	Feed    *feed.Feed
+	Items   []feed.Item
 }
 
 // Local Variables:  //
