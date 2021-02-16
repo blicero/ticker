@@ -2,11 +2,12 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 18:19:23 krylon>
+// Time-stamp: <2021-02-16 18:40:52 krylon>
 
 package web
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"krylib"
@@ -21,6 +22,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/hashicorp/logutils"
 )
 
 //go:generate go run ./build_templates.go
@@ -99,6 +101,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/feed/{id:(?:\\d+)$}", srv.handleFeedDetails)
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
+	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -500,3 +503,59 @@ func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	w.Write(response) // nolint: errcheck,gosec
 } // func (srv *Web) handleBeacon(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleGetNewMessages(w http.ResponseWriter, r *http.Request) {
+	// srv.log.Printf("[TRACE] Handle %s from %s\n",
+	// 	r.URL,
+	// 	r.RemoteAddr)
+
+	type msgItem struct {
+		Time    string
+		Level   logutils.LogLevel
+		Message string
+	}
+
+	type resBody struct {
+		Status   bool
+		Message  string
+		Messages []msgItem
+	}
+
+	var messages = srv.getMessages()
+	var res = resBody{
+		Status:   true,
+		Messages: make([]msgItem, len(messages)),
+	}
+
+	for idx, i := range messages {
+		res.Messages[idx] = msgItem{
+			Time:    i.TimeString(),
+			Level:   i.Level,
+			Message: i.Message,
+		}
+	}
+
+	var (
+		err error
+		msg string
+		buf []byte
+	)
+
+	if buf, err = json.Marshal(&res); err != nil {
+		msg = fmt.Sprintf("Error serializing response: %s",
+			err.Error())
+		srv.SendMessage(msg)
+		res.Message = msg
+		buf = errJSON(msg)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.WriteHeader(200)
+	if _, err = w.Write(buf); err != nil {
+		msg = fmt.Sprintf("Failed to send result: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+	}
+} // func (srv *Server) handleGetNewMessages(w http.ResponseWriter, r *http.Request)

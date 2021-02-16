@@ -2,18 +2,20 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 09. 2019 by Benjamin Walkenhorst
 // (c) 2019 Benjamin Walkenhorst
-// Time-stamp: <2021-02-11 20:47:23 krylon>
+// Time-stamp: <2021-02-16 18:39:45 krylon>
 //
 // Helper functions for use by the HTTP request handlers
 
 package web
 
-// func errJSON(msg string) []byte {
-// 	var res = fmt.Sprintf(`{ "Status": false, "Message": %q }`,
-// 		msg)
+import "fmt"
 
-// 	return []byte(res)
-// } // func errJSON(msg string) []byte
+func errJSON(msg string) []byte {
+	var res = fmt.Sprintf(`{ "Status": false, "Message": %q }`,
+		msg)
+
+	return []byte(res)
+} // func errJSON(msg string) []byte
 
 // func getMimeType(path string) (string, error) {
 // 	var (
