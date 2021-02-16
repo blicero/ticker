@@ -1,10 +1,11 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-16 12:42:08 krylon> */}}
+{{/* Time-stamp: <2021-02-16 18:28:48 krylon> */}}
 <table class="items">
   <thead>
     <tr>
       <th>Time</th>
+      <th>Rating</th>
       <th>Feed</th>
       <th>Title</th>
       <th>Summary</th>
@@ -17,8 +18,14 @@
     {{ range .Items }}
     <tr class="{{ $class.Next }}">
       <td>{{ fmt_time .Timestamp }}</td>
+      <td>
+        {{ if .IsRated }}
+        {{ .RatingString }}
+        {{ else }}
+
+        {{ end }}
+      </td>
       <td><a href="/feed/{{ .FeedID }}">
-        {{/* Feed #{{ .FeedID }} */}}
         {{ (index $feeds .FeedID).Name }}
       </a></td>
       <td>
