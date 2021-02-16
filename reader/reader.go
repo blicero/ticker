@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-15 20:17:43 krylon>
+// Time-stamp: <2021-02-16 18:16:10 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -11,16 +11,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"ticker/common"
 	"ticker/database"
 	"ticker/feed"
 	"ticker/logdomain"
 	"time"
-
-	deadlock "github.com/sasha-s/go-deadlock"
 )
 
-const checkDelay = time.Second // nolint: deadcode,varcheck,unused
+// FIXME For testing, I set this value rather low. For production use, I
+//       should probably set this to a higher value.
+const checkDelay = time.Second * 1
 
 // Reader regularly checks the subscribed Feeds and stores any new Items in
 // the database.
@@ -28,7 +29,7 @@ type Reader struct {
 	db       *database.Database
 	log      *log.Logger
 	active   bool
-	lock     deadlock.RWMutex
+	lock     sync.RWMutex
 	msgQueue chan<- string
 }
 
@@ -44,7 +45,7 @@ func New(q chan<- string) (*Reader, error) {
 		msg = fmt.Sprintf("Cannot create Logger for %s: %s",
 			logdomain.Reader,
 			err.Error())
-		r.sendMessage(msg)
+		r.sndMsg(msg)
 		fmt.Fprintln(os.Stderr, msg)
 		return nil, err
 	} else if r.db, err = database.Open(common.DbPath); err != nil {
@@ -52,14 +53,14 @@ func New(q chan<- string) (*Reader, error) {
 			common.DbPath,
 			err.Error())
 		r.log.Printf("[ERROR] %s\n", msg)
-		r.sendMessage(msg)
+		r.sndMsg(msg)
 		return nil, err
 	}
 
 	return r, nil
 } // func New() (*Reader, error)
 
-func (r *Reader) sendMessage(msg string) {
+func (r *Reader) sndMsg(msg string) {
 	if r.msgQueue != nil {
 		msg = "Reader - " + msg
 		r.msgQueue <- msg
@@ -105,17 +106,17 @@ func (r *Reader) Loop() error {
 		r.lock.Unlock()
 
 		r.log.Println("[TRACE] Reader.Loop() is finished.")
-		r.sendMessage("Reader Loop is finished")
+		r.sndMsg("Reader Loop is finished")
 	}()
 
 	for r.Active() {
-		r.log.Println("[TRACE] Reader Loop calling refresh.")
+		// r.log.Println("[TRACE] Reader Loop calling refresh.")
 
 		if err := r.refresh(); err != nil {
 			var msg = fmt.Sprintf("Failed to refresh Feeds: %s",
 				err.Error())
 			r.log.Printf("[ERROR] %s\n", msg)
-			r.sendMessage(msg)
+			r.sndMsg(msg)
 			return err
 		}
 
@@ -131,17 +132,17 @@ func (r *Reader) refresh() error {
 		feeds []feed.Feed
 	)
 
-	r.log.Println("[TRACE] Check/Refresh Feeds")
+	// r.log.Println("[TRACE] Check/Refresh Feeds")
 
-	defer func() {
-		r.log.Println("[TRACE] Reader.refresh() is finished.")
-	}()
+	// defer func() {
+	// 	r.log.Println("[TRACE] Reader.refresh() is finished.")
+	// }()
 
 	if feeds, err = r.db.FeedGetDue(); err != nil {
 		var msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
 		r.log.Printf("[ERROR] %s\n", msg)
-		r.sendMessage(msg)
+		r.sndMsg(msg)
 		return err
 	}
 
@@ -149,9 +150,11 @@ func (r *Reader) refresh() error {
 		var items []feed.Item
 
 		r.log.Printf("[TRACE] Check Feed %s\n", f.Name)
+		r.sndMsg(fmt.Sprintf("Refresh Feed %s", f.Name))
 
 		if !f.IsDue() {
-			r.log.Printf("[TRACE] Feed %s is next due at %s\n",
+			// CANTHAPPEN!!!
+			r.log.Printf("[CANTHAPPEN] Feed %s is next due at %s\n",
 				f.Name,
 				f.Next().Format(common.TimestampFormat))
 			continue
@@ -160,7 +163,7 @@ func (r *Reader) refresh() error {
 				f.Name,
 				err.Error())
 			r.log.Printf("[ERROR] %s\n", msg)
-			r.sendMessage(msg)
+			r.sndMsg(msg)
 			continue
 		}
 
@@ -178,7 +181,7 @@ func (r *Reader) refresh() error {
 					i.URL,
 					err.Error())
 				r.log.Printf("[ERROR] %s\n", msg)
-				r.sendMessage(msg)
+				r.sndMsg(msg)
 				return err
 			} else if ref != nil {
 				continue
@@ -189,7 +192,7 @@ func (r *Reader) refresh() error {
 					i.Title,
 					err.Error())
 				r.log.Printf("[ERROR] %s\n", msg)
-				r.sendMessage(msg)
+				r.sndMsg(msg)
 				return err
 			}
 		}
@@ -199,7 +202,7 @@ func (r *Reader) refresh() error {
 				f.Name,
 				err.Error())
 			r.log.Printf("[ERROR] %s\n", msg)
-			r.sendMessage(msg)
+			r.sndMsg(msg)
 			continue
 		}
 	}
