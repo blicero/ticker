@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 12:35:38 krylon>
+// Time-stamp: <2021-02-16 18:19:23 krylon>
 
 package web
 
@@ -301,6 +301,7 @@ func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request) {
 
 	f.Name = r.FormValue("name")
 	f.URL = r.FormValue("url")
+	f.Homepage = r.FormValue("homepage")
 	iStr = r.FormValue("interval")
 
 	if interval, err = strconv.ParseInt(iStr, 10, 64); err != nil {

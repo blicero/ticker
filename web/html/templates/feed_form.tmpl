@@ -1,26 +1,33 @@
 {{ define "feed_form" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-15 13:53:07 krylon> */}}
+{{/* Time-stamp: <2021-02-16 18:00:57 krylon> */}}
 <form action="/feed/subscribe" method="post">
   <table class="horizontal">
     <tr>
-      <th>
-        Name
-      </th>
+      <th>Name</th>
       <td>
         <input type="text" name="name" id="name" placeholder="Name" />
       </td>
     </tr>
     <tr>
-      <th>
-        URL
-      </th>
+      <th>URL</th>
       <td>
         <input
         type="url"
         name="url"
         id="url"
         placeholder="https://www.example.com/rss"
+        required />
+      </td>
+    </tr>
+    <tr>
+      <th>Homepage</th>
+      <td>
+        <input
+        type="url"
+        name="homepage"
+        id="homepage"
+        placeholder="https://www.example.com/"
         required />
       </td>
     </tr>
