@@ -483,10 +483,9 @@ func (srv *Server) sendErrorMessage(w http.ResponseWriter, msg string) {
 // const success = "Success"
 
 func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle %s from %s\n",
-		r.URL,
-		r.RemoteAddr)
-
+	// srv.log.Printf("[TRACE] Handle %s from %s\n",
+	// 	r.URL,
+	// 	r.RemoteAddr)
 	var timestamp = time.Now().Format(common.TimestampFormat)
 	const appName = common.AppName + " " + common.Version
 	var jstr = fmt.Sprintf(`{ "Status": true, "Message": "%s", "Timestamp": "%s", "Hostname": "%s" }`,
