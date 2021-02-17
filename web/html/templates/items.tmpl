@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-16 18:52:09 krylon> */}}
+{{/* Time-stamp: <2021-02-17 00:39:32 krylon> */}}
 <table class="items">
   <thead>
     <tr>
@@ -16,13 +16,21 @@
     {{ $class := cycle "even" "odd" }}
     {{ $feeds := .FeedMap }}
     {{ range .Items }}
-    <tr class="{{ $class.Next }}">
+    <tr class="{{ $class.Next }}" id="item_{{ .ID }}">
       <td>{{ fmt_time .Timestamp }}</td>
-      <td>
+      <td id="item_rating_{{ .ID }}">
         {{ if .IsRated }}
         {{ .RatingString }}
         {{ else }}
-
+        <input
+        type="button"
+        value="Good"
+        onclick="rate_item({{ .ID }}, 1);" />
+        &nbsp;|&nbsp;
+        <input
+        type="button"
+        value="Bad"
+        onclick="rate_item({{ .ID }}, 0);" />
         {{ end }}
       </td>
       <td><a href="/feed/{{ .FeedID }}">

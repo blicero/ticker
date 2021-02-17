@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 18:40:52 krylon>
+// Time-stamp: <2021-02-17 01:03:50 krylon>
 
 package web
 
@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"krylib"
 	"log"
+	"math"
 	"net/http"
 	"strconv"
 	"text/template"
@@ -102,6 +103,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
+	srv.router.HandleFunc("/ajax/rate_item", srv.handleRateItem)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -559,3 +561,87 @@ func (srv *Server) handleGetNewMessages(w http.ResponseWriter, r *http.Request) 
 		srv.SendMessage(msg)
 	}
 } // func (srv *Server) handleGetNewMessages(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleRateItem(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err                     error
+		db                      *database.Database
+		idStr, rStr, msg, reply string
+		id                      int64
+		item                    *feed.Item
+		rating                  float64
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Could not parse form data: %s", err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		return
+	}
+
+	idStr = r.PostFormValue("ID")
+	rStr = r.PostFormValue("Rating")
+
+	srv.log.Printf("[DEBUG] Rate Item %s - %s\n",
+		idStr,
+		rStr)
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse ID %q: %s", idStr, err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		goto SEND_ERROR_MESSAGE
+	} else if rating, err = strconv.ParseFloat(rStr, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse Rating %q: %s", rStr, err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if item, err = db.ItemGetByID(id); err != nil {
+		msg = fmt.Sprintf("Cannot load Item by ID %d: %s",
+			id,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		goto SEND_ERROR_MESSAGE
+	} else if item == nil {
+		msg = fmt.Sprintf("No such Item: %d",
+			id)
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		goto SEND_ERROR_MESSAGE
+	} else if err = db.ItemRatingSet(item, rating); err != nil {
+		msg = fmt.Sprintf("Cannot set Rating of Item %d to %.2f: %s",
+			item.ID,
+			rating,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		goto SEND_ERROR_MESSAGE
+	}
+
+	reply = fmt.Sprintf(`{ "Status": true, "ID": %d, "Rating": %f, "Message": "Success" }`,
+		id,
+		rating)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	reply = fmt.Sprintf(`{ "Status": false, "ID": %d, "Rating": %f, "Message": "%s" }`,
+		id,
+		math.NaN(),
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleRateItem(w http.ResponseWriter, r *http.Request)

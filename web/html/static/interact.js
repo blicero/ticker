@@ -1,4 +1,4 @@
-// Time-stamp: <2021-02-16 18:41:20 krylon>
+// Time-stamp: <2021-02-17 01:21:34 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -374,3 +374,26 @@ function toggleMsgDisplayVisible() {
     display.hidden = !display.hidden;
 } // function toggleMsgDisplayVisible()
 
+function rate_item(item_id, new_rating) {
+    var req = $.post("/ajax/rate_item",
+                     { ID: item_id, Rating: new_rating },
+                     function(reply) {
+                         console.log(reply);
+                     },
+                     "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log("Our Ajax request failed: " + status_text);
+        var data = reply; // $.parseJSON(reply.responseText);
+        if (data.Status) {
+            var msg = "Error rating item - but Status is true?!?!?!";
+            alert(msg);
+            console.log(msg);
+        }
+        else {
+            var msg = "Error rating item - " + data.Message;
+            alert(msg);
+            console.log(msg);
+        }
+    });
+} // function rate_item(item_id, new_rating)
