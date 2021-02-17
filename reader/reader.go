@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 18:16:10 krylon>
+// Time-stamp: <2021-02-17 19:16:32 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -31,6 +31,7 @@ type Reader struct {
 	active   bool
 	lock     sync.RWMutex
 	msgQueue chan<- string
+	StopQ    chan int
 }
 
 // New creates a new Reader.
@@ -38,7 +39,10 @@ func New(q chan<- string) (*Reader, error) {
 	var (
 		err error
 		msg string
-		r   = &Reader{msgQueue: q}
+		r   = &Reader{
+			msgQueue: q,
+			StopQ:    make(chan int),
+		}
 	)
 
 	if r.log, err = common.GetLogger(logdomain.Reader); err != nil {
@@ -100,7 +104,10 @@ func (r *Reader) Loop() error {
 	r.active = true
 	r.lock.Unlock()
 
+	var ticker = time.NewTicker(checkDelay)
+
 	defer func() {
+		ticker.Stop()
 		r.lock.Lock()
 		r.active = false
 		r.lock.Unlock()
@@ -112,15 +119,18 @@ func (r *Reader) Loop() error {
 	for r.Active() {
 		// r.log.Println("[TRACE] Reader Loop calling refresh.")
 
-		if err := r.refresh(); err != nil {
-			var msg = fmt.Sprintf("Failed to refresh Feeds: %s",
-				err.Error())
-			r.log.Printf("[ERROR] %s\n", msg)
-			r.sndMsg(msg)
-			return err
+		select {
+		case <-ticker.C:
+			if err := r.refresh(); err != nil {
+				var msg = fmt.Sprintf("Failed to refresh Feeds: %s",
+					err.Error())
+				r.log.Printf("[ERROR] %s\n", msg)
+				r.sndMsg(msg)
+				return err
+			}
+		case <-r.StopQ:
+			break
 		}
-
-		time.Sleep(checkDelay)
 	}
 
 	return nil
