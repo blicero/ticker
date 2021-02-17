@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-17 00:39:32 krylon> */}}
+{{/* Time-stamp: <2021-02-17 14:06:29 krylon> */}}
 <table class="items">
   <thead>
     <tr>
@@ -20,7 +20,12 @@
       <td>{{ fmt_time .Timestamp }}</td>
       <td id="item_rating_{{ .ID }}">
         {{ if .IsRated }}
-        {{ .RatingString }}
+        <small>{{ .RatingString }}</small>
+        {{ if (lt .Rating 0.5) }}
+        <img src="/static/emo_boring.png" />
+        {{ else }}
+        <img src="/static/emo_interesting.png" />
+        {{ end }}
         {{ else }}
         <input
         type="button"
