@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 13:38:45 krylon>
+// Time-stamp: <2021-02-17 01:18:22 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1291,7 +1291,7 @@ EXEC_QUERY:
 
 // ItemRatingSet sets an Item's Rating.
 func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error {
-	const qid = query.ItemAdd
+	const qid = query.ItemRatingSet
 	var (
 		err    error
 		msg    string
@@ -1299,6 +1299,11 @@ func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error {
 		tx     *sql.Tx
 		status bool
 	)
+
+	// db.log.Printf("[TRACE] Rate Item %d (%q): %f\n",
+	// 	i.ID,
+	// 	i.Title,
+	// 	rating)
 
 	if stmt, err = db.getQuery(qid); err != nil {
 		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
@@ -1319,7 +1324,6 @@ func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error {
 				db.log.Printf("[ERROR] %s\n", msg)
 				return errors.New(msg)
 			}
-
 		} else {
 			defer func() {
 				var err2 error
@@ -1353,13 +1357,14 @@ EXEC_QUERY:
 		}
 	}
 
+	status = true
 	i.Rating = rating
 	return nil
 } // func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error
 
 // ItemRatingClear clears an Item's Rating.
 func (db *Database) ItemRatingClear(i *feed.Item) error {
-	const qid = query.ItemAdd
+	const qid = query.ItemRatingClear
 	var (
 		err    error
 		msg    string
@@ -1421,6 +1426,7 @@ EXEC_QUERY:
 		}
 	}
 
+	status = true
 	i.Rating = math.NaN()
 	return nil
 } // func (db *Database) ItemRatingClear(i *feed.Item) error
