@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-17 01:03:50 krylon>
+// Time-stamp: <2021-02-17 19:47:06 krylon>
 
 package web
 
@@ -142,6 +142,23 @@ func (srv *Server) SendMessage(msg string) {
 			srv.msgBuf.Count())
 	}
 } // func (srv *Server) SendMessage(msg string)
+
+// Close shuts down the server.
+func (srv *Server) Close() error {
+	var err error
+
+	if err = srv.pool.Close(); err != nil {
+		srv.log.Printf("[ERROR] Cannot close database pool: %s\n",
+			err.Error())
+		return err
+	} else if err = srv.web.Close(); err != nil {
+		srv.log.Printf("[ERROR] Cannot shutdown HTTP server: %s\n",
+			err.Error())
+		return err
+	}
+
+	return nil
+} // func (srv *Server) Close() error
 
 // nolint: unused
 func (srv *Server) getMessages() []message {

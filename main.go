@@ -2,13 +2,15 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-15 14:19:10 krylon>
+// Time-stamp: <2021-02-17 19:47:41 krylon>
 
 package main
 
 import (
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 	"ticker/common"
 	"ticker/reader"
 	"ticker/web"
@@ -54,7 +56,19 @@ func main() {
 	go forwardMsg(msgq, srv)
 
 	go rdr.Loop()
-	srv.ListenAndServe()
+	go srv.ListenAndServe()
+
+	var sigQ = make(chan os.Signal, 1)
+
+	signal.Notify(sigQ, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGTERM)
+
+	sig := <-sigQ
+	fmt.Printf("Quitting on signal %s\n", sig)
+
+	rdr.StopQ <- 1
+	srv.Close()
+
+	os.Exit(0)
 } // func main()
 
 func forwardMsg(q <-chan string, srv *web.Server) {
