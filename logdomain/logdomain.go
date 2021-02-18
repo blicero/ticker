@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-11 19:50:00 krylon>
+// Time-stamp: <2021-02-17 21:58:00 krylon>
 
 // Package logdomain provides constants to identify the different
 // "areas" of the application that perform logging.
@@ -16,6 +16,7 @@ type ID uint8
 // These constants identify the various logging domains.
 const (
 	Common ID = iota
+	Classifier
 	DBPool
 	Database
 	Feed
@@ -27,6 +28,7 @@ const (
 func AllDomains() []ID {
 	return []ID{
 		Common,
+		Classifier,
 		DBPool,
 		Database,
 		Feed,

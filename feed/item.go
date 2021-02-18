@@ -2,16 +2,22 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 17:43:50 krylon>
+// Time-stamp: <2021-02-18 17:42:03 krylon>
 
 package feed
 
 import (
 	"fmt"
 	"math"
+	"regexp"
+	"strings"
 	"ticker/common"
 	"time"
+
+	"github.com/jaytaylor/html2text"
 )
+
+var whitespace *regexp.Regexp = regexp.MustCompile(`[\s\t\n\r]+`)
 
 // Item represents a single news item from an RSS Feed.
 type Item struct {
@@ -47,3 +53,22 @@ func (i *Item) RatingString() string {
 
 	return fmt.Sprintf("%.2f", i.Rating)
 } // func (i *Item) RatingString() string
+
+// Plaintext returns the complete text of the Item, cleansed of any HTML.
+func (i *Item) Plaintext() string {
+	var tmp []string = make([]string, 2)
+	var err error
+
+	if tmp[0], err = html2text.FromString(i.Title); err != nil {
+		tmp[0] = i.Title
+	}
+
+	if tmp[1], err = html2text.FromString(i.Description); err != nil {
+		tmp[1] = i.Description
+	}
+
+	tmp[0] = whitespace.ReplaceAllString(tmp[0], " ")
+	tmp[1] = whitespace.ReplaceAllString(tmp[1], " ")
+
+	return strings.Join(tmp, " ")
+} // func (self *NewsItem) Plaintext() string
