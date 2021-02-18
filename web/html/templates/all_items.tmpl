@@ -1,0 +1,26 @@
+{{ define "all_items" }}
+{{/* Created on 18. 02. 2021 */}}
+{{/* Time-stamp: <2021-02-18 19:04:54 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <h2>Latest Headlines</h2>
+
+    {{ if ne .Prev "" }}
+    <a href="/items/{{ .Prev }}">&lt;&lt;</a>
+    {{ end }}
+    &nbsp;&nbsp;&nbsp;
+    {{ if ne .Next "" }}
+    <a href="/items/{{ .Next }}">&gt;&gt;</a>
+    {{ end }}
+
+    {{ template "items" . }}
+
+    {{ template "footer" }}
+  </body>
+</html>
+{{ end }}

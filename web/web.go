@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-17 19:47:06 krylon>
+// Time-stamp: <2021-02-18 18:57:47 krylon>
 
 package web
 
@@ -100,6 +100,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/feed/form", srv.handleFeedForm)
 	srv.router.HandleFunc("/feed/subscribe", srv.handleFeedSubscribe)
 	srv.router.HandleFunc("/feed/{id:(?:\\d+)$}", srv.handleFeedDetails)
+
+	srv.router.HandleFunc("/items/{page:(?:\\d+|all)$}", srv.handleItems)
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
@@ -426,6 +428,107 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const (
+		tmplName = "all_items"
+		itemCnt  = 50
+	)
+
+	var (
+		err                 error
+		msg, pageSpec       string
+		pageNo, cnt, offset int64
+		db                  *database.Database
+		tmpl                *template.Template
+		data                = tmplDataItems{
+			tmplDataBase: tmplDataBase{
+				Title: "Main",
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	vars := mux.Vars(r)
+	pageSpec = vars["page"]
+
+	if pageSpec == "all" {
+		pageNo = -1
+	} else if pageNo, err = strconv.ParseInt(pageSpec, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse page number %q: %s",
+			pageSpec,
+			err.Error())
+		srv.log.Printf("[CANTHAPPEN] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	if pageNo != -1 {
+		cnt = itemCnt
+		offset = itemCnt * pageNo
+	} else {
+		cnt = -1
+	}
+
+	if pageNo > 0 {
+		data.Prev = strconv.FormatInt(pageNo-1, 10)
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Items, err = db.ItemGetAll(cnt, offset); err != nil {
+		msg = fmt.Sprintf("Cannot load Items (%d / offset %d) from database: %s",
+			itemCnt,
+			offset,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	} else if pageNo != -1 && len(data.Items) == itemCnt {
+		data.Next = strconv.FormatInt(pageNo+1, 10)
+	}
+
+	var feeds []feed.Feed
+
+	if feeds, err = db.FeedGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot get all Feeds: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	}
+
+	data.FeedMap = make(map[int64]feed.Feed, len(feeds))
+
+	for _, f := range feeds {
+		data.FeedMap[f.ID] = f
+	}
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	data.Messages = srv.getMessages()
+
+	w.Header().Set("Cache-Control", "no-cache")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request)
 
 /////////////////////////////////////////
 ////////////// Other ////////////////////
