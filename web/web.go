@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 18:57:47 krylon>
+// Time-stamp: <2021-02-18 23:11:59 krylon>
 
 package web
 
@@ -16,12 +16,14 @@ import (
 	"net/http"
 	"strconv"
 	"text/template"
+	"ticker/classifier"
 	"ticker/common"
 	"ticker/database"
 	"ticker/feed"
 	"ticker/logdomain"
 	"time"
 
+	"github.com/CyrusF/go-bayesian"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/logutils"
 )
@@ -49,6 +51,7 @@ type Server struct {
 	tmpl      *template.Template
 	mimeTypes map[string]string
 	pool      *database.Pool
+	// rev       *classifier.Classifier
 }
 
 // Create creates a new Server instance.
@@ -73,7 +76,12 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 		srv.log.Printf("[ERROR] Cannot create DB pool: %s\n",
 			err.Error())
 		return nil, err
-	}
+	} /* else if srv.rev, err = classifier.New(); err != nil {
+		srv.log.Printf("[ERROR] Cannot create Classifier: %s\n",
+			err.Error())
+		srv.pool.Close()
+		return nil, err
+	} */
 
 	srv.tmpl = template.New("").Funcs(funcmap)
 	for name, body := range htmlData.Templates {
@@ -219,14 +227,6 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	// if data.Notes, err = db.NoteGetRecent(5); err != nil {
-	// 	msg = fmt.Sprintf("Lookup of recent Notes failed: %s",
-	// 		err.Error())
-	// 	srv.log.Println("[ERROR] " + msg)
-	// 	srv.SendMessage(msg)
-	// 	data.Notes = make([]zettel.Zettel, 0)
-	// }
-
 	if data.Feeds, err = db.FeedGetAll(); err != nil {
 		msg = fmt.Sprintf("Cannot query all Feeds: %s",
 			err.Error())
@@ -357,8 +357,9 @@ func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request) {
 } // func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
 
 	const tmplName = "feed_details"
 
@@ -444,6 +445,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		pageNo, cnt, offset int64
 		db                  *database.Database
 		tmpl                *template.Template
+		rev                 *classifier.Classifier
 		data                = tmplDataItems{
 			tmplDataBase: tmplDataBase{
 				Title: "Main",
@@ -481,7 +483,14 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if data.Items, err = db.ItemGetAll(cnt, offset); err != nil {
+	if rev, err = classifier.New(); err != nil {
+		msg = fmt.Sprintf("Cannot create Classifier: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	} else if data.Items, err = db.ItemGetAll(cnt, offset); err != nil {
 		msg = fmt.Sprintf("Cannot load Items (%d / offset %d) from database: %s",
 			itemCnt,
 			offset,
@@ -492,6 +501,15 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if pageNo != -1 && len(data.Items) == itemCnt {
 		data.Next = strconv.FormatInt(pageNo+1, 10)
+	}
+
+	if err = rev.Train(); err != nil {
+		msg = fmt.Sprintf("Cannot train Classifier: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
 	}
 
 	var feeds []feed.Feed
@@ -509,6 +527,40 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 
 	for _, f := range feeds {
 		data.FeedMap[f.ID] = f
+	}
+
+	for idx, item := range data.Items {
+		var (
+			certain bool
+			score   map[bayesian.Class]float64
+			class   bayesian.Class
+		)
+
+		if !math.IsNaN(item.Rating) {
+			continue
+		}
+
+		score, class, certain = rev.Classify(&item)
+
+		if certain {
+			switch class {
+			case classifier.Good:
+				data.Items[idx].Rating = score[class]
+			case classifier.Bad:
+				data.Items[idx].Rating = -score[class]
+			default:
+				srv.log.Printf("[CANTHAPPEN] Unexpected classification for news Item %d (%q): %s\n",
+					item.ID,
+					item.Title,
+					class)
+				continue
+			}
+
+			srv.log.Printf("[TRACE] Rate Item %d (%q) - %f\n",
+				item.ID,
+				item.Title,
+				data.Items[idx].Rating)
+		}
 	}
 
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {

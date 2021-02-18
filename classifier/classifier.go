@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 17. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 09:20:20 krylon>
+// Time-stamp: <2021-02-18 22:28:43 krylon>
 
 // Package classifier implements semi-automatic rating of news items.
 package classifier
@@ -22,9 +22,10 @@ import (
 	"github.com/endeveit/guesslanguage"
 )
 
+// Good and Bad are the two categories for rating news items.
 const (
-	good bayesian.Class = "good"
-	bad  bayesian.Class = "bad"
+	Good bayesian.Class = "good"
+	Bad  bayesian.Class = "bad"
 )
 
 var nonword = regexp.MustCompile(`\W+`)
@@ -85,9 +86,9 @@ func (c *Classifier) learn(items []feed.Item) {
 		}
 
 		if item.Rating >= 0.5 {
-			doc.Class = good
+			doc.Class = Good
 		} else {
-			doc.Class = bad
+			doc.Class = Bad
 		}
 
 		docs = append(docs, doc)
