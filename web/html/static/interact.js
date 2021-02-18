@@ -1,4 +1,4 @@
-// Time-stamp: <2021-02-17 01:21:34 krylon>
+// Time-stamp: <2021-02-17 20:45:07 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -378,7 +378,14 @@ function rate_item(item_id, new_rating) {
     var req = $.post("/ajax/rate_item",
                      { ID: item_id, Rating: new_rating },
                      function(reply) {
-                         console.log(reply);
+                         var content = "";
+                         if (new_rating < 0.5) {
+                             content = '<img src="/static/emo_boring.png" />';
+                         } else {
+                             content = '<img src="/static/emo_interesting.png" />';
+                         }
+
+                         $("#item_rating_" + item_id)[0].innerHTML = content;
                      },
                      "json");
 
