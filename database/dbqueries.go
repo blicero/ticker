@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 13:34:31 krylon>
+// Time-stamp: <2021-02-17 22:46:24 krylon>
 
 package database
 
@@ -70,6 +70,20 @@ SELECT
 FROM item
 ORDER BY timestamp DESC
 LIMIT ?
+`,
+
+	query.ItemGetRated: `
+SELECT
+    id,
+    feed_id,
+    link,
+    title,
+    description,
+    timestamp,
+    read,
+    rating
+FROM item
+WHERE rating IS NOT NULL
 `,
 	query.ItemGetByID: `
 SELECT
