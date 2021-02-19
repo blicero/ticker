@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 17:42:03 krylon>
+// Time-stamp: <2021-02-19 13:20:47 krylon>
 
 package feed
 
@@ -21,14 +21,15 @@ var whitespace *regexp.Regexp = regexp.MustCompile(`[\s\t\n\r]+`)
 
 // Item represents a single news item from an RSS Feed.
 type Item struct {
-	ID          int64
-	FeedID      int64
-	URL         string
-	Title       string
-	Description string
-	Timestamp   time.Time
-	Read        bool
-	Rating      float64
+	ID            int64
+	FeedID        int64
+	URL           string
+	Title         string
+	Description   string
+	Timestamp     time.Time
+	Read          bool
+	Rating        float64
+	ManuallyRated bool
 }
 
 func (i *Item) String() string {
@@ -42,7 +43,7 @@ func (i *Item) String() string {
 
 // IsRated returns true if the Item has a Rating.
 func (i *Item) IsRated() bool {
-	return !math.IsNaN(i.Rating)
+	return i.ManuallyRated
 } // func (i *Item) IsRated() bool
 
 // RatingString returns the Item's rating as a string.
@@ -56,7 +57,7 @@ func (i *Item) RatingString() string {
 
 // Plaintext returns the complete text of the Item, cleansed of any HTML.
 func (i *Item) Plaintext() string {
-	var tmp []string = make([]string, 2)
+	var tmp = make([]string, 2)
 	var err error
 
 	if tmp[0], err = html2text.FromString(i.Title); err != nil {

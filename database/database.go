@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 19:14:15 krylon>
+// Time-stamp: <2021-02-19 13:23:15 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -721,20 +721,31 @@ EXEC_QUERY:
 
 	for rows.Next() {
 		var (
-			f               feed.Feed
-			interval, stamp int64
+			id                  int64
+			name, url, homepage string
+			active              bool
+			f                   *feed.Feed
+			interval, stamp     int64
 		)
 
-		if err = rows.Scan(&f.ID, &f.Name, &f.URL, &f.Homepage, &interval, &stamp, &f.Active); err != nil {
+		// if err = rows.Scan(&f.ID, &f.Name, &f.URL, &f.Homepage, &interval, &stamp, &f.Active); err != nil {
+		if err = rows.Scan(&id, &name, &url, &homepage, &interval, &stamp, &active); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n", err.Error())
 			return nil, err
-		} else if stamp != 0 {
+		} else if f, err = feed.New(id, name, url, homepage, time.Second*time.Duration(interval), active); err != nil {
+			db.log.Printf("[ERROR] Cannot create Feed %s: %s\n",
+				name,
+				err.Error())
+			return nil, err
+		}
+
+		if stamp != 0 {
 			f.LastUpdate = time.Unix(stamp, 0)
 		}
 
-		f.Interval = time.Second * time.Duration(interval)
+		// f.Interval = time.Second * time.Duration(interval)
 
-		list = append(list, f)
+		list = append(list, *f)
 	}
 
 	return list, nil
@@ -1089,6 +1100,7 @@ EXEC_QUERY:
 
 		if rating != nil {
 			item.Rating = *rating
+			item.ManuallyRated = true
 		} else {
 			item.Rating = math.NaN()
 		}
@@ -1134,9 +1146,9 @@ EXEC_QUERY:
 
 	for rows.Next() {
 		var (
-			item   feed.Item
 			rating *float64
 			stamp  int64
+			item   = feed.Item{ManuallyRated: true}
 		)
 
 		if err = rows.Scan(
@@ -1216,6 +1228,7 @@ EXEC_QUERY:
 				err.Error())
 			return nil, err
 		} else if rating != nil {
+			item.ManuallyRated = true
 			item.Rating = *rating
 		}
 
@@ -1278,6 +1291,7 @@ EXEC_QUERY:
 				err.Error())
 			return nil, err
 		} else if rating != nil {
+			item.ManuallyRated = true
 			item.Rating = *rating
 		}
 
@@ -1344,6 +1358,7 @@ EXEC_QUERY:
 		}
 
 		if rating != nil {
+			item.ManuallyRated = true
 			item.Rating = *rating
 		} else {
 			item.Rating = math.NaN()
@@ -1418,6 +1433,7 @@ EXEC_QUERY:
 		}
 
 		if rating != nil {
+			item.ManuallyRated = true
 			item.Rating = *rating
 		} else {
 			item.Rating = math.NaN()
@@ -1499,6 +1515,7 @@ EXEC_QUERY:
 
 	status = true
 	i.Rating = rating
+	i.ManuallyRated = true
 	return nil
 } // func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error
 
@@ -1568,5 +1585,6 @@ EXEC_QUERY:
 
 	status = true
 	i.Rating = math.NaN()
+	i.ManuallyRated = false
 	return nil
 } // func (db *Database) ItemRatingClear(i *feed.Item) error

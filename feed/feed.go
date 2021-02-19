@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 13:33:13 krylon>
+// Time-stamp: <2021-02-19 12:02:19 krylon>
 
 // Package feed provides the basic data type and logic to represent and interact
 // with RSS feeds.
@@ -36,12 +36,13 @@ type Feed struct {
 }
 
 // New creates a new Feed.
-func New(id int64, name, url string, interval time.Duration, active bool) (*Feed, error) {
+func New(id int64, name, url, homepage string, interval time.Duration, active bool) (*Feed, error) {
 	var err error
 	var f = &Feed{
 		ID:       id,
 		Name:     name,
 		URL:      url,
+		Homepage: homepage,
 		Interval: interval,
 		Active:   active,
 	}
