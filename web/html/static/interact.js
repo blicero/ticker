@@ -1,4 +1,4 @@
-// Time-stamp: <2021-02-17 20:45:07 krylon>
+// Time-stamp: <2021-02-19 14:38:30 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -385,6 +385,11 @@ function rate_item(item_id, new_rating) {
                              content = '<img src="/static/emo_interesting.png" />';
                          }
 
+                         content += `<br /><input
+        type="button"
+        value="Unvote"
+        onclick="unvote_item(${item_id});" />`;
+
                          $("#item_rating_" + item_id)[0].innerHTML = content;
                      },
                      "json");
@@ -404,3 +409,8 @@ function rate_item(item_id, new_rating) {
         }
     });
 } // function rate_item(item_id, new_rating)
+
+function unvote_item(item_id) {
+    console.log("IMPLEMENT ME: Unvote Item " + item_id);
+    alert("Yeah, we'll take care of that shortly...");
+} // function unvote_item(item_id)
