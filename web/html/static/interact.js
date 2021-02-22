@@ -1,4 +1,4 @@
-// Time-stamp: <2021-02-22 18:51:17 krylon>
+// Time-stamp: <2021-02-22 22:05:05 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -356,7 +356,7 @@ function rate_item(item_id, new_rating) {
                      { ID: item_id, Rating: new_rating },
                      function(reply) {
                          var content = "";
-                         if (new_rating < 0.5) {
+                         if (new_rating < 0.0) {
                              content = '<img src="/static/emo_boring.png" />';
                          } else {
                              content = '<img src="/static/emo_interesting.png" />';
@@ -388,8 +388,18 @@ function rate_item(item_id, new_rating) {
 } // function rate_item(item_id, new_rating)
 
 function unvote_item(item_id) {
-    console.log("IMPLEMENT ME: Unvote Item " + item_id);
-    alert("Yeah, we'll take care of that shortly...");
+    const addr = "/ajax/unrate_item/" + item_id;
+    var req = $.get(
+        addr,
+        {},
+        function(reply) {
+            // Display zee buttons!
+            alert("Rating on Item " + item_id + " has been cleared.");
+        });
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log("Error unrating Item at " + addr + ": "  + status_text);
+    });
 } // function unvote_item(item_id)
 
 function hide_boring_items() {

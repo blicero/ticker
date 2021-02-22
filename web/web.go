@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 23:11:59 krylon>
+// Time-stamp: <2021-02-22 21:54:18 krylon>
 
 package web
 
@@ -114,6 +114,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
 	srv.router.HandleFunc("/ajax/rate_item", srv.handleRateItem)
+	srv.router.HandleFunc("/ajax/unrate_item/{id:(?:\\d+)$}", srv.handleUnrateItem)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -817,3 +818,64 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleRateItem(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleUnrateItem(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err               error
+		db                *database.Database
+		idStr, msg, reply string
+		id                int64
+		item              *feed.Item
+	)
+
+	vars := mux.Vars(r)
+
+	idStr = vars["id"]
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse ID %q: %s",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if item, err = db.ItemGetByID(id); err != nil {
+		msg = fmt.Sprintf("Cannot load Item %d: %s",
+			id,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if item == nil {
+		msg = fmt.Sprintf("No such Item: %d", id)
+		goto SEND_ERROR_MESSAGE
+	} else if err = db.ItemRatingClear(item); err != nil {
+		msg = fmt.Sprintf("Cannot clear Rating of Item %d (%q): %s",
+			id,
+			item.Title,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	reply = fmt.Sprintf(`{ "Status": true, "ID": %d, "Message": "Success" }`,
+		id)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "ID": %d, "Message": "%s" }`,
+		id,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleUnrateItem(w http.ResponseWriter, r *http.Request)
