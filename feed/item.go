@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-19 13:20:47 krylon>
+// Time-stamp: <2021-02-22 17:06:56 krylon>
 
 package feed
 
@@ -45,6 +45,11 @@ func (i *Item) String() string {
 func (i *Item) IsRated() bool {
 	return i.ManuallyRated
 } // func (i *Item) IsRated() bool
+
+// IsBoring returns true if the Item has been rated or classified as boring.
+func (i *Item) IsBoring() bool {
+	return i.Rating <= 0
+} // func (i *Item) IsBoring() bool
 
 // RatingString returns the Item's rating as a string.
 func (i *Item) RatingString() string {

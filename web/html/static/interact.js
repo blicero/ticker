@@ -1,4 +1,4 @@
-// Time-stamp: <2021-02-19 14:38:30 krylon>
+// Time-stamp: <2021-02-22 18:51:17 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -38,15 +38,6 @@ function timeStampString(t) {
         " " + hour + ":" + minute + ":" + second;
     return s;
 } // function timeStampString(t)
-
-// function toggleIntroVisible() {
-//     var item = $("#intro")[0];
-//     if (item.hidden) {
-//         item.hidden = false;
-//     } else {
-//         item.hidden = true;
-//     }
-// } // function toggleIntroVisible()
 
 function beaconLoop() {
     try {
@@ -103,25 +94,11 @@ function beaconToggle() {
 } // function beaconToggle()
 
 
-var isNoteEdit = false;
-var noteID = -1;
-var noteBody = "";
-var markup = "";
-const renderUrl = "/ajax/render_note";
-const saveNoteUrl = "/ajax/save_note";
-const saveTitleUrl = "/ajax/rename_note";
-const addLabelUrl = "/ajax/label_create";
-const addLinkUrl = "/ajax/label_link_create";
-const delLinkUrl = "/ajax/label_link_delete";
-
 /*
 The ‘content’ attribute of Window objects is deprecated.  Please use ‘window.top’ instead. interact.js:125:8
 Ignoring get or set of property that has [LenientThis] because the “this” object is incorrect. interact.js:125:8
 
 */
-
-const previewUpdateInterval = 2500;
-var updatePreview = false;
 
 function db_maintenance() {
     const maintURL = "/ajax/db_maint";
@@ -414,3 +391,28 @@ function unvote_item(item_id) {
     console.log("IMPLEMENT ME: Unvote Item " + item_id);
     alert("Yeah, we'll take care of that shortly...");
 } // function unvote_item(item_id)
+
+function hide_boring_items() {
+    console.log("Hiding boring items.");
+    $.each($("tr.boring"), function() { $(this).hide(); } );
+} // function hide_boring_items()
+
+function show_boring_items() {
+    console.log("Displaying boring items.");
+    $.each($("tr.boring"), function() { $(this).show(); } );
+} // function show_boring_items()
+
+function toggle_hide_boring() {
+    console.log("toggle_hide_boring()");
+
+    settings.items.hideboring = !settings.items.hideboring;
+    saveSetting("items", "hideboring", settings.items.hideboring);
+
+    if (settings.items.hideboring) {
+        hide_boring_items();
+    } else {
+        show_boring_items();
+    }
+
+    return true;
+} // function toggle_hide_boring()

@@ -1,5 +1,5 @@
 {{ define "head" }}
-{{/* Time-stamp: <2021-02-19 13:56:11 krylon> */}}
+{{/* Time-stamp: <2021-02-22 18:21:30 krylon> */}}
 <head>
   <title>{{ app_string }}@{{ hostname  }} - {{ .Title }}</title>
   
@@ -20,7 +20,6 @@
   <script type="text/javascript" src="/static/interact.js">
   </script>
 
-  {{ if .Debug }}
   <script>
    $(document).ready(function() {
      initSettings();
@@ -49,10 +48,11 @@
      window.setTimeout(function() { settings.messages.queryEnabled = true; }, 250);
      {{ end }}
 
-     // window.setTimeout(reminder_get_pending, 500);
+     if (settings.items.hideboring) {
+       hide_boring_items();
+     }
    });
   </script>
-  {{ end }}
 
   <link rel="stylesheet" type="text/css" href="/static/style.css" />
   {{/* <link rel="stylesheet" type="text/css" href="/static/normalize.css" /> */}}

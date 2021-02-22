@@ -1,5 +1,5 @@
 {{ define "menu" }}
-{{/* Time-stamp: <2021-02-18 19:02:13 krylon> */}}
+{{/* Time-stamp: <2021-02-22 17:43:16 krylon> */}}
 <div class="menubar">
   <nav>
     <table>
@@ -47,6 +47,16 @@
                  class="small"
                  value="Perform DB maintenance"
                  onclick="db_maintenance();" />
+        </td>
+        <td>
+          &nbsp;&sdot;&nbsp;
+        </td>
+        <td>
+          Hide Boring?&nbsp;
+          <input
+          type="checkbox"
+          value="Hide Boring"
+          onclick="toggle_hide_boring();" />
         </td>
       </tr>
     </table>
