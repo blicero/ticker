@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 13:33:28 krylon>
+// Time-stamp: <2021-02-23 21:05:40 krylon>
 
 package database
 
@@ -38,5 +38,23 @@ CREATE TABLE item (
         ON DELETE CASCADE
         ON UPDATE RESTRICT
 )
+`,
+
+	"CREATE VIRTUAL TABLE item_index USING fts4(link, body)",
+
+	`
+CREATE TRIGGER tr_item_fts_insert
+AFTER INSERT ON item
+BEGIN
+    INSERT INTO item_index (link, body) VALUES (new.link, new.title || ' ' || new.description);
+END;
+`,
+	`
+CREATE TRIGGER tr_item_fts_delete
+AFTER DELETE ON item
+BEGIN
+    DELETE FROM item_index
+    WHERE item_index.link = old.link;
+END;
 `,
 }

@@ -1,4 +1,4 @@
-// Time-stamp: <2021-02-22 22:05:05 krylon>
+// Time-stamp: <2021-02-23 23:12:23 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -356,7 +356,7 @@ function rate_item(item_id, new_rating) {
                      { ID: item_id, Rating: new_rating },
                      function(reply) {
                          var content = "";
-                         if (new_rating < 0.0) {
+                         if (new_rating <= 0.0) {
                              content = '<img src="/static/emo_boring.png" />';
                          } else {
                              content = '<img src="/static/emo_interesting.png" />';
@@ -426,3 +426,17 @@ function toggle_hide_boring() {
 
     return true;
 } // function toggle_hide_boring()
+
+function rebuildFTS() {
+    var req = $.get("/ajax/rebuild_fts",
+                    "",
+                    function(reply) {
+                        console.log("FTS index has been rebuilt.");
+                    });
+
+    req.fail(function(reply, status_text, xhr) {
+        var msg = reply + " -- " + status_text;
+        console.log(msg);
+        alert(msg);
+    });
+} // function rebuildFTS()

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-22 21:54:18 krylon>
+// Time-stamp: <2021-02-23 22:53:31 krylon>
 
 package web
 
@@ -111,10 +111,13 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 
 	srv.router.HandleFunc("/items/{page:(?:\\d+|all)$}", srv.handleItems)
 
+	srv.router.HandleFunc("/search", srv.handleSearch)
+
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
 	srv.router.HandleFunc("/ajax/rate_item", srv.handleRateItem)
 	srv.router.HandleFunc("/ajax/unrate_item/{id:(?:\\d+)$}", srv.handleUnrateItem)
+	srv.router.HandleFunc("/ajax/rebuild_fts", srv.handleRebuildFTS)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -583,6 +586,91 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	}
 } // func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request)
 
+func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const (
+		tmplName = "all_items"
+		itemCnt  = 50
+	)
+
+	var (
+		err       error
+		msg, qstr string
+		db        *database.Database
+		tmpl      *template.Template
+		data      = tmplDataItems{
+			tmplDataBase: tmplDataBase{
+				Title: "Main",
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Could not parse form data: %s", err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	}
+
+	qstr = r.FormValue("query")
+
+	srv.log.Printf("[TRACE] Receive query for %q\n",
+		qstr)
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	var feeds []feed.Feed
+
+	if feeds, err = db.FeedGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot get all Feeds: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	}
+
+	data.FeedMap = make(map[int64]feed.Feed, len(feeds))
+
+	for _, f := range feeds {
+		data.FeedMap[f.ID] = f
+	}
+
+	if data.Items, err = db.ItemGetFTS(qstr); err != nil {
+		msg = fmt.Sprintf("Cannot search database for %q: %s",
+			qstr,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	}
+
+	data.Messages = srv.getMessages()
+
+	w.Header().Set("Cache-Control", "no-cache")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request)
+
 /////////////////////////////////////////
 ////////////// Other ////////////////////
 /////////////////////////////////////////
@@ -879,3 +967,35 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleUnrateItem(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleRebuildFTS(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err        error
+		db         *database.Database
+		msg, reply string
+		status     bool
+	)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if err = db.FTSRebuild(); err != nil {
+		msg = fmt.Sprintf("Cannot rebuild FTS index: %s",
+			err.Error())
+	} else {
+		msg = "FTS index was rebuilt successfully."
+		status = true
+	}
+
+	reply = fmt.Sprintf(`{ "Status": %t, "Message": "%s" }`,
+		status,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	// w.Header().Set("Content-Length", strconv.FormatInt(len(reply), 10))
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleRebuildFTS(w http.ResponseWriter, r *http.request)

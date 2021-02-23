@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-19 13:23:15 krylon>
+// Time-stamp: <2021-02-23 22:03:01 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -130,14 +130,15 @@ func Open(path string) (*Database, error) {
 
 	if !dbExists {
 		if err = db.initialize(); err != nil {
-			if err = db.db.Close(); err != nil {
+			var e2 error
+			if e2 = db.db.Close(); e2 != nil {
 				db.log.Printf("[CRITICAL] Failed to close database: %s\n",
-					err.Error())
-				return nil, err
-			} else if err = os.Remove(path); err != nil {
+					e2.Error())
+				return nil, e2
+			} else if e2 = os.Remove(path); e2 != nil {
 				db.log.Printf("[CRITICAL] Failed to remove database file %s: %s\n",
 					db.path,
-					err.Error())
+					e2.Error())
 			}
 			return nil, err
 		}
@@ -163,15 +164,14 @@ func (db *Database) initialize() error {
 		return err
 	}
 
-	for _, query := range initQueries {
+	for _, q := range initQueries {
 		db.log.Printf("[TRACE] Execute init query:\n%s\n",
-			query)
-		if _, err = tx.Exec(query); err != nil {
-			var rbErr error
+			q)
+		if _, err = tx.Exec(q); err != nil {
 			db.log.Printf("[ERROR] Cannot execute init query: %s\n%s\n",
 				err.Error(),
-				query)
-			if rbErr = tx.Rollback(); rbErr != nil {
+				q)
+			if rbErr := tx.Rollback(); rbErr != nil {
 				db.log.Printf("[CANTHAPPEN] Cannot rollback transaction: %s\n",
 					rbErr.Error())
 				return rbErr
@@ -1445,6 +1445,73 @@ EXEC_QUERY:
 	return items, nil
 } // func (db *Database) ItemGetAll(cnt, offset int64) ([]feed.Item, error)
 
+// ItemGetFTS retrieves Items that match a full-text search query.
+func (db *Database) ItemGetFTS(fts string) ([]feed.Item, error) {
+	const qid query.ID = query.ItemGetFTS
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(fts); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var items = make([]feed.Item, 0, 32)
+
+	for rows.Next() {
+		var (
+			item   feed.Item
+			rating *float64
+			stamp  int64
+		)
+
+		if err = rows.Scan(
+			&item.ID,
+			&item.FeedID,
+			&item.URL,
+			&item.Title,
+			&item.Description,
+			&stamp,
+			&item.Read,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if rating != nil {
+			item.ManuallyRated = true
+			item.Rating = *rating
+		} else {
+			item.Rating = math.NaN()
+		}
+		item.Timestamp = time.Unix(stamp, 0)
+		items = append(items, item)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetFTS(fts string) ([]feed.Item, error)
+
 // ItemRatingSet sets an Item's Rating.
 func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error {
 	const qid = query.ItemRatingSet
@@ -1588,3 +1655,98 @@ EXEC_QUERY:
 	i.ManuallyRated = false
 	return nil
 } // func (db *Database) ItemRatingClear(i *feed.Item) error
+
+// FTSRebuild rebuilds the index used in the full-text search.
+func (db *Database) FTSRebuild() error {
+	const (
+		qsel query.ID = query.ItemGetContent
+		qins query.ID = query.ItemInsertFTS
+		qdel query.ID = query.FTSClear
+	)
+	var (
+		err           error
+		status        bool
+		sel, ins, del *sql.Stmt
+	)
+
+	if sel, err = db.getQuery(qsel); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qsel,
+			err.Error())
+		return err
+	} else if ins, err = db.getQuery(qins); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qins,
+			err.Error())
+		return err
+	} else if del, err = db.getQuery(qdel); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qdel,
+			err.Error())
+		return err
+	} else if err = db.Begin(); err != nil {
+		db.log.Printf("[ERROR] Cannot begin transaction: %s\n",
+			err.Error())
+		return err
+	}
+
+	defer func() {
+		var x error
+		if status {
+			if x = db.Commit(); x != nil {
+				db.log.Printf("[ERROR] Cannot commit transaction: %s\n",
+					err.Error())
+			}
+		} else {
+			if x = db.Rollback(); x != nil {
+				db.log.Printf("[ERROR] Cannot roll back transaction: %s\n",
+					err.Error())
+			}
+		}
+	}()
+
+	sel = db.tx.Stmt(sel)
+	ins = db.tx.Stmt(ins)
+	del = db.tx.Stmt(del)
+
+	if _, err = del.Exec(); err != nil {
+		db.log.Printf("[ERROR] Cannot clear FTS index: %s\n",
+			err.Error())
+		return err
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = sel.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			db.log.Printf("[ERROR] Cannot execute query %s: %s\n",
+				qsel,
+				err.Error())
+			return err
+		}
+	}
+
+	defer rows.Close() // nolint: errcheck
+
+	for rows.Next() {
+		var link, body string
+
+		if err = rows.Scan(&link, &body); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return err
+		} else if _, err = ins.Exec(link, body); err != nil {
+			db.log.Printf("[ERROR] Cannot insert Item %s into full text index: %s\n",
+				link,
+				err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) FTSRebuild() error

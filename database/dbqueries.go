@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 18:30:03 krylon>
+// Time-stamp: <2021-02-23 22:00:54 krylon>
 
 package database
 
@@ -57,6 +57,7 @@ WHERE id = ?
 INSERT INTO item (feed_id, link, title, description, timestamp)
 VALUES           (      ?,    ?,     ?,           ?,         ?)
 `,
+	query.ItemInsertFTS: "INSERT INTO item_index (link, body) VALUES (?, ?)",
 	query.ItemGetRecent: `
 SELECT
     id,
@@ -137,6 +138,28 @@ FROM item
 ORDER BY timestamp DESC
 LIMIT ? OFFSET ?
 `,
+	query.ItemGetFTS: `
+SELECT
+    i.id,
+    i.feed_id,
+    i.link,
+    i.title,
+    i.description,
+    i.timestamp,
+    i.read,
+    i.rating
+FROM item_index x
+INNER JOIN item i ON x.link = i.link
+WHERE item_index MATCH ?
+ORDER BY i.timestamp DESC, i.title ASC
+`,
+	query.ItemGetContent: `
+SELECT
+    link,
+    title || ' ' || description AS body
+FROM item
+`,
 	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
 	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",
+	query.FTSClear:        "DELETE FROM item_index",
 }
