@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-23 21:05:40 krylon>
+// Time-stamp: <2021-02-24 19:54:29 krylon>
 
 package database
 
@@ -56,5 +56,32 @@ BEGIN
     DELETE FROM item_index
     WHERE item_index.link = old.link;
 END;
+`,
+
+	`
+CREATE TABLE tag (
+    id		INTEGER PRIMARY KEY,
+    name	TEXT UNIQUE NOT NULL,
+    parent      INTEGER,
+    description TEXT,
+    FOREIGN KEY (parent) REFERENCES tag (id)
+         ON DELETE RESTRICT
+         ON UPDATE RESTRICT
+)
+`,
+
+	`
+CREATE TABLE tag_link (
+    id		INTEGER PRIMARY KEY,
+    tag_id	INTEGER NOT NULL,
+    item_id	INTEGER NOT NULL,
+    UNIQUE (tag_id, item_id),
+    FOREIGN KEY (tag_id) REFERENCES tag (id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT,
+    FOREIGN KEY (item_id) REFERENCES item (id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
+)
 `,
 }

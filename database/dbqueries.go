@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-23 22:00:54 krylon>
+// Time-stamp: <2021-02-24 20:22:13 krylon>
 
 package database
 
@@ -159,7 +159,37 @@ SELECT
     title || ' ' || description AS body
 FROM item
 `,
-	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
-	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",
-	query.FTSClear:        "DELETE FROM item_index",
+	// TODO As Tags can form a hierarchy, I would really like this query to
+	//      also return Items that are linked with Tags that are *children*
+	//      of the given Tag.
+	//      That will most likely involve a recursive CTE, and I think
+	//      I have done something vaguely like it before, but seeing as how
+	//      I am a lazy person, I will postpone that until the rest of the
+	//      Tag related stuff is working.
+	query.ItemGetByTag: `
+SELECT
+    i.id,
+    i.feed_id,
+    i.link,
+    i.title,
+    i.description,
+    i.timestamp,
+    i.read,
+    i.rating
+FROM tag_link t
+INNER JOIN item i ON t.item_id = i.id
+WHERE t.tag_id = ?
+`,
+	query.ItemRatingSet:        "UPDATE item SET rating = ? WHERE id = ?",
+	query.ItemRatingClear:      "UPDATE item SET rating = NULL WHERE id = ?",
+	query.FTSClear:             "DELETE FROM item_index",
+	query.TagCreate:            "INSERT INTO tag (name, description, parent) VALUES (?, ?, ?)",
+	query.TagDelete:            "DELETE FROM tag WHERE id = ?",
+	query.TagNameUpdate:        "UPDATE tag SET name = ? WHERE id = ?",
+	query.TagDescriptionUpdate: "UPDATE tag SET description = ? WHERE id = ?",
+	query.TagParentSet:         "UPDATE tag SET parent = ? WHERE id = ?",
+	query.TagParentClear:       "UPDATE tag SET parent = NULL WHERE id = ?",
+	query.TagLinkCreate:        "INSERT INTO tag_link (tag_id, item_id) VALUES (?, ?)",
+	query.TagLinkDelete:        "DELETE FROM tag_link WHERE tag_id = ? AND item_id = ?",
+	query.TagLinkGetByItem:     "SELECT tag_id FROM tag_link WHERE item_id = ?",
 }

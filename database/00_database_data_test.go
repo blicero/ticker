@@ -2,12 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-03 20:16:04 krylon>
+// Time-stamp: <2021-02-24 20:42:50 krylon>
 
 package database
 
 import (
 	"ticker/feed"
+	"ticker/tag"
 	"time"
 )
 
@@ -37,5 +38,69 @@ var testFeeds = []*feed.Feed{
 		URL:      "http://www.ndr.de/home/index-rss.xml",
 		Interval: time.Minute * 60,
 		Active:   true,
+	},
+}
+
+// var testTags = []tag.Tag{
+// 	tag.Tag{
+// 		Name:        "IT",
+// 		Description: "Computer-related stuff",
+// 	},
+// 	tag.Tag{
+// 		Name:        "Politics",
+// 		Description: "knowing how the sausage is made, they thought it was better to have a salad",
+// 	},
+// 	tag.Tag{
+// 		Name:        "Culture",
+// 		Description: "Anything related to literature, music, art, movies, series, theater, TV, etc.",
+// 	},
+// }
+
+type testTag struct {
+	t        tag.Tag
+	children []testTag
+}
+
+var testTags = []testTag{
+	testTag{
+		t: tag.Tag{
+			Name:        "IT",
+			Description: "Computer-related stuff",
+		},
+		children: []testTag{
+			testTag{
+				t: tag.Tag{
+					Name: "Internet",
+				},
+			},
+			testTag{
+				t: tag.Tag{
+					Name: "Programming",
+				},
+			},
+		},
+	},
+	testTag{
+		t: tag.Tag{
+			Name:        "Culture",
+			Description: "If you have to ask, there probably is no point in explaining...",
+		},
+		children: []testTag{
+			testTag{
+				t: tag.Tag{
+					Name: "Movies",
+				},
+			},
+			testTag{
+				t: tag.Tag{
+					Name: "Literature",
+				},
+			},
+			testTag{
+				t: tag.Tag{
+					Name: "Music",
+				},
+			},
+		},
 	},
 }
