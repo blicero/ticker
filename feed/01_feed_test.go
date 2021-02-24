@@ -2,14 +2,14 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-06 18:02:29 krylon>
+// Time-stamp: <2021-02-23 23:45:48 krylon>
 
 package feed
 
 import (
 	"testing"
+	"ticker/common"
 	"time"
-	"vm/common"
 
 	"github.com/SlyMarbo/rss"
 )

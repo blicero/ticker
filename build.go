@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-19 12:51:40 krylon>
+// Time-stamp: <2021-02-24 11:16:18 krylon>
 
 // +build ignore
 
@@ -15,7 +15,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"krylib"
 	"log"
 	"os"
 	"os/exec"
@@ -26,6 +25,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/blicero/krylib"
 
 	"github.com/hashicorp/logutils"
 )

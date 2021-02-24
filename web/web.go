@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-23 22:53:31 krylon>
+// Time-stamp: <2021-02-24 11:15:49 krylon>
 
 package web
 
@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"krylib"
 	"log"
 	"math"
 	"net/http"
@@ -22,6 +21,8 @@ import (
 	"ticker/feed"
 	"ticker/logdomain"
 	"time"
+
+	"github.com/blicero/krylib"
 
 	"github.com/CyrusF/go-bayesian"
 	"github.com/gorilla/mux"

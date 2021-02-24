@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-23 22:03:01 krylon>
+// Time-stamp: <2021-02-24 11:16:04 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -12,7 +12,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"krylib"
 	"log"
 	"math"
 	"os"
@@ -23,6 +22,8 @@ import (
 	"ticker/logdomain"
 	"ticker/query"
 	"time"
+
+	"github.com/blicero/krylib"
 
 	_ "github.com/mattn/go-sqlite3" // Import the database driver
 )
