@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-24 11:15:49 krylon>
+// Time-stamp: <2021-02-25 02:55:04 krylon>
 
 package web
 
@@ -20,6 +20,7 @@ import (
 	"ticker/database"
 	"ticker/feed"
 	"ticker/logdomain"
+	"ticker/tag"
 	"time"
 
 	"github.com/blicero/krylib"
@@ -113,6 +114,10 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/items/{page:(?:\\d+|all)$}", srv.handleItems)
 
 	srv.router.HandleFunc("/search", srv.handleSearch)
+
+	srv.router.HandleFunc("/tag/all", srv.handleTagList)
+	srv.router.HandleFunc("/tag/create", srv.handleTagCreate)
+	srv.router.HandleFunc("/tag/{id:(?:\\d+)$}", srv.handleTagDetails)
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
@@ -671,6 +676,180 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const (
+		tmplName = "tags"
+		itemCnt  = 5
+	)
+
+	var (
+		err  error
+		msg  string
+		tmpl *template.Template
+		db   *database.Database
+		data = tmplDataTags{
+			tmplDataBase: tmplDataBase{
+				Title: "All Tags",
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Tags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Cannot find Template %s",
+			tmplName)
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	data.Messages = srv.getMessages()
+	w.Header().Set("Cache-Control", "no-cache")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const (
+		parentID = 0
+	)
+
+	var (
+		err             error
+		msg, name, desc string
+		t               *tag.Tag
+		db              *database.Database
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Cannnot parse form data: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	name = r.FormValue("name")
+	desc = r.FormValue("description")
+	// TODO Parent!
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if t, err = db.TagCreate(name, desc, parentID); err != nil {
+		msg = fmt.Sprintf("Cannot create Tag %q: %s",
+			name,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	var addr = fmt.Sprintf("/tag/%d", t.ID)
+	http.Redirect(w, r, addr, http.StatusFound)
+} // func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const (
+		tmplName = "tag_details"
+		itemCnt  = 5
+	)
+
+	var (
+		err        error
+		msg, idStr string
+		id         int64
+		tmpl       *template.Template
+		db         *database.Database
+		data       = tmplDataTagDetails{
+			tmplDataBase: tmplDataBase{
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	vars := mux.Vars(r)
+	idStr = vars["id"]
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse Tag ID %q: %s",
+			idStr,
+			err.Error())
+		srv.log.Println("[CANTHAPPEN] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Tag, err = db.TagGetByID(id); err != nil {
+		msg = fmt.Sprintf("Cannot load Tag %d: %s",
+			id,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.Items, err = db.ItemGetByTag(data.Tag); err != nil {
+		msg = fmt.Sprintf("Cannot load Items tagged as %s: %s",
+			data.Tag.Name,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Did not find template %s",
+			tmplName)
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	data.Title = fmt.Sprintf("Details for Tag %s", data.Tag.Name)
+	data.Messages = srv.getMessages()
+	w.Header().Set("Cache-Control", "no-cache")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request)
 
 /////////////////////////////////////////
 ////////////// Other ////////////////////

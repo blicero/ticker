@@ -1,0 +1,20 @@
+{{ define "tags" }}
+{{/* Created on 24. 02. 2021 */}}
+{{/* Time-stamp: <2021-02-24 22:26:24 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    {{ template "tag_form" . }}
+
+    <hr />
+
+    {{ template "tag_view" . }}
+
+    {{ template "footer" }}
+  </body>
+</html>
+{{ end }}

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 22:36:25 krylon>
+// Time-stamp: <2021-02-25 02:15:54 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"ticker/common"
 	"ticker/feed"
+	"ticker/tag"
 	"time"
 
 	"github.com/hashicorp/logutils"
@@ -70,6 +71,19 @@ type tmplDataItems struct {
 	FeedMap map[int64]feed.Feed
 	Next    string
 	Prev    string
+}
+
+type tmplDataTags struct {
+	tmplDataBase
+	Tags        []tag.Tag
+	TaggedItems map[int64][]feed.Item
+}
+
+type tmplDataTagDetails struct {
+	tmplDataBase
+	Tag      *tag.Tag
+	Items    []feed.Item
+	Children []tag.Tag
 }
 
 // Local Variables:  //

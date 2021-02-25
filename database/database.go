@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-24 20:26:47 krylon>
+// Time-stamp: <2021-02-25 02:47:24 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1514,6 +1514,75 @@ EXEC_QUERY:
 	return items, nil
 } // func (db *Database) ItemGetFTS(fts string) ([]feed.Item, error)
 
+// ItemGetByTag fetches all Items the given Tag is attached to.
+//
+// Currently, this does not take the Tag hierarchy into account.
+func (db *Database) ItemGetByTag(t *tag.Tag) ([]feed.Item, error) {
+	const qid query.ID = query.ItemGetByTag
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(t.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var items = make([]feed.Item, 0, 32)
+
+	for rows.Next() {
+		var (
+			item   feed.Item
+			rating *float64
+			stamp  int64
+		)
+
+		if err = rows.Scan(
+			&item.ID,
+			&item.FeedID,
+			&item.URL,
+			&item.Title,
+			&item.Description,
+			&stamp,
+			&item.Read,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if rating != nil {
+			item.ManuallyRated = true
+			item.Rating = *rating
+		} else {
+			item.Rating = math.NaN()
+		}
+		item.Timestamp = time.Unix(stamp, 0)
+		items = append(items, item)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetByTag(t *tag.Tag) ([]feed.Item, error)
+
 // ItemRatingSet sets an Item's Rating.
 func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error {
 	const qid = query.ItemRatingSet
@@ -1910,6 +1979,115 @@ EXEC_QUERY:
 	status = true
 	return nil
 } // func (db *Database) TagDelete(id int64) error
+
+// TagGetAll fetches all Tags from the database, in no particular order.
+func (db *Database) TagGetAll() ([]tag.Tag, error) {
+	const qid query.ID = query.TagGetAll
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var tags = make([]tag.Tag, 0, 16)
+
+	for rows.Next() {
+		var (
+			t      tag.Tag
+			parent *int64
+		)
+
+		if err = rows.Scan(&t.ID, &t.Name, &t.Description, &parent); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if parent != nil {
+			t.Parent = *parent
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetAll() ([]tag.Tag, error)
+
+// TagGetByID loads a Tag by its database ID.
+func (db *Database) TagGetByID(id int64) (*tag.Tag, error) {
+	const qid query.ID = query.TagGetByID
+
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var (
+			t      = &tag.Tag{ID: id}
+			parent *int64
+		)
+
+		if err = rows.Scan(&t.ID, &t.Name, &t.Description, &parent); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if parent != nil {
+			t.Parent = *parent
+		}
+
+		return t, nil
+	}
+
+	return nil, nil
+} // func (db *Database) TagGetByID(id int64) (*tag.Tag, error)
 
 // TagNameUpdate renames the given Tag to the new name.
 func (db *Database) TagNameUpdate(t *tag.Tag, name string) error {

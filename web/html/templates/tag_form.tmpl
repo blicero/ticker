@@ -1,0 +1,38 @@
+{{ define "tag_form" }}
+{{/* Created on 24. 02. 2021 */}}
+{{/* Time-stamp: <2021-02-24 22:41:12 krylon> */}}
+<form action="/tag/create" method="post">
+  <h3>Define Tag</h3>
+  <table class="horizontal">
+    <tr>
+      <th>Name</th>
+      <td>
+        <input
+        type="text"
+        name="name"
+        placeholder="Name"
+        required />
+      </td>
+    </tr>
+    <tr>
+      <th>Description</th>
+      <td>
+        <input
+        type="text"
+        name="description"
+        placeholder="Description" />
+      </td>
+    </tr>
+    <tr>
+      <th>Parent</th>
+      <td class="placeholder">
+        Coming soon: Hierarchical tags!
+      </td>
+    </tr>
+    <tr>
+      <th><input type="reset" value="Clear" /></th>
+      <td><input type="submit" value="OK" /></td>
+    </tr>
+  </table>
+</form>
+{{ end }}

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-24 19:54:29 krylon>
+// Time-stamp: <2021-02-25 03:09:50 krylon>
 
 package database
 
@@ -75,7 +75,7 @@ CREATE TABLE tag_link (
     id		INTEGER PRIMARY KEY,
     tag_id	INTEGER NOT NULL,
     item_id	INTEGER NOT NULL,
-    UNIQUE (tag_id, item_id),
+    CONSTRAINT tag_item_uniq UNIQUE (tag_id, item_id),
     FOREIGN KEY (tag_id) REFERENCES tag (id)
         ON DELETE CASCADE
         ON UPDATE RESTRICT,
