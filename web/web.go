@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-26 17:49:44 krylon>
+// Time-stamp: <2021-02-26 19:05:48 krylon>
 
 package web
 
@@ -732,15 +732,12 @@ func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
 		r.URL.EscapedPath())
 
-	const (
-		parentID = 0
-	)
-
 	var (
-		err             error
-		msg, name, desc string
-		t               *tag.Tag
-		db              *database.Database
+		err                   error
+		msg, name, desc, pStr string
+		t                     *tag.Tag
+		db                    *database.Database
+		parentID              int64
 	)
 
 	if err = r.ParseForm(); err != nil {
@@ -754,7 +751,17 @@ func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
 
 	name = r.FormValue("name")
 	desc = r.FormValue("description")
-	// TODO Parent!
+	pStr = r.FormValue("parent")
+
+	if parentID, err = strconv.ParseInt(pStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse Parent ID %q: %s",
+			pStr,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
 
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)

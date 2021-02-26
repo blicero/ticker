@@ -1,8 +1,8 @@
 {{ define "tag_form" }}
 {{/* Created on 24. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-24 22:41:12 krylon> */}}
+{{/* Time-stamp: <2021-02-26 19:10:47 krylon> */}}
 <form action="/tag/create" method="post">
-  <h3>Define Tag</h3>
+  <h2>Define Tag</h2>
   <table class="horizontal">
     <tr>
       <th>Name</th>
@@ -25,8 +25,13 @@
     </tr>
     <tr>
       <th>Parent</th>
-      <td class="placeholder">
-        Coming soon: Hierarchical tags!
+      <td>
+        <select name="parent">
+          <option value="0">None</option>
+          {{ range .Tags }}
+          <option value="{{ .ID }}">{{ .Name }}</option>
+          {{ end }}
+        </select>
       </td>
     </tr>
     <tr>
