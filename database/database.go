@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-25 02:47:24 krylon>
+// Time-stamp: <2021-02-26 17:22:27 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -687,6 +687,60 @@ EXEC_QUERY:
 	return list, nil
 } // func (db *Database) FeedGetAll() ([]feed.Feed, error)
 
+// FeedGetMap returns a map of Feeds usable in HTML templates.
+func (db *Database) FeedGetMap() (map[int64]feed.Feed, error) {
+	const qid = query.FeedGetAll
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var fmap = make(map[int64]feed.Feed, 16)
+
+	for rows.Next() {
+		var (
+			f               feed.Feed
+			interval, stamp int64
+		)
+
+		if err = rows.Scan(&f.ID, &f.Name, &f.URL, &f.Homepage, &interval, &stamp, &f.Active); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n", err.Error())
+			return nil, err
+		} else if stamp != 0 {
+			f.LastUpdate = time.Unix(stamp, 0)
+		}
+
+		f.Interval = time.Second * time.Duration(interval)
+
+		fmap[f.ID] = f
+	}
+
+	return fmap, nil
+} // func (db *Database) FeedGetMap() (map[int64]feed.Feed, error)
+
 // FeedGetDue fetches only those Feeds that are due for a refresh.
 func (db *Database) FeedGetDue() ([]feed.Feed, error) {
 	const qid = query.FeedGetDue
@@ -1098,6 +1152,12 @@ EXEC_QUERY:
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+			return nil, err
 		}
 
 		if rating != nil {
@@ -1107,6 +1167,7 @@ EXEC_QUERY:
 			item.Rating = math.NaN()
 		}
 		item.Timestamp = time.Unix(stamp, 0)
+
 		items = append(items, item)
 	}
 
@@ -1163,6 +1224,12 @@ EXEC_QUERY:
 			&item.Read,
 			&rating); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
 				err.Error())
 			return nil, err
 		}
@@ -1229,6 +1296,12 @@ EXEC_QUERY:
 				id,
 				err.Error())
 			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+			return nil, err
 		} else if rating != nil {
 			item.ManuallyRated = true
 			item.Rating = *rating
@@ -1290,6 +1363,12 @@ EXEC_QUERY:
 			&rating); err != nil {
 			db.log.Printf("[ERROR] Cannot scan Row for Item %s: %s\n",
 				uri,
+				err.Error())
+			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
 				err.Error())
 			return nil, err
 		} else if rating != nil {
@@ -1355,6 +1434,12 @@ EXEC_QUERY:
 			&item.Read,
 			&rating); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
 				err.Error())
 			return nil, err
 		}
@@ -1432,9 +1517,13 @@ EXEC_QUERY:
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
-		}
-
-		if rating != nil {
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+			return nil, err
+		} else if rating != nil {
 			item.ManuallyRated = true
 			item.Rating = *rating
 		} else {
@@ -1497,6 +1586,12 @@ EXEC_QUERY:
 			&item.Read,
 			&rating); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
 				err.Error())
 			return nil, err
 		}
@@ -1566,6 +1661,12 @@ EXEC_QUERY:
 			&item.Read,
 			&rating); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
 				err.Error())
 			return nil, err
 		}
@@ -2056,12 +2157,15 @@ func (db *Database) TagGetByID(id int64) (*tag.Tag, error) {
 	var rows *sql.Rows
 
 EXEC_QUERY:
-	if rows, err = stmt.Query(); err != nil {
+	if rows, err = stmt.Query(id); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
 		}
 
+		db.log.Printf("[ERROR] Cannot load Tag #%d: %s\n",
+			id,
+			err.Error())
 		return nil, err
 	}
 
@@ -2073,7 +2177,7 @@ EXEC_QUERY:
 			parent *int64
 		)
 
-		if err = rows.Scan(&t.ID, &t.Name, &t.Description, &parent); err != nil {
+		if err = rows.Scan(&t.Name, &t.Description, &parent); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
@@ -2088,6 +2192,64 @@ EXEC_QUERY:
 
 	return nil, nil
 } // func (db *Database) TagGetByID(id int64) (*tag.Tag, error)
+
+// TagGetByItem returns a (possibly empty) slice of all Tags attached to an
+// Item.
+func (db *Database) TagGetByItem(itemID int64) ([]tag.Tag, error) {
+	const qid query.ID = query.TagGetByItem
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(itemID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		db.log.Printf("[ERROR] Cannot load Tags for Item #%d: %s\n",
+			itemID,
+			err.Error())
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var tags = make([]tag.Tag, 0, 4)
+
+	for rows.Next() {
+		var (
+			t      tag.Tag
+			parent *int64
+		)
+
+		if err = rows.Scan(&t.ID, &t.Name, &t.Description, &parent); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if parent != nil {
+			t.Parent = *parent
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetByItem(itemID int64) ([]tag.Tag, error)
 
 // TagNameUpdate renames the given Tag to the new name.
 func (db *Database) TagNameUpdate(t *tag.Tag, name string) error {
@@ -2367,3 +2529,190 @@ EXEC_QUERY:
 	t.Parent = 0
 	return nil
 } // func (db *Database) TagParentClear(t *tag.Tag) error
+
+// TagLinkCreate attaches the given Tag to the given Item.
+func (db *Database) TagLinkCreate(itemID, tagID int64) error {
+	const qid query.ID = query.TagLinkCreate
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(tagID, itemID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot attach Tag %d to Item %d: %s",
+				tagID,
+				itemID,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) TagLinkCreate(itemID, tagID int64) error
+
+// TagLinkDelete detaches a Tag from an Item.
+func (db *Database) TagLinkDelete(itemID, tagID int64) error {
+	const qid query.ID = query.TagLinkDelete
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(tagID, itemID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot attach Tag %d to Item %d: %s",
+				tagID,
+				itemID,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) TagLinkDelete(itemID, tagID int64) error
+
+// TagLinkGetByItem returns a slice of *the IDs* of all the Tags attached
+// to a given Item.
+func (db *Database) TagLinkGetByItem(itemID int64) ([]int64, error) {
+	const qid query.ID = query.TagLinkGetByItem
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(itemID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		db.log.Printf("[ERROR] Cannot load Tags for Item #%d: %s\n",
+			itemID,
+			err.Error())
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+	var tags = make([]int64, 0, 4)
+
+	for rows.Next() {
+		var tagID int64
+
+		if err = rows.Scan(&tagID); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		tags = append(tags, tagID)
+	}
+
+	return tags, nil
+} // func (db *Database) TagLinkGetByItem(itemID int64) ([]int64, error)

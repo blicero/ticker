@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 18:36:28 krylon>
+// Time-stamp: <2021-02-25 18:08:45 krylon>
 
 package database
 
@@ -22,6 +22,7 @@ func TestCreateDatabase(t *testing.T) {
 	}
 } // func TestCreateDatabase(t *testing.T)
 
+// We prepare each query once to make sure there are no syntax errors in the SQL.
 func TestPrepareQueries(t *testing.T) {
 	if db == nil {
 		t.SkipNow()

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-22 17:06:56 krylon>
+// Time-stamp: <2021-02-26 17:34:45 krylon>
 
 package feed
 
@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strings"
 	"ticker/common"
+	"ticker/tag"
 	"time"
 
 	"github.com/jaytaylor/html2text"
@@ -30,6 +31,7 @@ type Item struct {
 	Read          bool
 	Rating        float64
 	ManuallyRated bool
+	Tags          []tag.Tag
 }
 
 func (i *Item) String() string {
@@ -77,4 +79,16 @@ func (i *Item) Plaintext() string {
 	tmp[1] = whitespace.ReplaceAllString(tmp[1], " ")
 
 	return strings.Join(tmp, " ")
-} // func (self *NewsItem) Plaintext() string
+} // func (i *Item) Plaintext() string
+
+// HasTag returns true if the Tag with the given ID is attached to the
+// receiver Item.
+func (i *Item) HasTag(tagID int64) bool {
+	for _, t := range i.Tags {
+		if t.ID == tagID {
+			return true
+		}
+	}
+
+	return false
+} // func (i *Item) HasTag(tagID int64) bool

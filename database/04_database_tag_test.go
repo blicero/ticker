@@ -2,12 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-24 21:01:30 krylon>
+// Time-stamp: <2021-02-25 17:59:41 krylon>
 
 package database
 
 import (
 	"testing"
+	"ticker/feed"
 	"ticker/tag"
 )
 
@@ -50,3 +51,36 @@ func TestTagCreate(t *testing.T) {
 		}
 	}
 } // func TestTagCreate(t *testing.T)
+
+func TestTagLinkCreate(t *testing.T) {
+	if db == nil {
+		t.SkipNow()
+	}
+
+	// We are being deliberately stupid and just attach all existing tags
+	// to all Items.
+	var (
+		err   error
+		items []feed.Item
+		tags  []tag.Tag
+	)
+
+	if items, err = db.ItemGetAll(-1, 0); err != nil {
+		t.Fatalf("Cannot load all Items: %s", err.Error())
+	} else if tags, err = db.TagGetAll(); err != nil {
+		t.Fatalf("Cannot load all Tags: %s", err.Error())
+	}
+
+	for _, i := range items {
+		for _, tt := range tags {
+			if err = db.TagLinkCreate(i.ID, tt.ID); err != nil {
+				t.Fatalf("Cannot attach Tag %s (%d) to Item %q (%d): %s",
+					tt.Name,
+					tt.ID,
+					i.Title,
+					i.ID,
+					err.Error())
+			}
+		}
+	}
+} // func TestTagLinkCreate(t *testing.T)

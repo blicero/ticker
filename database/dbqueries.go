@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-24 23:46:24 krylon>
+// Time-stamp: <2021-02-25 17:17:18 krylon>
 
 package database
 
@@ -180,13 +180,23 @@ FROM tag_link t
 INNER JOIN item i ON t.item_id = i.id
 WHERE t.tag_id = ?
 `,
-	query.ItemRatingSet:        "UPDATE item SET rating = ? WHERE id = ?",
-	query.ItemRatingClear:      "UPDATE item SET rating = NULL WHERE id = ?",
-	query.FTSClear:             "DELETE FROM item_index",
-	query.TagCreate:            "INSERT INTO tag (name, description, parent) VALUES (?, ?, ?)",
-	query.TagDelete:            "DELETE FROM tag WHERE id = ?",
-	query.TagGetAll:            "SELECT id, name, description, parent FROM tag",
-	query.TagGetByID:           "SELECT name, description, parent FROM tag WHERE id = ?",
+	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
+	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",
+	query.FTSClear:        "DELETE FROM item_index",
+	query.TagCreate:       "INSERT INTO tag (name, description, parent) VALUES (?, ?, ?)",
+	query.TagDelete:       "DELETE FROM tag WHERE id = ?",
+	query.TagGetAll:       "SELECT id, name, description, parent FROM tag",
+	query.TagGetByID:      "SELECT name, description, parent FROM tag WHERE id = ?",
+	query.TagGetByItem: `
+SELECT
+    t.id,
+    t.name,
+    t.description,
+    t.parent
+FROM tag_link l
+INNER JOIN tag t ON l.tag_id = t.id
+WHERE l.item_id = ?
+`,
 	query.TagGetByName:         "SELECT id, description, parent FROM tag WHERE name = ?",
 	query.TagNameUpdate:        "UPDATE tag SET name = ? WHERE id = ?",
 	query.TagDescriptionUpdate: "UPDATE tag SET description = ? WHERE id = ?",
