@@ -1,6 +1,6 @@
 {{ define "tag_details" }}
 {{/* Created on 25. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-25 02:09:08 krylon> */}}
+{{/* Time-stamp: <2021-02-25 16:57:45 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -13,6 +13,16 @@
     <blockquote>
       {{ .Tag.Description }}
     </blockquote>
+
+    <hr />
+
+    {{ if (gt (len .Items) 0) }}
+    {{ template "items" . }}
+    {{ else }}
+    <div class="center important">
+      No Items are currently tagged {{ .Tag.Name }}
+    </div>
+    {{ end }}
 
     {{ template "footer" }}
   </body>

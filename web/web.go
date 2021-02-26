@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-25 02:55:04 krylon>
+// Time-stamp: <2021-02-26 17:49:44 krylon>
 
 package web
 
@@ -124,6 +124,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/rate_item", srv.handleRateItem)
 	srv.router.HandleFunc("/ajax/unrate_item/{id:(?:\\d+)$}", srv.handleUnrateItem)
 	srv.router.HandleFunc("/ajax/rebuild_fts", srv.handleRebuildFTS)
+	srv.router.HandleFunc("/ajax/tag_link_create", srv.handleTagLinkCreate)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -509,6 +510,13 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, "/index", http.StatusFound)
 		return
+	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
 	} else if pageNo != -1 && len(data.Items) == itemCnt {
 		data.Next = strconv.FormatInt(pageNo+1, 10)
 	}
@@ -520,23 +528,13 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, "/index", http.StatusFound)
 		return
-	}
-
-	var feeds []feed.Feed
-
-	if feeds, err = db.FeedGetAll(); err != nil {
+	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
-		http.Redirect(w, r, "/index", http.StatusFound)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
-	}
-
-	data.FeedMap = make(map[int64]feed.Feed, len(feeds))
-
-	for _, f := range feeds {
-		data.FeedMap[f.ID] = f
 	}
 
 	for idx, item := range data.Items {
@@ -826,6 +824,12 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 		msg = fmt.Sprintf("Cannot load Items tagged as %s: %s",
 			data.Tag.Name,
 			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
+		msg = fmt.Sprintf("Cannot get FeedMap: %s", err.Error())
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
@@ -1178,4 +1182,76 @@ func (srv *Server) handleRebuildFTS(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Set("Content-Length", strconv.FormatInt(len(reply), 10))
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
-} // func (srv *Server) handleRebuildFTS(w http.ResponseWriter, r *http.request)
+} // func (srv *Server) handleRebuildFTS(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleTagLinkCreate(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err                         error
+		db                          *database.Database
+		tagStr, itemStr, msg, reply string
+		itemID, tagID               int64
+		t                           *tag.Tag
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Cannot parse form data: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	itemStr = r.FormValue("Item")
+	tagStr = r.FormValue("Tag")
+
+	if itemID, err = strconv.ParseInt(itemStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot Parse Item ID %q: %s",
+			itemStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if tagID, err = strconv.ParseInt(tagStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot Parse Tag ID %q: %s",
+			tagStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if err = db.TagLinkCreate(itemID, tagID); err != nil {
+		msg = fmt.Sprintf("Cannot Attach Tag %d to Item %d: %s",
+			tagID,
+			itemID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if t, err = db.TagGetByID(tagID); err != nil {
+		msg = fmt.Sprintf("Cannot load Tag %d: %s",
+			tagID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	srv.log.Printf("[DEBUG] Attach Tag %d to Item %d successfully.\n",
+		tagID,
+		itemID)
+	reply = fmt.Sprintf(`{ "Status": true, "Message": "Success", "ID": %d, "Name": %q }`,
+		tagID,
+		t.Name)
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleTagLinkCreate(w http.ResponseWriter, r *http.Request)

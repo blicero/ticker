@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2021-02-12 23:45:31 krylon>
+// Time-stamp: <2021-02-25 20:21:43 krylon>
 
 package web
 
@@ -44,6 +44,7 @@ var funcmap = template.FuncMap{
 	"join":             joinStrings,
 	"escape_linebreak": escapeLinebreak,
 	"nbsp":             nbsp,
+	"uuid":             common.GetUUID,
 }
 
 type generator struct {

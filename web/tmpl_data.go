@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-02-25 02:15:54 krylon>
+// Time-stamp: <2021-02-25 22:17:51 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -71,6 +71,20 @@ type tmplDataItems struct {
 	FeedMap map[int64]feed.Feed
 	Next    string
 	Prev    string
+	AllTags []tag.Tag
+}
+
+// TagLinkData returns data for use in the tag_link_form template.
+func (t *tmplDataItems) TagLinkData(i feed.Item) *tmplDataTagLinkData {
+	return &tmplDataTagLinkData{
+		Item: i,
+		Tags: t.AllTags,
+	}
+} // func (t *tmplDataItems) TagLinkData() *tmplDataTagLinkData
+
+type tmplDataTagLinkData struct {
+	Item feed.Item
+	Tags []tag.Tag
 }
 
 type tmplDataTags struct {
@@ -84,6 +98,7 @@ type tmplDataTagDetails struct {
 	Tag      *tag.Tag
 	Items    []feed.Item
 	Children []tag.Tag
+	FeedMap  map[int64]feed.Feed
 }
 
 // Local Variables:  //

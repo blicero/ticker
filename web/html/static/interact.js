@@ -1,4 +1,4 @@
-// Time-stamp: <2021-02-23 23:12:23 krylon>
+// Time-stamp: <2021-02-26 17:57:59 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -440,3 +440,32 @@ function rebuildFTS() {
         alert(msg);
     });
 } // function rebuildFTS()
+
+function attach_tag(form_id, item_id) {
+    var sel = $("#" + form_id)[0].value;
+    var tag_id = parseInt(sel);
+
+    console.log("Attach Tag #" + sel + " to Item " + item_id + ".");
+
+    var req = $.post("/ajax/tag_link_create",
+                     { Tag: tag_id, Item: item_id },
+                     function(reply) {
+                         console.log(`Successfully attached Tag ${sel} to Item ${item_id}`);
+                         var div_id = `#tags_${item_id}`;
+                         var div = $(div_id)[0];
+
+                         var tag = `<a href="/tag/${tag_id}">${reply.Name}</a>&nbsp;`;
+
+                         div.innerHTML += tag;
+
+                         var opt_id = `#${form_id}_opt_${tag_id}`;
+                         var opt = $(opt_id)[0];
+
+                         opt.remove();
+                     },
+                     "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
+    });
+} // function attach_tag(form_id, item_id)

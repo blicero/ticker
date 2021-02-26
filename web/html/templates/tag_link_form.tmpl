@@ -1,0 +1,14 @@
+{{ define "tag_link_form" }}
+{{/* Created on 25. 02. 2021 */}}
+{{/* Time-stamp: <2021-02-26 17:55:47 krylon> */}}
+{{ $id := uuid }}
+<select id="{{ $id }}">
+  {{ $item := .Item }}
+  {{ range .Tags }}
+  {{ if (not ($item.HasTag .ID)) }}
+  <option id="{{ $id }}_opt_{{ .ID }}" value="{{ .ID }}">{{ .Name }}</option>
+  {{ end }}
+  {{ end }}
+</select>
+<input type="button" value="Add" onclick="attach_tag('{{ $id }}', {{ .Item.ID }});" />
+{{ end }}

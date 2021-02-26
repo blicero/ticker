@@ -1,9 +1,12 @@
 {{ define "tag_view" }}
 {{/* Created on 24. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-24 22:50:05 krylon> */}}
+{{/* Time-stamp: <2021-02-25 16:44:59 krylon> */}}
 <ul>
   {{ range .Tags }}
-  <li> {{ .Name }} -- {{ .Description }} </li>
+  <li>
+    <big><a href="/tag/{{ .ID }}">{{ .Name }}</a></big>
+    -- {{ .Description }}
+  </li>
   {{ end }}
 </ul>
 {{ end }}
