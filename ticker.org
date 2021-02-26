@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-25 03:22:22 krylon>
+# Time-stamp: <2021-02-26 18:08:04 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,27 +13,27 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-02-25 Do 03:22]
-   | Headline                  | Time      |          |         |         |       |
-   |---------------------------+-----------+----------+---------+---------+-------|
-   | *Total time*              | *4d 0:21* |          |         |         |       |
-   |---------------------------+-----------+----------+---------+---------+-------|
-   | Ticker                    | 4d 0:21   |          |         |         |       |
-   | \_  Main                  |           |     0:56 |         |         |       |
-   | \_    Shutdown            |           |          |    0:56 |         |       |
-   | \_  Components [9/12]     |           | 3d 23:25 |         |         |       |
-   | \_    Feed [6/6]          |           |          | 1d 4:37 |         |       |
-   | \_      Homepage          |           |          |         |    0:12 |       |
-   | \_      Rating [3/3]      |           |          |         | 1d 1:09 |       |
-   | \_        Web Frontend    |           |          |         |         | 12:09 |
-   | \_        Classifier      |           |          |         |         | 12:23 |
-   | \_    Database [1/1]      |           |          |   21:55 |         |       |
-   | \_      Due Feeds         |           |          |         |    1:26 |       |
-   | \_    Reader [0/0]        |           |          |   15:50 |         |       |
-   | \_    Web interface [0/0] |           |          |   18:26 |         |       |
-   | \_    Tags [0/3]          |           |          |    7:07 |         |       |
-   | \_      Web interface     |           |          |         |    5:06 |       |
-   | \_    Search [2/2]        |           |          |    3:30 |         |       |
+   #+CAPTION: Clock summary at [2021-02-26 Fr 18:08]
+   | Headline                  | Time      |         |         |         |       |
+   |---------------------------+-----------+---------+---------+---------+-------|
+   | *Total time*              | *4d 9:42* |         |         |         |       |
+   |---------------------------+-----------+---------+---------+---------+-------|
+   | Ticker                    | 4d 9:42   |         |         |         |       |
+   | \_  Main                  |           |    0:56 |         |         |       |
+   | \_    Shutdown            |           |         |    0:56 |         |       |
+   | \_  Components [9/13]     |           | 4d 8:46 |         |         |       |
+   | \_    Feed [6/6]          |           |         | 1d 4:37 |         |       |
+   | \_      Homepage          |           |         |         |    0:12 |       |
+   | \_      Rating [3/3]      |           |         |         | 1d 1:09 |       |
+   | \_        Web Frontend    |           |         |         |         | 12:09 |
+   | \_        Classifier      |           |         |         |         | 12:23 |
+   | \_    Database [1/1]      |           |         |   21:55 |         |       |
+   | \_      Due Feeds         |           |         |         |    1:26 |       |
+   | \_    Reader [0/0]        |           |         |   15:50 |         |       |
+   | \_    Web interface [0/0] |           |         |   18:26 |         |       |
+   | \_    Tags [0/3]          |           |         |   16:28 |         |       |
+   | \_      Web interface     |           |         |         |   14:27 |       |
+   | \_    Search [2/2]        |           |         |    3:30 |         |       |
    #+END:
 
 ** Questions
@@ -44,7 +44,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [9/12]
+** Components [9/13]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -151,10 +151,11 @@
 ***** TODO Hierarchy
 **** TODO Web interface
      :LOGBOOK:
+     CLOCK: [2021-02-26 Fr 16:47]--[2021-02-26 Fr 18:07] =>  1:20
+     CLOCK: [2021-02-25 Do 16:12]--[2021-02-26 Fr 00:13] =>  8:01
      CLOCK: [2021-02-25 Do 00:45]--[2021-02-25 Do 03:22] =>  2:37
      CLOCK: [2021-02-24 Mi 21:47]--[2021-02-25 Do 00:16] =>  2:29
-     :END:
-     
+     :END:     
 *** Search [2/2]
     :LOGBOOK:
     CLOCK: [2021-02-23 Di 20:00]--[2021-02-23 Di 23:30] =>  3:30
@@ -175,4 +176,7 @@
      requires support in the web interface.
 **** DONE Web interface
      CLOSED: [2021-02-23 Di 23:30]
+*** TODO Read Later
+    It would be nice to be able to mark Items for later reading, so they do
+    not get lost.
 ** Tedious tasks
