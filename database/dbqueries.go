@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-25 17:17:18 krylon>
+// Time-stamp: <2021-02-27 18:14:15 krylon>
 
 package database
 
@@ -187,6 +187,7 @@ WHERE t.tag_id = ?
 	query.TagDelete:       "DELETE FROM tag WHERE id = ?",
 	query.TagGetAll:       "SELECT id, name, description, parent FROM tag",
 	query.TagGetByID:      "SELECT name, description, parent FROM tag WHERE id = ?",
+	query.TagGetByName:    "SELECT id, description, parent FROM tag WHERE name = ?",
 	query.TagGetByItem: `
 SELECT
     t.id,
@@ -197,7 +198,48 @@ FROM tag_link l
 INNER JOIN tag t ON l.tag_id = t.id
 WHERE l.item_id = ?
 `,
-	query.TagGetByName:         "SELECT id, description, parent FROM tag WHERE name = ?",
+	query.TagGetChildren: `
+WITH RECURSIVE children(id, name, description, parent) AS (
+    SELECT
+        id,
+        name,
+        description,
+        parent
+    FROM tag WHERE id = ?
+    UNION ALL
+    SELECT
+        tag.id,
+        tag.name,
+        tag.description,
+        tag.parent
+    FROM tag, children
+    WHERE tag.parent = children.id
+)
+
+SELECT
+    id,
+    name, 
+    description,
+    parent
+FROM children
+WHERE id <> ?
+`,
+	query.TagGetChildrenImmediate: `
+SELECT
+    id,
+    name,
+    description
+FROM tag
+WHERE parent = ?
+`,
+	query.TagGetRoots: `
+SELECT
+    id,
+    name,
+    description
+FROM tag
+WHERE COALESCE(parent, 0) = 0
+`,
 	query.TagNameUpdate:        "UPDATE tag SET name = ? WHERE id = ?",
 	query.TagDescriptionUpdate: "UPDATE tag SET description = ? WHERE id = ?",
 	query.TagParentSet:         "UPDATE tag SET parent = ? WHERE id = ?",

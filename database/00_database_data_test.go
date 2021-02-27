@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-24 20:42:50 krylon>
+// Time-stamp: <2021-02-27 17:23:05 krylon>
 
 package database
 
@@ -41,66 +41,40 @@ var testFeeds = []*feed.Feed{
 	},
 }
 
-// var testTags = []tag.Tag{
-// 	tag.Tag{
-// 		Name:        "IT",
-// 		Description: "Computer-related stuff",
-// 	},
-// 	tag.Tag{
-// 		Name:        "Politics",
-// 		Description: "knowing how the sausage is made, they thought it was better to have a salad",
-// 	},
-// 	tag.Tag{
-// 		Name:        "Culture",
-// 		Description: "Anything related to literature, music, art, movies, series, theater, TV, etc.",
-// 	},
-// }
-
-type testTag struct {
-	t        tag.Tag
-	children []testTag
-}
-
-var testTags = []testTag{
-	testTag{
-		t: tag.Tag{
-			Name:        "IT",
-			Description: "Computer-related stuff",
-		},
-		children: []testTag{
-			testTag{
-				t: tag.Tag{
-					Name: "Internet",
+var testTags = []tag.Tag{
+	tag.Tag{
+		Name:        "IT",
+		Description: "Computer-related stuff",
+		Children: []tag.Tag{
+			tag.Tag{
+				Name:        "Internet",
+				Description: "The Internet is a bunch of tubes",
+				Children: []tag.Tag{
+					tag.Tag{Name: "Twitter"},
+					tag.Tag{Name: "Privacy"},
 				},
 			},
-			testTag{
-				t: tag.Tag{
-					Name: "Programming",
+			tag.Tag{
+				Name: "Programming",
+				Children: []tag.Tag{
+					tag.Tag{Name: "WebDev"},
+					tag.Tag{Name: "Esoteric"},
+					tag.Tag{
+						Name: "Lisp",
+						Children: []tag.Tag{
+							tag.Tag{Name: "Scheme"},
+						},
+					},
 				},
 			},
 		},
 	},
-	testTag{
-		t: tag.Tag{
-			Name:        "Culture",
-			Description: "If you have to ask, there probably is no point in explaining...",
-		},
-		children: []testTag{
-			testTag{
-				t: tag.Tag{
-					Name: "Movies",
-				},
-			},
-			testTag{
-				t: tag.Tag{
-					Name: "Literature",
-				},
-			},
-			testTag{
-				t: tag.Tag{
-					Name: "Music",
-				},
-			},
-		},
+	tag.Tag{
+		Name:        "Politics",
+		Description: "knowing how the sausage is made, they thought it was better to have a salad",
+	},
+	tag.Tag{
+		Name:        "Culture",
+		Description: "Anything related to literature, music, art, movies, series, theater, TV, etc.",
 	},
 }

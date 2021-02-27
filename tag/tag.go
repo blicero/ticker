@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-24 20:13:00 krylon>
+// Time-stamp: <2021-02-26 19:25:33 krylon>
 
 // Package tag provides ... well, Tags to attach to Items.
 //
@@ -15,4 +15,5 @@ type Tag struct {
 	Name        string
 	Description string
 	Parent      int64
+	Children    []Tag
 }

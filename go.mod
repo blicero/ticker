@@ -7,6 +7,7 @@ require (
 	github.com/SlyMarbo/rss v1.0.1
 	github.com/bbalet/stopwords v1.0.0
 	github.com/blicero/krylib v0.0.0-20210224100727-002c413214d3
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/stemmer v0.0.0-20161207102402-66719a20c4b5
 	github.com/endeveit/guesslanguage v0.0.0-20141216121003-b9ec07401dcb
 	github.com/gorilla/mux v1.8.0

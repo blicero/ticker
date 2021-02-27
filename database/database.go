@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-26 17:22:27 krylon>
+// Time-stamp: <2021-02-27 18:25:29 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -2136,6 +2136,179 @@ EXEC_QUERY:
 	return tags, nil
 } // func (db *Database) TagGetAll() ([]tag.Tag, error)
 
+// TagGetHierarchy retrieves a slice of all Tags, organized in a hierarchical
+// fashion.
+func (db *Database) TagGetHierarchy() ([]tag.Tag, error) {
+	const (
+		qroot     query.ID = query.TagGetRoots
+		qchildren query.ID = query.TagGetChildren
+	)
+
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qroot); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qroot,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var tags = make([]tag.Tag, 0, 16)
+
+	for rows.Next() {
+		var t tag.Tag
+
+		if err = rows.Scan(&t.ID, &t.Name, &t.Description); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		} else if t.Children, err = db.TagGetChildrenImmediate(t.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot get children of Tag %s (%d): %s\n",
+				t.Name,
+				t.ID,
+				err.Error())
+			return nil, err
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetHierarchy() ([]tag.Tag, error)
+
+// TagGetChildren fetches all the children - recursively - of the given Tag.
+func (db *Database) TagGetChildren(id int64) ([]tag.Tag, error) {
+	const qid query.ID = query.TagGetChildren
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(id, id); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var tags = make([]tag.Tag, 0, 16)
+
+	for rows.Next() {
+		var (
+			t      tag.Tag
+			parent *int64
+		)
+
+		if err = rows.Scan(&t.ID, &t.Name, &t.Description, &parent); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if parent != nil {
+			t.Parent = *parent
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetChildren(id int64) ([]tag.Tag, error)
+
+// TagGetChildrenImmediate fetches all Tags that are directly descended from
+// the given parent Tag, i.e. Tags whose parent ID equals the argument.
+func (db *Database) TagGetChildrenImmediate(id int64) ([]tag.Tag, error) {
+	const qid query.ID = query.TagGetChildrenImmediate
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(id); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var tags = make([]tag.Tag, 0, 16)
+
+	for rows.Next() {
+		var t tag.Tag
+
+		if err = rows.Scan(&t.ID, &t.Name, &t.Description); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		t.Parent = id
+
+		if t.Children, err = db.TagGetChildrenImmediate(t.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot get immediate children of Tag %s (%d): %s\n",
+				t.Name,
+				t.ID,
+				err.Error())
+			return nil, err
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetChildrenImmediate(id int64) ([]tag.Tag, error)
+
 // TagGetByID loads a Tag by its database ID.
 func (db *Database) TagGetByID(id int64) (*tag.Tag, error) {
 	const qid query.ID = query.TagGetByID
@@ -2192,6 +2365,63 @@ EXEC_QUERY:
 
 	return nil, nil
 } // func (db *Database) TagGetByID(id int64) (*tag.Tag, error)
+
+// TagGetByName loads a Tag by its database ID.
+func (db *Database) TagGetByName(name string) (*tag.Tag, error) {
+	const qid query.ID = query.TagGetByName
+
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(name); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		db.log.Printf("[ERROR] Cannot load Tag %s: %s\n",
+			name,
+			err.Error())
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var (
+			t      = &tag.Tag{Name: name}
+			parent *int64
+		)
+
+		if err = rows.Scan(&t.ID, &t.Description, &parent); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if parent != nil {
+			t.Parent = *parent
+		}
+
+		return t, nil
+	}
+
+	return nil, nil
+} // func (db *Database) TagGetByName(id int64) (*tag.Tag, error)
 
 // TagGetByItem returns a (possibly empty) slice of all Tags attached to an
 // Item.
