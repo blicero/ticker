@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-26 19:05:48 krylon>
+// Time-stamp: <2021-02-27 18:31:32 krylon>
 
 package web
 
@@ -701,7 +701,7 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if data.Tags, err = db.TagGetAll(); err != nil {
+	if data.Tags, err = db.TagGetHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
