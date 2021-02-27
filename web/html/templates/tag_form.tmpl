@@ -1,6 +1,6 @@
 {{ define "tag_form" }}
 {{/* Created on 24. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-26 19:10:47 krylon> */}}
+{{/* Time-stamp: <2021-02-27 21:59:36 krylon> */}}
 <form action="/tag/create" method="post">
   <h2>Define Tag</h2>
   <table class="horizontal">
@@ -28,7 +28,7 @@
       <td>
         <select name="parent">
           <option value="0">None</option>
-          {{ range .Tags }}
+          {{ range .AllTags }}
           <option value="{{ .ID }}">{{ .Name }}</option>
           {{ end }}
         </select>

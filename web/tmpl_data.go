@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-02-25 22:17:51 krylon>
+// Time-stamp: <2021-02-27 21:48:11 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -49,6 +49,7 @@ type tmplDataBase struct {
 	Debug      bool
 	TestMsgGen bool
 	URL        string
+	AllTags    []tag.Tag
 }
 
 type tmplDataIndex struct {
@@ -57,6 +58,14 @@ type tmplDataIndex struct {
 	Feeds   []feed.Feed
 	Items   []feed.Item
 }
+
+// TagLinkData returns data for use in the tag_link_form template.
+func (t *tmplDataIndex) TagLinkData(i feed.Item) *tmplDataTagLinkData {
+	return &tmplDataTagLinkData{
+		Item: i,
+		Tags: t.AllTags,
+	}
+} // func (t *tmplDataIndex) TagLinkData() *tmplDataTagLinkData
 
 type tmplDataFeedDetails struct {
 	tmplDataBase
@@ -71,7 +80,6 @@ type tmplDataItems struct {
 	FeedMap map[int64]feed.Feed
 	Next    string
 	Prev    string
-	AllTags []tag.Tag
 }
 
 // TagLinkData returns data for use in the tag_link_form template.

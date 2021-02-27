@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-27 18:31:32 krylon>
+// Time-stamp: <2021-02-27 21:59:36 krylon>
 
 package web
 
@@ -244,6 +244,13 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
+	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
 	} else if data.Items, err = db.ItemGetRecent(recentCnt); err != nil {
 		msg = fmt.Sprintf("Cannot query all Items: %s",
 			err.Error())
@@ -417,6 +424,13 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 			err.Error())
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
 	} else if data.Items, err = db.ItemGetByFeed(id, recentCnt); err != nil {
 		msg = fmt.Sprintf("Cannot query all Items: %s",
@@ -661,6 +675,13 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, "/index", http.StatusFound)
 		return
+	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
 	}
 
 	data.Messages = srv.getMessages()
@@ -703,6 +724,13 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 
 	if data.Tags, err = db.TagGetHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
@@ -776,8 +804,12 @@ func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var addr = fmt.Sprintf("/tag/%d", t.ID)
-	http.Redirect(w, r, addr, http.StatusFound)
+	srv.log.Printf("[DEBUG] Created Tag %s (%d)\n",
+		t.Name,
+		t.ID)
+
+	// var addr = fmt.Sprintf("/tag/%d", t.ID)
+	http.Redirect(w, r, r.Referer(), http.StatusFound)
 } // func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
