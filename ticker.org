@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-02-28 00:48:48 krylon>
+# Time-stamp: <2021-03-01 19:48:43 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-02-28 So 00:48]
+   #+CAPTION: Clock summary at [2021-03-01 Mo 19:48]
    | Headline                  | Time       |          |         |         |       |
    |---------------------------+------------+----------+---------+---------+-------|
-   | *Total time*              | *4d 18:37* |          |         |         |       |
+   | *Total time*              | *4d 19:05* |          |         |         |       |
    |---------------------------+------------+----------+---------+---------+-------|
-   | Ticker                    | 4d 18:37   |          |         |         |       |
+   | Ticker                    | 4d 19:05   |          |         |         |       |
    | \_  Main                  |            |     0:56 |         |         |       |
    | \_    Shutdown            |            |          |    0:56 |         |       |
-   | \_  Components [9/13]     |            | 4d 17:41 |         |         |       |
+   | \_  Components [10/13]    |            | 4d 18:09 |         |         |       |
    | \_    Feed [6/6]          |            |          | 1d 4:37 |         |       |
    | \_      Homepage          |            |          |         |    0:12 |       |
    | \_      Rating [3/3]      |            |          |         | 1d 1:09 |       |
@@ -31,9 +31,9 @@
    | \_      Due Feeds         |            |          |         |    1:26 |       |
    | \_    Reader [0/0]        |            |          |   15:50 |         |       |
    | \_    Web interface [0/0] |            |          |   18:26 |         |       |
-   | \_    Tags [0/3]          |            |          | 1d 1:23 |         |       |
-   | \_      Database          |            |          |         |   10:31 |       |
-   | \_        Hierarchy       |            |          |         |         |  8:30 |
+   | \_    Tags [1/3]          |            |          | 1d 1:51 |         |       |
+   | \_      Database          |            |          |         |   10:59 |       |
+   | \_        Hierarchy       |            |          |         |         |  8:58 |
    | \_      Web interface     |            |          |         |   14:52 |       |
    | \_    Search [2/2]        |            |          |    3:30 |         |       |
    #+END:
@@ -46,7 +46,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [9/13]
+** Components [10/13]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -142,7 +142,7 @@
     CLOCK: [2021-02-12 Fr 17:21]--[2021-02-12 Fr 19:04] =>  1:43
     CLOCK: [2021-02-12 Fr 15:23]--[2021-02-12 Fr 16:34] =>  1:11
     :END:
-*** Tags [0/3]
+*** Tags [1/3]
     I would like to create tags and assign them to items.
     Furthermore, I would like to use the Bayesian classifier to suggest tags
     for Items and maybe assign them automatically eventually.
@@ -150,14 +150,19 @@
      :LOGBOOK:
      CLOCK: [2021-02-24 Mi 19:35]--[2021-02-24 Mi 21:36] =>  2:01
      :END:
-***** TODO Hierarchy
+***** SUSPENDED Hierarchy
+      CLOSED: [2021-03-01 Mo 19:48]
       :LOGBOOK:
+      CLOCK: [2021-03-01 Mo 19:19]--[2021-03-01 Mo 19:47] =>  0:28
       CLOCK: [2021-02-27 Sa 21:25]--[2021-02-28 So 00:48] =>  3:23
       CLOCK: [2021-02-27 Sa 16:51]--[2021-02-27 Sa 19:13] =>  2:22
       CLOCK: [2021-02-26 Fr 19:15]--[2021-02-26 Fr 22:00] =>  2:45
       :END:
       I need to figure out an SQL query to get the Tags in the right order,
       "right" meaning the order should reflect the hierarchy.
+      ...
+      That is surprisingly tricky, and given the fact it is not such a big
+      problem, I postpone this.
 **** TODO Web interface
      :LOGBOOK:
      CLOCK: [2021-02-26 Fr 18:49]--[2021-02-26 Fr 19:14] =>  0:25
