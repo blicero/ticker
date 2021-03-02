@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-02 14:52:44 krylon>
+// Time-stamp: <2021-03-02 17:43:24 krylon>
 
 package database
 
@@ -264,23 +264,39 @@ WHERE item_id = ?
 `,
 	query.ReadLaterGetAll: `
 SELECT
-    id,
-    item_id,
-    note,
-    timestamp,
-    deadline,
-    read
-FROM read_later
+    l.id,
+    l.item_id,
+    l.note,
+    l.timestamp,
+    l.deadline,
+    l.read,
+    i.feed_id,
+    i.link,
+    i.title,
+    i.description,
+    i.timestamp,
+    i.read,
+    i.rating
+FROM read_later l
+INNER JOIN item i ON i.id = l.item_id
 `,
 	query.ReadLaterGetUnread: `
 SELECT
-    id,
-    item_id,
-    note,
-    timestamp,
-    deadline
-FROM read_later
-WHERE read <> 1
+    l.id,
+    l.item_id,
+    l.note,
+    l.timestamp,
+    l.deadline,
+    i.feed_id,
+    i.link,
+    i.title,
+    i.description,
+    i.timestamp,
+    i.read,
+    i.rating
+FROM read_later l
+INNER JOIN item i ON l.item_id = i.id
+WHERE l.read <> 1
 `,
 	query.ReadLaterMarkRead: `
 UPDATE read_later

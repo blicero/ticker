@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-02 15:02:56 krylon>
+// Time-stamp: <2021-03-02 17:54:57 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -3032,3 +3032,516 @@ EXEC_QUERY:
 		return later, nil
 	}
 } // func (db *Database) ReadLaterAdd(item *feed.Item, note string, deadline time.Time) (*feed.ReadLater, error)
+
+// ReadLaterGetByItem returns the ReadLater note for the given Item.
+func (db *Database) ReadLaterGetByItem(item *feed.Item) (*feed.ReadLater, error) {
+	const qid query.ID = query.ReadLaterGetByItem
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(item.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var (
+			stamp    int64
+			deadline *int64
+			note     *string
+			later    = &feed.ReadLater{
+				Item:   item,
+				ItemID: item.ID,
+			}
+		)
+
+		if err = rows.Scan(
+			&later.ID,
+			&note,
+			&stamp,
+			&deadline,
+			&later.Read); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if deadline != nil {
+			later.Deadline = time.Unix(*deadline, 0)
+		}
+
+		if note != nil {
+			later.Note = *note
+		}
+
+		later.Timestamp = time.Unix(stamp, 0)
+
+		return later, nil
+	}
+
+	return nil, nil
+} // func (db *Database) ReadLaterGetByItem(itemID int64) (*feed.ReadLater, error)
+
+// ReadLaterGetAll returns all ReadLater notes.
+func (db *Database) ReadLaterGetAll() ([]feed.ReadLater, error) {
+	const qid query.ID = query.ReadLaterGetAll
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var items = make([]feed.ReadLater, 0, 32)
+
+	if rows.Next() {
+		var (
+			lstamp, istamp int64
+			deadline       *int64
+			note           *string
+			rating         *float64
+			later          feed.ReadLater
+			item           = new(feed.Item)
+		)
+
+		if err = rows.Scan(
+			&later.ID,
+			&later.ItemID,
+			&note,
+			&lstamp,
+			&deadline,
+			&later.Read,
+			&item.FeedID,
+			&item.URL,
+			&item.Title,
+			&item.Description,
+			&istamp,
+			&item.Read,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if deadline != nil {
+			later.Deadline = time.Unix(*deadline, 0)
+		}
+
+		if note != nil {
+			later.Note = *note
+		}
+
+		if rating != nil {
+			item.Rating = *rating
+		} else {
+			item.Rating = math.NaN()
+		}
+
+		later.Item = item
+		later.Timestamp = time.Unix(lstamp, 0)
+		item.ID = later.ItemID
+		item.Timestamp = time.Unix(istamp, 0)
+
+		items = append(items, later)
+	}
+
+	return items, nil
+} // func (db *Database) ReadLaterGetAll() ([]feed.ReadLater, error)
+
+// ReadLaterGetUnread returns all ReadLater items that are not marked a read.
+func (db *Database) ReadLaterGetUnread() ([]feed.ReadLater, error) {
+	const qid query.ID = query.ReadLaterGetUnread
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var items = make([]feed.ReadLater, 0, 32)
+
+	if rows.Next() {
+		var (
+			lstamp, istamp int64
+			deadline       *int64
+			note           *string
+			rating         *float64
+			later          = feed.ReadLater{Read: false}
+			item           = new(feed.Item)
+		)
+
+		if err = rows.Scan(
+			&later.ID,
+			&later.ItemID,
+			&note,
+			&lstamp,
+			&deadline,
+			&item.FeedID,
+			&item.URL,
+			&item.Title,
+			&item.Description,
+			&istamp,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if deadline != nil {
+			later.Deadline = time.Unix(*deadline, 0)
+		}
+
+		if note != nil {
+			later.Note = *note
+		}
+
+		if rating != nil {
+			item.Rating = *rating
+		} else {
+			item.Rating = math.NaN()
+		}
+
+		later.Timestamp = time.Unix(lstamp, 0)
+		item.Timestamp = time.Unix(istamp, 0)
+		item.ID = later.ItemID
+		later.Item = item
+
+		items = append(items, later)
+	}
+
+	return items, nil
+} // func (db *Database) ReadLaterGetUnread() ([]feed.ReadLater, error)
+
+// ReadLaterMarkRead marks a ReadLater note as read.
+func (db *Database) ReadLaterMarkRead(l *feed.ReadLater) error {
+	const qid query.ID = query.ReadLaterMarkRead
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(l.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot mark ReadLater Note %d as Read: %s",
+				l.ID,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	l.Read = true
+	return nil
+} // func (db *Database) ReadLaterMarkRead(l *feed.ReadLater) error
+
+// ReadLaterDelete deletes a ReadLater note from the database.
+func (db *Database) ReadLaterDelete(id int64) error {
+	const qid query.ID = query.ReadLaterDelete
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(id); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot delete ReadLater note %d: %s",
+				id,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) ReadLaterDelete(id int64) error
+
+// ReadLaterSetDeadline updates the deadline of a ReadLater note.
+func (db *Database) ReadLaterSetDeadline(l *feed.ReadLater, deadline time.Time) error {
+	const qid query.ID = query.ReadLaterSetDeadine
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(deadline.Unix(), l.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot set deadline of ReadLater note %d to %s: %s",
+				l.ID,
+				l.Timestamp.Format(common.TimestampFormat),
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	l.Deadline = deadline
+	return nil
+} // func (db *Database) ReadLaterSetDeadline(l *feed.ReadLater, deadline time.Time) error
+
+// ReadLaterSetNote updates the Note on a ReadLater item.
+func (db *Database) ReadLaterSetNote(l *feed.ReadLater, note string) error {
+	const qid query.ID = query.ReadLaterSetNote
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(note, l.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot set Note of ReadLater note %d: %s",
+				l.ID,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	l.Note = note
+	return nil
+} // func (db *Database) ReadLaterSetNote(l *feed.ReadLater, note string) error
