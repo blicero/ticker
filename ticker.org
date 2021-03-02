@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-02 15:05:12 krylon>
+# Time-stamp: <2021-03-02 18:22:43 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -193,6 +193,7 @@
      CLOSED: [2021-02-23 Di 23:30]
 *** TODO Read Later
     :LOGBOOK:
+    CLOCK: [2021-03-02 Di 17:19]--[2021-03-02 Di 18:22] =>  1:03
     CLOCK: [2021-03-02 Di 14:45]--[2021-03-02 Di 15:05] =>  0:20
     CLOCK: [2021-03-01 Mo 20:01]--[2021-03-01 Mo 20:40] =>  0:39
     :END:
