@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-27 21:59:36 krylon>
+// Time-stamp: <2021-03-02 23:02:02 krylon>
 
 package web
 
@@ -36,12 +36,6 @@ const (
 	defaultPoolSize = 4
 	recentCnt       = 20
 )
-
-// type message struct {
-// 	Timestamp time.Time
-// 	Message   string
-// 	Level     string
-// }
 
 // Server implements the web interface
 type Server struct {
@@ -125,6 +119,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/unrate_item/{id:(?:\\d+)$}", srv.handleUnrateItem)
 	srv.router.HandleFunc("/ajax/rebuild_fts", srv.handleRebuildFTS)
 	srv.router.HandleFunc("/ajax/tag_link_create", srv.handleTagLinkCreate)
+	srv.router.HandleFunc("/ajax/tag_link_delete", srv.handleTagLinkDelete)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -1294,3 +1289,67 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleTagLinkCreate(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleTagLinkDelete(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err                         error
+		db                          *database.Database
+		tagStr, itemStr, msg, reply string
+		itemID, tagID               int64
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Cannot parse form data: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	itemStr = r.FormValue("Item")
+	tagStr = r.FormValue("Tag")
+
+	if itemID, err = strconv.ParseInt(itemStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot Parse Item ID %q: %s",
+			itemStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if tagID, err = strconv.ParseInt(tagStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot Parse Tag ID %q: %s",
+			tagStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if err = db.TagLinkDelete(itemID, tagID); err != nil {
+		msg = fmt.Sprintf("Cannot Attach Tag %d to Item %d: %s",
+			tagID,
+			itemID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	srv.log.Printf("[DEBUG] Detach Tag %d from Item %d successfully.\n",
+		tagID,
+		itemID)
+	reply = `{ "Status": true, "Message": "Success" }`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleTagLinkDelete(w http.ResponseWriter, r *http.Request)

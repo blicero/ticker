@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-26 18:03:20 krylon> */}}
+{{/* Time-stamp: <2021-03-03 00:06:33 krylon> */}}
 <table class="items">
   <thead>
     <tr>
@@ -18,7 +18,7 @@
     {{ $feeds := .FeedMap }}
     {{ $dot := . }}
     {{ range .Items }}
-    <tr class="{{ $class.Next }}{{ if .IsBoring }} boring{{ end }} " id="item_{{ .ID }}">
+    <tr class="{{ $class.Next }}{{ if .IsBoring }} boring{{ end }}" id="item_{{ .ID }}">
       <td>{{ fmt_time .Timestamp }}</td>
       <td id="item_rating_{{ .ID }}">
         <small>{{ .RatingString }}</small><br />
@@ -48,8 +48,11 @@
       </td>
       <td>
         <div id="tags_{{ .ID }}">
+          {{ $item_id := .ID }}
           {{ range .Tags }}
-          <a href="/tag/{{ .ID }}">{{ .Name }}</a>&nbsp;
+          <a class="item_{{ $item_id }}_tag_{{ .ID }}" href="/tag/{{ .ID }}">{{ .Name }}</a>
+          <img class="item_{{ $item_id }}_tag_{{ .ID }}" src="/static/delete.png" onclick="untag({{ $item_id }}, {{ .ID }});" />
+          &nbsp;
           {{ end }}
         </div>
         <br /><br />

@@ -1,4 +1,4 @@
-// Time-stamp: <2021-02-26 17:57:59 krylon>
+// Time-stamp: <2021-03-03 00:32:40 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -356,10 +356,14 @@ function rate_item(item_id, new_rating) {
                      { ID: item_id, Rating: new_rating },
                      function(reply) {
                          var content = "";
+                         var row_id = `#item_${item_id}`;
+                         var row = $(row_id);
                          if (new_rating <= 0.0) {
                              content = '<img src="/static/emo_boring.png" />';
+                             row.addClass("boring");
                          } else {
                              content = '<img src="/static/emo_interesting.png" />';
+                             row.removeClass("boring");
                          }
 
                          content += `<br /><input
@@ -394,7 +398,9 @@ function unvote_item(item_id) {
         {},
         function(reply) {
             // Display zee buttons!
-            alert("Rating on Item " + item_id + " has been cleared.");
+            var row_id = `#item_${item_id}`;
+            $(row_id).removeClass("boring");
+            console.log("Rating on Item " + item_id + " has been cleared.");
         });
 
     req.fail(function(reply, status_text, xhr) {
@@ -454,7 +460,7 @@ function attach_tag(form_id, item_id) {
                          var div_id = `#tags_${item_id}`;
                          var div = $(div_id)[0];
 
-                         var tag = `<a href="/tag/${tag_id}">${reply.Name}</a>&nbsp;`;
+                         var tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" onclick="untag(${item_id}, ${tag_id});" />`;
 
                          div.innerHTML += tag;
 
@@ -469,3 +475,40 @@ function attach_tag(form_id, item_id) {
         console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
     });
 } // function attach_tag(form_id, item_id)
+
+function untag(item_id, tag_id) {
+    var tag = `#item_${item_id}_tag_${tag_id}`;
+    var msg = `Remove tag ${tag_id} from Item ${item_id}`;
+    console.log(msg);
+    // alert(msg);
+    
+    var req = $.post("/ajax/tag_link_delete",
+                     { Tag: tag_id, Item: item_id },
+                     function(reply) {
+                         console.log(`Successfully detached Tag ${tag_id} from Item ${item_id}`);
+
+                         var label_id = `.item_${item_id}_tag_${tag_id}`;
+                         var labels = $(label_id);
+
+                         // Not sure if this will work, but if it does, we do not have
+                         // to contact the server or complicate the function call.
+                         var txt = labels[0].innerHTML;
+
+                         labels.each(function() { $(this).remove(); });
+
+                         var sel_id = `tag_menu_item_${item_id}`;
+                         var sel = $("#" + sel_id)[0];
+
+                         var opt = `<option id="${sel_id}_opt_{tag_id}">${txt}</option>`;
+
+                         var sel_id = "#tag_menu_item_" + item_id;
+                         var sel = $(sel_id)[0];
+
+                         sel.innerHTML += opt;
+                     },
+                     "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
+    });
+} // function untag(item_id, tag_id)

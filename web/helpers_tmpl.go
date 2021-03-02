@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2021-02-25 20:21:43 krylon>
+// Time-stamp: <2021-03-02 23:13:16 krylon>
 
 package web
 
@@ -45,6 +45,8 @@ var funcmap = template.FuncMap{
 	"escape_linebreak": escapeLinebreak,
 	"nbsp":             nbsp,
 	"uuid":             common.GetUUID,
+	"concat":           concat,
+	"i64str":           i64str,
 }
 
 type generator struct {
@@ -247,3 +249,11 @@ func nbsp(cnt int) string {
 
 	return bld.String()
 } // func nbsp(cnt int) string
+
+func concat(s1, s2 string) string {
+	return s1 + s2
+} // func concat(s1, s2 string) string
+
+func i64str(i int64) string {
+	return strconv.FormatInt(i, 10)
+} // func i64str(i int64) string

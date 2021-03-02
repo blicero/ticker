@@ -1,4 +1,4 @@
-/* Time-stamp: <2021-02-26 18:51:38 krylon> */
+/* Time-stamp: <2021-03-02 20:46:27 krylon> */
 
 body { 
     font-family: Arial,Helvetica,sans-serif;
@@ -25,6 +25,10 @@ h2 {
 
 *.error {
     color: #FF0000;
+}
+
+*.boring {
+    font-size: 10pt;
 }
 
 *.cmd {

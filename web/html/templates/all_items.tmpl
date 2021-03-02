@@ -1,6 +1,6 @@
 {{ define "all_items" }}
 {{/* Created on 18. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-18 19:04:54 krylon> */}}
+{{/* Time-stamp: <2021-03-02 18:58:50 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -11,14 +11,22 @@
     <h2>Latest Headlines</h2>
 
     {{ if ne .Prev "" }}
-    <a href="/items/{{ .Prev }}">&lt;&lt;</a>
+    <a href="/items/{{ .Prev }}">&lt;&lt; Previous</a>
     {{ end }}
     &nbsp;&nbsp;&nbsp;
     {{ if ne .Next "" }}
-    <a href="/items/{{ .Next }}">&gt;&gt;</a>
+    <a href="/items/{{ .Next }}">Next &gt;&gt;</a>
     {{ end }}
 
     {{ template "items" . }}
+
+    {{ if ne .Prev "" }}
+    <a href="/items/{{ .Prev }}">&lt;&lt; Previous</a>
+    {{ end }}
+    &nbsp;&nbsp;&nbsp;
+    {{ if ne .Next "" }}
+    <a href="/items/{{ .Next }}">Next &gt;&gt;</a>
+    {{ end }}
 
     {{ template "footer" }}
   </body>
