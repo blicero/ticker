@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-27 18:14:15 krylon>
+// Time-stamp: <2021-03-02 14:52:44 krylon>
 
 package database
 
@@ -247,4 +247,48 @@ WHERE COALESCE(parent, 0) = 0
 	query.TagLinkCreate:        "INSERT INTO tag_link (tag_id, item_id) VALUES (?, ?)",
 	query.TagLinkDelete:        "DELETE FROM tag_link WHERE tag_id = ? AND item_id = ?",
 	query.TagLinkGetByItem:     "SELECT tag_id FROM tag_link WHERE item_id = ?",
+
+	query.ReadLaterAdd: `
+INSERT INTO read_later (item_id, note, timestamp, deadline)
+                VALUES (      ?,    ?,         ?,        ?)
+`,
+	query.ReadLaterGetByItem: `
+SELECT
+    id,
+    note,
+    timestamp,
+    deadline,
+    read
+FROM read_later
+WHERE item_id = ?
+`,
+	query.ReadLaterGetAll: `
+SELECT
+    id,
+    item_id,
+    note,
+    timestamp,
+    deadline,
+    read
+FROM read_later
+`,
+	query.ReadLaterGetUnread: `
+SELECT
+    id,
+    item_id,
+    note,
+    timestamp,
+    deadline
+FROM read_later
+WHERE read <> 1
+`,
+	query.ReadLaterMarkRead: `
+UPDATE read_later
+SET read = 1
+WHERE item_id = ?
+`,
+	query.ReadLaterDelete:     "DELETE FROM read_later WHERE item_id = ?",
+	query.ReadLaterDeleteRead: "DELETE FROM read_later WHERE COALESCE(read, 0) <> 0",
+	query.ReadLaterSetDeadine: "UPDATE read_later SET deadline = ? WHERE item_id = ?",
+	query.ReadLaterSetNote:    "UPDATE read_later SET note = ? WHERE item_id = ?",
 }

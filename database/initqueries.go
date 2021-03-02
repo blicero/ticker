@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-25 03:09:50 krylon>
+// Time-stamp: <2021-03-02 14:51:31 krylon>
 
 package database
 
@@ -82,6 +82,20 @@ CREATE TABLE tag_link (
     FOREIGN KEY (item_id) REFERENCES item (id)
         ON DELETE CASCADE
         ON UPDATE RESTRICT
+)
+`,
+
+	`
+CREATE TABLE read_later (
+    id		INTEGER PRIMARY KEY,
+    item_id	INTEGER UNIQUE NOT NULL,
+    note        TEXT,
+    timestamp   INTEGER NOT NULL,
+    deadline	INTEGER,
+    read	INTEGER,
+    FOREIGN KEY (item_id) REFERENCES item (id)
+        ON DELETE CASCADE
+	ON UPDATE RESTRICT
 )
 `,
 }

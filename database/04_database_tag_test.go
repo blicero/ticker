@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 24. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-27 18:26:37 krylon>
+// Time-stamp: <2021-03-02 14:51:55 krylon>
 
 package database
 
@@ -10,8 +10,6 @@ import (
 	"testing"
 	"ticker/feed"
 	"ticker/tag"
-
-	"github.com/davecgh/go-spew/spew"
 )
 
 func processTag(t *tag.Tag) error {
@@ -140,6 +138,6 @@ func TestTagHierarchy(t *testing.T) {
 			len(testTags))
 	}
 
-	t.Logf("Tag hierarchy:\n%s\n",
-		spew.Sdump(tags))
+	// t.Logf("Tag hierarchy:\n%s\n",
+	// 	spew.Sdump(tags))
 } // func TestTagHierarchy(t *testing.T)

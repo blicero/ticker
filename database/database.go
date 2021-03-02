@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-27 18:25:29 krylon>
+// Time-stamp: <2021-03-02 15:02:56 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -2946,3 +2946,89 @@ EXEC_QUERY:
 
 	return tags, nil
 } // func (db *Database) TagLinkGetByItem(itemID int64) ([]int64, error)
+
+// ReadLaterAdd adds a ReadLater note to the database.
+func (db *Database) ReadLaterAdd(item *feed.Item, note string, deadline time.Time) (*feed.ReadLater, error) {
+	const qid query.ID = query.ReadLaterAdd
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return nil, errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+	var (
+		now = time.Now()
+		res sql.Result
+	)
+
+EXEC_QUERY:
+	if res, err = stmt.Exec(item.ID, note, now.Unix(), deadline.Unix()); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot add Item %s (%s) to database: %s",
+				item.Title,
+				item.URL,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return nil, err
+		}
+	} else {
+		var later = &feed.ReadLater{
+			Item:     item,
+			ItemID:   item.ID,
+			Note:     note,
+			Deadline: deadline,
+		}
+
+		if later.ID, err = res.LastInsertId(); err != nil {
+			db.log.Printf("[ERROR] Cannot get ID of new Item %q: %s\n",
+				item.Title,
+				err.Error())
+			return nil, err
+		}
+
+		status = true
+		return later, nil
+	}
+} // func (db *Database) ReadLaterAdd(item *feed.Item, note string, deadline time.Time) (*feed.ReadLater, error)
