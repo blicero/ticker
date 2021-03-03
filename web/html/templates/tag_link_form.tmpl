@@ -1,13 +1,11 @@
 {{ define "tag_link_form" }}
 {{/* Created on 25. 02. 2021 */}}
-{{/* Time-stamp: <2021-03-02 23:13:27 krylon> */}}
+{{/* Time-stamp: <2021-03-03 14:42:57 krylon> */}}
 {{ $id := concat "tag_menu_item_" (i64str .Item.ID) }}
 <select id="{{ $id }}">
   {{ $item := .Item }}
   {{ range .Tags }}
-  {{ if (not ($item.HasTag .ID)) }}
-  <option id="{{ $id }}_opt_{{ .ID }}" value="{{ .ID }}">{{ .Name }}</option>
-  {{ end }}
+  <option id="{{ $id }}_opt_{{ .ID }}" {{ if ($item.HasTag .ID) }}hidden {{ end }}value="{{ .ID }}">{{ .Name }}</option>
   {{ end }}
 </select>
 <input type="button" value="Add" onclick="attach_tag('{{ $id }}', {{ .Item.ID }});" />

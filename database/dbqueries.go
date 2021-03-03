@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-02 17:43:24 krylon>
+// Time-stamp: <2021-03-03 10:25:12 krylon>
 
 package database
 
@@ -185,7 +185,7 @@ WHERE t.tag_id = ?
 	query.FTSClear:        "DELETE FROM item_index",
 	query.TagCreate:       "INSERT INTO tag (name, description, parent) VALUES (?, ?, ?)",
 	query.TagDelete:       "DELETE FROM tag WHERE id = ?",
-	query.TagGetAll:       "SELECT id, name, description, parent FROM tag",
+	query.TagGetAll:       "SELECT id, name, description, parent FROM tag ORDER BY name",
 	query.TagGetByID:      "SELECT name, description, parent FROM tag WHERE id = ?",
 	query.TagGetByName:    "SELECT id, description, parent FROM tag WHERE name = ?",
 	query.TagGetByItem: `

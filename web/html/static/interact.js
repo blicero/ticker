@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-03 00:32:40 krylon>
+// Time-stamp: <2021-03-03 14:54:52 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -465,9 +465,7 @@ function attach_tag(form_id, item_id) {
                          div.innerHTML += tag;
 
                          var opt_id = `#${form_id}_opt_${tag_id}`;
-                         var opt = $(opt_id)[0];
-
-                         opt.remove();
+                         $(opt_id).hide();
                      },
                      "json");
 
@@ -490,21 +488,11 @@ function untag(item_id, tag_id) {
                          var label_id = `.item_${item_id}_tag_${tag_id}`;
                          var labels = $(label_id);
 
-                         // Not sure if this will work, but if it does, we do not have
-                         // to contact the server or complicate the function call.
-                         var txt = labels[0].innerHTML;
-
                          labels.each(function() { $(this).remove(); });
 
                          var sel_id = `tag_menu_item_${item_id}`;
-                         var sel = $("#" + sel_id)[0];
-
-                         var opt = `<option id="${sel_id}_opt_{tag_id}">${txt}</option>`;
-
-                         var sel_id = "#tag_menu_item_" + item_id;
-                         var sel = $(sel_id)[0];
-
-                         sel.innerHTML += opt;
+                         var opt_id = `#${sel_id}_opt_${tag_id}`;
+                         $(opt_id).show();
                      },
                      "json");
 
@@ -512,3 +500,7 @@ function untag(item_id, tag_id) {
         console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
     });
 } // function untag(item_id, tag_id)
+
+function mark_read(item_id, item_title) {
+    console.log(`Mark Item "${item_title}" as read`);
+} // function mark_read(item_id, item_title)
