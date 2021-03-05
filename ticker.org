@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-05 18:38:35 krylon>
+# Time-stamp: <2021-03-05 23:05:35 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,31 +13,32 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-05 Fr 18:38]
-   | Headline                  | Time       |          |         |         |       |
-   |---------------------------+------------+----------+---------+---------+-------|
-   | *Total time*              | *5d 23:05* |          |         |         |       |
-   |---------------------------+------------+----------+---------+---------+-------|
-   | Ticker                    | 5d 23:05   |          |         |         |       |
-   | \_  Main                  |            |     0:56 |         |         |       |
-   | \_    Shutdown            |            |          |    0:56 |         |       |
-   | \_  Components [11/16]    |            | 5d 22:09 |         |         |       |
-   | \_    Feed [5/6]          |            |          | 1d 4:37 |         |       |
-   | \_      Homepage          |            |          |         |    0:12 |       |
-   | \_      Rating [2/3]      |            |          |         | 1d 1:09 |       |
-   | \_        Web Frontend    |            |          |         |         | 12:09 |
-   | \_        Classifier      |            |          |         |         | 12:23 |
-   | \_    Database [1/1]      |            |          |   21:55 |         |       |
-   | \_      Due Feeds         |            |          |         |    1:26 |       |
-   | \_    Reader [0/0]        |            |          |   15:50 |         |       |
-   | \_    Web interface [0/1] |            |          |   18:55 |         |       |
-   | \_    Tags [2/4]          |            |          | 1d 9:34 |         |       |
-   | \_      Database          |            |          |         |   10:59 |       |
-   | \_        Hierarchy       |            |          |         |         |  8:58 |
-   | \_      Web interface     |            |          |         |   20:45 |       |
-   | \_    Search [2/2]        |            |          |    3:30 |         |       |
-   | \_    Read Later [1/2]    |            |          |   19:48 |         |       |
-   | \_      Web interface     |            |          |         |   17:46 |       |
+   #+CAPTION: Clock summary at [2021-03-05 Fr 23:05]
+   | Headline                  | Time      |         |         |         |       |
+   |---------------------------+-----------+---------+---------+---------+-------|
+   | *Total time*              | *6d 2:05* |         |         |         |       |
+   |---------------------------+-----------+---------+---------+---------+-------|
+   | Ticker                    | 6d 2:05   |         |         |         |       |
+   | \_  Main                  |           |    0:56 |         |         |       |
+   | \_    Shutdown            |           |         |    0:56 |         |       |
+   | \_  Components [12/17]    |           | 6d 1:09 |         |         |       |
+   | \_    Feed [5/6]          |           |         | 1d 4:37 |         |       |
+   | \_      Homepage          |           |         |         |    0:12 |       |
+   | \_      Rating [2/3]      |           |         |         | 1d 1:09 |       |
+   | \_        Web Frontend    |           |         |         |         | 12:09 |
+   | \_        Classifier      |           |         |         |         | 12:23 |
+   | \_    Database [1/1]      |           |         |   21:55 |         |       |
+   | \_      Due Feeds         |           |         |         |    1:26 |       |
+   | \_    Reader [0/0]        |           |         |   15:50 |         |       |
+   | \_    Web interface [1/2] |           |         |   21:55 |         |       |
+   | \_      Embed             |           |         |         |    3:00 |       |
+   | \_    Tags [2/4]          |           |         | 1d 9:34 |         |       |
+   | \_      Database          |           |         |         |   10:59 |       |
+   | \_        Hierarchy       |           |         |         |         |  8:58 |
+   | \_      Web interface     |           |         |         |   20:45 |       |
+   | \_    Search [2/2]        |           |         |    3:30 |         |       |
+   | \_    Read Later [1/2]    |           |         |   19:48 |         |       |
+   | \_      Web interface     |           |         |         |   17:46 |       |
    #+END:
 
 ** Questions
@@ -48,7 +49,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [11/16]
+** Components [12/17]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -130,7 +131,7 @@
     CLOCK: [2021-02-07 So 17:45]--[2021-02-07 So 22:15] =>  4:30
     CLOCK: [2021-02-07 So 11:46]--[2021-02-07 So 15:46] =>  4:00
     :END:
-*** Web interface [0/1]
+*** Web interface [1/2]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -144,6 +145,33 @@
     CLOCK: [2021-02-12 Fr 17:21]--[2021-02-12 Fr 19:04] =>  1:43
     CLOCK: [2021-02-12 Fr 15:23]--[2021-02-12 Fr 16:34] =>  1:11
     :END:
+**** DONE Embed
+     CLOSED: [2021-03-05 Fr 23:03]
+     :LOGBOOK:
+     CLOCK: [2021-03-05 Fr 22:07]--[2021-03-05 Fr 23:03] =>  0:56
+     CLOCK: [2021-03-05 Fr 19:33]--[2021-03-05 Fr 21:37] =>  2:04
+     :END:
+     For a number of years, I have used a homegrown solution for embedding
+     HTML templates, Javascript files etc. in a Go binary via the go:generate
+     directive, so all I needed for deployment was the executable file itself,
+     and nothing else.
+
+     That has worked well enough, for a long time, but /today/
+     ([2021-03-05 Fr]), I am running into a situation where it causes trouble,
+     because the resulting source file has grown *really* big, and the static
+     analyzer I use as part of my build system chokes on it, gobbling up all
+     available RAM (and then some!), while going absolutely nowhere.
+
+     However, the recently-released Go 1.16 release supports the go:embed
+     directive, which would make the same task more painless.
+     So there we go.
+     It is going to take some work, making that change. Not /that/ much, and I
+     don't think it's going to be tricky, but it will be tedious, especially
+     as I am rather tired while writing these words.
+
+     [2021-03-05 Fr 23:03]
+     Seems to work. Now I have to build Go 1.16 from source on OpenBSD,
+     because go:embed is still new.
 **** TODO Snazzy
      I tried to include script.aculo.us for in-place-editing, but that library
      is based on prototype.js, and both libraries appear have been dead for
