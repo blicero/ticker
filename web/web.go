@@ -2,17 +2,22 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-05 16:38:53 krylon>
+// Time-stamp: <2021-03-05 23:02:14 krylon>
 
 package web
 
 import (
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"io/fs"
 	"log"
 	"math"
 	"net/http"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"text/template"
 	"ticker/classifier"
@@ -30,7 +35,8 @@ import (
 	"github.com/hashicorp/logutils"
 )
 
-//go:generate go run ./build_templates.go
+//go:embed html
+var assets embed.FS
 
 const (
 	defaultPoolSize = 4
@@ -79,17 +85,40 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 		return nil, err
 	} */
 
+	const tmplFolder = "html/templates"
+	var templates []fs.DirEntry
+	var tmplRe = regexp.MustCompile("[.]tmpl$")
+
+	if templates, err = assets.ReadDir(tmplFolder); err != nil {
+		srv.log.Printf("[ERROR] Cannot read embedded templates: %s\n",
+			err.Error())
+		return nil, err
+	}
+
 	srv.tmpl = template.New("").Funcs(funcmap)
-	for name, body := range htmlData.Templates {
-		if srv.tmpl, err = srv.tmpl.Parse(body); err != nil {
+	for _, entry := range templates {
+		var (
+			content []byte
+			path    = filepath.Join(tmplFolder, entry.Name())
+		)
+
+		if !tmplRe.MatchString(entry.Name()) {
+			continue
+		} else if content, err = assets.ReadFile(path); err != nil {
+			msg = fmt.Sprintf("Cannot read embedded file %s: %s",
+				path,
+				err.Error())
+			srv.log.Printf("[CRITICAL] %s\n", msg)
+			return nil, errors.New(msg)
+		} else if srv.tmpl, err = srv.tmpl.Parse(string(content)); err != nil {
 			msg = fmt.Sprintf("Could not parse template %s: %s",
-				name,
+				entry.Name(),
 				err.Error())
 			srv.log.Println("[CRITICAL] " + msg)
 			return nil, errors.New(msg)
 		} else if common.Debug {
 			srv.log.Printf("[TRACE] Template \"%s\" was parsed successfully.\n",
-				name)
+				entry.Name())
 		}
 	}
 
@@ -966,7 +995,7 @@ func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request) {
 		request.URL.EscapedPath())
 
 	const (
-		filename = "favicon.ico"
+		filename = "html/static/favicon.ico"
 		mimeType = "image/vnd.microsoft.icon"
 	)
 
@@ -978,12 +1007,18 @@ func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request) {
 		w.Header().Set("Cache-Control", "no-store, max-age=0")
 	}
 
-	if body, ok := htmlData.Static[filename]; ok {
-		w.WriteHeader(200)
-		_, _ = w.Write(body) // nolint: gosec
-	} else {
+	var (
+		err error
+		fh  fs.File
+	)
+
+	if fh, err = assets.Open(filename); err != nil {
 		msg := fmt.Sprintf("ERROR - cannot find file %s", filename)
 		srv.sendErrorMessage(w, msg)
+	} else {
+		defer fh.Close()
+		w.WriteHeader(200)
+		io.Copy(w, fh) // nolint: errcheck
 	}
 } // func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request)
 
@@ -996,6 +1031,7 @@ func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request
 
 	vars := mux.Vars(request)
 	filename := vars["file"]
+	path := filepath.Join("html", "static", filename)
 
 	var mimeType string
 
@@ -1019,12 +1055,18 @@ func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request
 		w.Header().Set("Cache-Control", "max-age=7200")
 	}
 
-	if body, ok := htmlData.Static[filename]; ok {
-		w.WriteHeader(200)
-		_, _ = w.Write(body) // nolint: gosec
-	} else {
-		msg := fmt.Sprintf("ERROR - cannot find file %s", filename)
+	var (
+		err error
+		fh  fs.File
+	)
+
+	if fh, err = assets.Open(path); err != nil {
+		msg := fmt.Sprintf("ERROR - cannot find file %s", path)
 		srv.sendErrorMessage(w, msg)
+	} else {
+		defer fh.Close()
+		w.WriteHeader(200)
+		io.Copy(w, fh) // nolint: errcheck
 	}
 } // func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request)
 
