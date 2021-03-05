@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-04 23:08:40 krylon>
+// Time-stamp: <2021-03-05 14:55:22 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -566,29 +566,45 @@ function read_later_mark(item_id) {
 } // function read_later_mark(item_id)
 
 function read_later_mark_read(item_id, item_title) {
-    console.log(`IMPLEMENTME: Mark Item "${item_title}" as read`);
-    const url = `/ajax/read_later_set_read/${item_id}`;
     const checkbox_id = `#later_mark_read_${item_id}`;
-
     const state = $(checkbox_id)[0].checked;
+    const url = `/ajax/read_later_set_read/${item_id}/${state ? 1 : 0}`;
 
     var req = $.get(url,
                     {},
                     function(reply) {
                         if (!reply.Status) {
-                            var errmsg = `Error marking Item as read: ${reply.Message}`;
+                            const errmsg = `Error marking Item as read: ${reply.Message}`;
                             console.log(errmsg);
                             alert(errmsg);
                         } else {
                             // Do something!
-                            var rowid = `#item_${item_id}`;
-                            $(rowid).addClass("read");
-                            $(rowid).removeClass("urgent");
+                            const rowid = `#item_${item_id}`;
+                            if (state) {
+                                $(rowid).addClass("read");
+                                $(rowid).removeClass("urgent");
+                            } else {
+                                // Instead of just turning on the urgent class,
+                                // we should if the item's deadline has actually
+                                // passed. What would be the easiest way of
+                                // doing that?
+                                const now = new Date();
+                                const row_id = `#item_${item_id}`;
+                                const cell = $(row_id)[0].children[0];
+                                const txt = cell.textContent.trim();
+                                const deadline = new Date(txt);
+
+                                $(rowid).removeClass("read");
+                                if (deadline <= now) {
+                                    $(rowid).addClass("urgent");
+                                }
+                            }
                         }
                     },
                     "json");
 
     req.fail(function(reply, status_text, xhr) {
         console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
+        $(checkbox_id)[0].checked = !state;
     });
 } // function read_later_mark_read(item_id, item_title)

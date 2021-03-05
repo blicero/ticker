@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-04 18:53:26 krylon>
+// Time-stamp: <2021-03-05 14:36:22 krylon>
 
 package web
 
@@ -123,7 +123,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/tag_link_create", srv.handleTagLinkCreate)
 	srv.router.HandleFunc("/ajax/tag_link_delete", srv.handleTagLinkDelete)
 	srv.router.HandleFunc("/ajax/read_later_mark", srv.handleReadLaterMark)
-	srv.router.HandleFunc("/ajax/read_later_set_read/{id:(?:\\d+)$}", srv.handleReadLaterSetRead)
+	srv.router.HandleFunc("/ajax/read_later_set_read/{id:(?:\\d+)}/{state:(?:\\d+)$}", srv.handleReadLaterSetRead)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -1516,20 +1516,26 @@ func (srv *Server) handleReadLaterSetRead(w http.ResponseWriter, r *http.Request
 		r.RemoteAddr)
 
 	var (
-		err        error
-		msg, reply string
-		db         *database.Database
-		idStr      string
-		itemID     int64
+		err             error
+		msg, reply      string
+		db              *database.Database
+		idStr, stateStr string
+		itemID, state   int64
 	)
 
 	vars := mux.Vars(r)
 
 	idStr = vars["id"]
+	stateStr = vars["state"]
 
 	if itemID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
 		msg = fmt.Sprintf("Cannot parse Item ID %q: %s",
 			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if state, err = strconv.ParseInt(stateStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse State %q: %s",
+			stateStr,
 			err.Error())
 		goto SEND_ERROR_MESSAGE
 	}
@@ -1537,8 +1543,15 @@ func (srv *Server) handleReadLaterSetRead(w http.ResponseWriter, r *http.Request
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if err = db.ReadLaterMarkRead(itemID); err != nil {
-		msg = fmt.Sprintf("Cannot mark Item %d as read: %s",
+	if state != 0 {
+		if err = db.ReadLaterMarkRead(itemID); err != nil {
+			msg = fmt.Sprintf("Cannot mark Item %d as read: %s",
+				itemID,
+				err.Error())
+			goto SEND_ERROR_MESSAGE
+		}
+	} else if err = db.ReadLaterMarkUnread(itemID); err != nil {
+		msg = fmt.Sprintf("Cannot mark Item %d as unread: %s",
 			itemID,
 			err.Error())
 		goto SEND_ERROR_MESSAGE
