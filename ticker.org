@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-03 14:55:49 krylon>
+# Time-stamp: <2021-03-04 23:21:56 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,31 +13,31 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-03 Mi 14:55]
-   | Headline                  | Time      |         |         |         |       |
-   |---------------------------+-----------+---------+---------+---------+-------|
-   | *Total time*              | *5d 5:32* |         |         |         |       |
-   |---------------------------+-----------+---------+---------+---------+-------|
-   | Ticker                    | 5d 5:32   |         |         |         |       |
-   | \_  Main                  |           |    0:56 |         |         |       |
-   | \_    Shutdown            |           |         |    0:56 |         |       |
-   | \_  Components [11/15]    |           | 5d 4:36 |         |         |       |
-   | \_    Feed [5/6]          |           |         | 1d 4:37 |         |       |
-   | \_      Homepage          |           |         |         |    0:12 |       |
-   | \_      Rating [2/3]      |           |         |         | 1d 1:09 |       |
-   | \_        Web Frontend    |           |         |         |         | 12:09 |
-   | \_        Classifier      |           |         |         |         | 12:23 |
-   | \_    Database [1/1]      |           |         |   21:55 |         |       |
-   | \_      Due Feeds         |           |         |         |    1:26 |       |
-   | \_    Reader [0/0]        |           |         |   15:50 |         |       |
-   | \_    Web interface [0/0] |           |         |   18:26 |         |       |
-   | \_    Tags [2/4]          |           |         | 1d 9:34 |         |       |
-   | \_      Database          |           |         |         |   10:59 |       |
-   | \_        Hierarchy       |           |         |         |         |  8:58 |
-   | \_      Web interface     |           |         |         |   20:45 |       |
-   | \_    Search [2/2]        |           |         |    3:30 |         |       |
-   | \_    Read Later [1/2]    |           |         |    2:44 |         |       |
-   | \_      Web interface     |           |         |         |    0:42 |       |
+   #+CAPTION: Clock summary at [2021-03-04 Do 23:21]
+   | Headline                  | Time       |          |         |         |       |
+   |---------------------------+------------+----------+---------+---------+-------|
+   | *Total time*              | *5d 19:37* |          |         |         |       |
+   |---------------------------+------------+----------+---------+---------+-------|
+   | Ticker                    | 5d 19:37   |          |         |         |       |
+   | \_  Main                  |            |     0:56 |         |         |       |
+   | \_    Shutdown            |            |          |    0:56 |         |       |
+   | \_  Components [11/15]    |            | 5d 18:41 |         |         |       |
+   | \_    Feed [5/6]          |            |          | 1d 4:37 |         |       |
+   | \_      Homepage          |            |          |         |    0:12 |       |
+   | \_      Rating [2/3]      |            |          |         | 1d 1:09 |       |
+   | \_        Web Frontend    |            |          |         |         | 12:09 |
+   | \_        Classifier      |            |          |         |         | 12:23 |
+   | \_    Database [1/1]      |            |          |   21:55 |         |       |
+   | \_      Due Feeds         |            |          |         |    1:26 |       |
+   | \_    Reader [0/0]        |            |          |   15:50 |         |       |
+   | \_    Web interface [0/0] |            |          |   18:26 |         |       |
+   | \_    Tags [2/4]          |            |          | 1d 9:34 |         |       |
+   | \_      Database          |            |          |         |   10:59 |       |
+   | \_        Hierarchy       |            |          |         |         |  8:58 |
+   | \_      Web interface     |            |          |         |   20:45 |       |
+   | \_    Search [2/2]        |            |          |    3:30 |         |       |
+   | \_    Read Later [1/2]    |            |          |   16:49 |         |       |
+   | \_      Web interface     |            |          |         |   14:47 |       |
    #+END:
 
 ** Questions
@@ -213,7 +213,18 @@
      CLOSED: [2021-03-03 Mi 10:23]
 **** TODO Web interface
      :LOGBOOK:
+     CLOCK: [2021-03-04 Do 14:25]--[2021-03-04 Do 23:21] =>  8:56
+     CLOCK: [2021-03-04 Do 10:23]--[2021-03-04 Do 10:34] =>  0:11
+     CLOCK: [2021-03-03 Mi 18:49]--[2021-03-03 Mi 23:47] =>  4:58
      CLOCK: [2021-03-03 Mi 10:23]--[2021-03-03 Mi 11:05] =>  0:42
      :END:
-     
+***** [2021-03-04 Do 15:23]
+      To display ReadLater items, I use a table that is /almost/ the same as I
+      use for Items elsewhere, but /not quite/. 
+      I would like to factor out the rendering of individual cells - such as
+      Rating and Tags - into separate templates that I can use from both places
+      so I have less duplication of code. This is not a very high priority
+      issue, but it would be desirable.
+      Well, either /that/, or I adapt the items.tmpl template to accomodate
+      both use cases. But that sounds exceedingly tedious.
 ** Tedious tasks
