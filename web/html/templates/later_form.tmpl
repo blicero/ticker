@@ -1,0 +1,31 @@
+{{ define "later_form" }}
+{{/* Created on 03. 03. 2021 */}}
+{{/* Time-stamp: <2021-03-03 21:37:00 krylon> */}}
+<table class="horizontal" id="read_later_form_{{ .ID }}" hidden>
+  <tr>
+    <th>Deadline</th>
+    <td>
+      <input type="number" min="0" id="later_deadline_num_{{ .ID }}" />
+      <select id="later_deadline_unit_{{ .ID }}">
+        <option value="60">minutes</option>
+        <option value="3600">hours</option>
+        <option value="86400">days</option>
+      </select>
+    </td>
+  </tr>
+  <tr>
+    <th>Note</th>
+    <td>
+      <input type="text" id="later_note_{{ .ID }}" />
+    </td>
+  </tr>
+  <tr>
+    <th>
+      <input type="button" value="Cancel" onclick="read_later_reset({{ .ID }});" />
+    </th>
+    <td>
+      <input type="button" value="OK" onclick="read_later_mark({{ .ID }});" />
+    </td>
+  </tr>
+</table>
+{{ end }}

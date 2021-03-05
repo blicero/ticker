@@ -1,6 +1,6 @@
 {{ define "tags" }}
 {{/* Created on 24. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-27 18:36:49 krylon> */}}
+{{/* Time-stamp: <2021-03-04 15:47:26 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -14,7 +14,7 @@
 
     <ul>
       {{ range .Tags }}
-      {{ template "tag_view" . }}
+      {{ template "tag_view" . }}&nbsp;
       {{ end }}
     </ul>
 

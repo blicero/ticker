@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-02 23:02:02 krylon>
+// Time-stamp: <2021-03-04 18:53:26 krylon>
 
 package web
 
@@ -113,6 +113,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/tag/create", srv.handleTagCreate)
 	srv.router.HandleFunc("/tag/{id:(?:\\d+)$}", srv.handleTagDetails)
 
+	srv.router.HandleFunc("/later/all", srv.handleReadLaterAll)
+
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
 	srv.router.HandleFunc("/ajax/rate_item", srv.handleRateItem)
@@ -120,6 +122,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/rebuild_fts", srv.handleRebuildFTS)
 	srv.router.HandleFunc("/ajax/tag_link_create", srv.handleTagLinkCreate)
 	srv.router.HandleFunc("/ajax/tag_link_delete", srv.handleTagLinkDelete)
+	srv.router.HandleFunc("/ajax/read_later_mark", srv.handleReadLaterMark)
+	srv.router.HandleFunc("/ajax/read_later_set_read/{id:(?:\\d+)$}", srv.handleReadLaterSetRead)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -261,7 +265,7 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -302,7 +306,7 @@ func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -440,7 +444,7 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 	data.Title = data.Feed.Name
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -589,7 +593,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -681,7 +685,7 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -741,7 +745,7 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Messages = srv.getMessages()
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -879,7 +883,7 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 
 	data.Title = fmt.Sprintf("Details for Tag %s", data.Tag.Name)
 	data.Messages = srv.getMessages()
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -888,6 +892,69 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const (
+		tmplName = "later_all"
+	)
+
+	var (
+		err  error
+		msg  string
+		tmpl *template.Template
+		db   *database.Database
+		data = tmplDataReadLater{
+			tmplDataBase: tmplDataBase{
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+				Title: "Read Later",
+			},
+		}
+	)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot get all Tags: %s", err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
+		msg = fmt.Sprintf("Cannot get FeedMap: %s", err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.Items, err = db.ReadLaterGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot get ReadLater items: %s", err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Did not find template %s",
+			tmplName)
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	data.Messages = srv.getMessages()
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.request)
 
 /////////////////////////////////////////
 ////////////// Other ////////////////////
@@ -920,7 +987,7 @@ func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request
 	w.Header().Set("Content-Type", mimeType)
 
 	if common.Debug {
-		w.Header().Set("Cache-Control", "no-cache")
+		w.Header().Set("Cache-Control", "no-store, max-age=0")
 	} else {
 		w.Header().Set("Cache-Control", "max-age=7200")
 	}
@@ -980,7 +1047,7 @@ func (srv *Server) handleBeacon(w http.ResponseWriter, r *http.Request) {
 	var response = []byte(jstr)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	w.WriteHeader(200)
 	w.Write(response) // nolint: errcheck,gosec
 } // func (srv *Web) handleBeacon(w http.ResponseWriter, r *http.Request)
@@ -1031,7 +1098,7 @@ func (srv *Server) handleGetNewMessages(w http.ResponseWriter, r *http.Request) 
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
 	w.WriteHeader(200)
 	if _, err = w.Write(buf); err != nil {
 		msg = fmt.Sprintf("Failed to send result: %s",
@@ -1353,3 +1420,143 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleTagLinkDelete(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleReadLaterMark(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err                      error
+		msg, reply               string
+		db                       *database.Database
+		idStr, note, deadlineStr string
+		itemID, timestamp        int64
+		item                     *feed.Item
+		deadline                 time.Time
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Cannot parse form data: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		goto SEND_ERROR_MESSAGE
+	}
+
+	idStr = r.FormValue("ItemID")
+	note = r.FormValue("Note")
+	deadlineStr = r.FormValue("Deadline")
+
+	if itemID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse Item ID %q: %s",
+			idStr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		goto SEND_ERROR_MESSAGE
+	} else if timestamp, err = strconv.ParseInt(deadlineStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse deadline %q: %s",
+			deadlineStr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		goto SEND_ERROR_MESSAGE
+	}
+
+	deadline = time.Unix(timestamp, 0)
+	srv.log.Printf("[DEBUG] Set deadline for Item %d to %s\n",
+		itemID,
+		deadline.Format(common.TimestampFormat))
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if item, err = db.ItemGetByID(itemID); err != nil {
+		msg = fmt.Sprintf("Cannot load Item %d: %s",
+			itemID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n",
+			msg)
+		goto SEND_ERROR_MESSAGE
+	} else if _, err = db.ReadLaterAdd(item, note, deadline); err != nil {
+		msg = fmt.Sprintf("Cannot mark Item %q (%d) for reading later: %s",
+			item.Title,
+			item.ID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n",
+			msg)
+		goto SEND_ERROR_MESSAGE
+	}
+
+	srv.log.Printf("[DEBUG] %s -- Mark Item %q (%d) for later reading: Deadline = %s, Note = %q\n",
+		r.URL,
+		item.Title,
+		itemID,
+		deadline.Format(common.TimestampFormat),
+		note)
+
+	reply = `{ "Status": true, "Message": "Success" }`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleReadLaterMark(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleReadLaterSetRead(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err        error
+		msg, reply string
+		db         *database.Database
+		idStr      string
+		itemID     int64
+	)
+
+	vars := mux.Vars(r)
+
+	idStr = vars["id"]
+
+	if itemID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse Item ID %q: %s",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if err = db.ReadLaterMarkRead(itemID); err != nil {
+		msg = fmt.Sprintf("Cannot mark Item %d as read: %s",
+			itemID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	reply = `{ "Status": true, "Message": "Success" }`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleReadLaterSetRead(w http.ResponseWriter, r *http.Request)

@@ -1,0 +1,18 @@
+{{ define "later_all" }}
+{{/* Created on 04. 03. 2021 */}}
+{{/* Time-stamp: <2021-03-04 14:47:45 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <h2>Read Later</h2>
+
+    {{ template "later_list" . }}
+
+    {{ template "footer" . }}
+  </body>
+</html>
+{{ end }}

@@ -1,0 +1,8 @@
+{{ define "later" }}
+{{/* Created on 03. 03. 2021 */}}
+{{/* Time-stamp: <2021-03-03 19:57:20 krylon> */}}
+<div id="later_{{ .ItemID }}">
+  Read: <checkbox onclick="read_later_mark_read({{ .ItemID }}, "{{ js .Item.Title }}");" /><br />
+  Deadline: {{ fmt_time .Deadline }}
+</div>
+{{ end }}

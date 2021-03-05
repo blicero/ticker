@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-03 14:54:52 krylon>
+// Time-stamp: <2021-03-04 23:08:40 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -460,7 +460,7 @@ function attach_tag(form_id, item_id) {
                          var div_id = `#tags_${item_id}`;
                          var div = $(div_id)[0];
 
-                         var tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" onclick="untag(${item_id}, ${tag_id});" />`;
+                         var tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" onclick="untag(${item_id}, ${tag_id});" /> &nbsp; `;
 
                          div.innerHTML += tag;
 
@@ -501,6 +501,94 @@ function untag(item_id, tag_id) {
     });
 } // function untag(item_id, tag_id)
 
-function mark_read(item_id, item_title) {
-    console.log(`Mark Item "${item_title}" as read`);
-} // function mark_read(item_id, item_title)
+// "/ajax/read_later_mark"
+
+function read_later_show(item_id) {
+    var button_id = `#read_later_button_${item_id}`;
+    var form_id = `#read_later_form_${item_id}`;
+
+    $(form_id).show();
+    $(button_id).hide();
+} // function read_later_show(item_id)
+
+function read_later_reset(item_id) {
+    var button_id = `#read_later_button_${item_id}`;
+    var form_id = `#read_later_form_${item_id}`;
+
+    $(form_id).hide();
+    $(button_id).show();
+} // function read_later_reset(item_id)
+
+function read_later_mark(item_id) {
+    console.log(`IMPLEMENTME: Mark Item ${item_id} for later reading.`);
+    var button_id = `#read_later_button_${item_id}`;
+    var form_id = `#read_later_form_${item_id}`;
+    var num_id = `#later_deadline_num_${item_id}`;
+    var unit_sel_id = `#later_deadline_unit_${item_id}`;
+    var note_id = `#later_note_${item_id}`;
+
+    var num = $(num_id)[0].value;
+    var unit = $(unit_sel_id)[0].value;
+
+    var deadline = num * unit;
+
+    var now = new Date();
+    var due_time = Math.floor(now.getTime() / 1000 + deadline);
+
+    var note = $(note_id)[0].value;
+
+    var req = $.post("/ajax/read_later_mark",
+                     {
+                         ItemID:        item_id,
+                         Note:          note,
+                         Deadline:      due_time,
+                     },
+                     function(reply) {
+                         if (!reply.Status) {
+                             var errmsg = `Error marking Item for later: ${reply.Message}`;
+                             console.log(errmsg);
+                             alert(errmsg);
+                         } else {
+                             $(form_id).hide();
+                             $(button_id).hide();
+                         }
+                     },
+                     "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
+    });
+
+    console.log(`Deadline is ${due_time}`);
+
+    $(form_id).hide();
+    $(button_id).show();
+} // function read_later_mark(item_id)
+
+function read_later_mark_read(item_id, item_title) {
+    console.log(`IMPLEMENTME: Mark Item "${item_title}" as read`);
+    const url = `/ajax/read_later_set_read/${item_id}`;
+    const checkbox_id = `#later_mark_read_${item_id}`;
+
+    const state = $(checkbox_id)[0].checked;
+
+    var req = $.get(url,
+                    {},
+                    function(reply) {
+                        if (!reply.Status) {
+                            var errmsg = `Error marking Item as read: ${reply.Message}`;
+                            console.log(errmsg);
+                            alert(errmsg);
+                        } else {
+                            // Do something!
+                            var rowid = `#item_${item_id}`;
+                            $(rowid).addClass("read");
+                            $(rowid).removeClass("urgent");
+                        }
+                    },
+                    "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
+    });
+} // function read_later_mark_read(item_id, item_title)

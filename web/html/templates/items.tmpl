@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-03-03 00:06:33 krylon> */}}
+{{/* Time-stamp: <2021-03-03 20:07:09 krylon> */}}
 <table class="items">
   <thead>
     <tr>
@@ -19,7 +19,16 @@
     {{ $dot := . }}
     {{ range .Items }}
     <tr class="{{ $class.Next }}{{ if .IsBoring }} boring{{ end }}" id="item_{{ .ID }}">
-      <td>{{ fmt_time .Timestamp }}</td>
+      <td>
+        {{ fmt_time .Timestamp }}<br />
+        <input
+        type="button"
+        value="Read Later"
+        id="read_later_button_{{ .ID }}"
+        onclick="read_later_show({{ .ID }});" />
+        <br />
+        {{ template "later_form" . }}
+      </td>
       <td id="item_rating_{{ .ID }}">
         <small>{{ .RatingString }}</small><br />
         {{ if not .IsRated }}

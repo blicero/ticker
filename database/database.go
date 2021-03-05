@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-02 17:54:57 krylon>
+// Time-stamp: <2021-03-04 21:29:38 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -3134,8 +3134,9 @@ EXEC_QUERY:
 	defer rows.Close() // nolint: errcheck,gosec
 
 	var items = make([]feed.ReadLater, 0, 32)
+	// var items = make(map[int64]feed.ReadLater, 32)
 
-	if rows.Next() {
+	for rows.Next() {
 		var (
 			lstamp, istamp int64
 			deadline       *int64
@@ -3143,6 +3144,7 @@ EXEC_QUERY:
 			rating         *float64
 			later          feed.ReadLater
 			item           = new(feed.Item)
+			read           *bool
 		)
 
 		if err = rows.Scan(
@@ -3151,7 +3153,7 @@ EXEC_QUERY:
 			&note,
 			&lstamp,
 			&deadline,
-			&later.Read,
+			&read,
 			&item.FeedID,
 			&item.URL,
 			&item.Title,
@@ -3162,6 +3164,15 @@ EXEC_QUERY:
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(later.ItemID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %d: %s\n",
+				later.ItemID,
+				err.Error())
+			return nil, err
+		}
+
+		if read != nil {
+			later.Read = *read
 		}
 
 		if deadline != nil {
@@ -3174,6 +3185,7 @@ EXEC_QUERY:
 
 		if rating != nil {
 			item.Rating = *rating
+			item.ManuallyRated = true
 		} else {
 			item.Rating = math.NaN()
 		}
@@ -3184,13 +3196,14 @@ EXEC_QUERY:
 		item.Timestamp = time.Unix(istamp, 0)
 
 		items = append(items, later)
+		// items[later.ItemID] = later
 	}
 
 	return items, nil
 } // func (db *Database) ReadLaterGetAll() ([]feed.ReadLater, error)
 
 // ReadLaterGetUnread returns all ReadLater items that are not marked a read.
-func (db *Database) ReadLaterGetUnread() ([]feed.ReadLater, error) {
+func (db *Database) ReadLaterGetUnread() (map[int64]feed.ReadLater, error) {
 	const qid query.ID = query.ReadLaterGetUnread
 	var (
 		err  error
@@ -3220,7 +3233,8 @@ EXEC_QUERY:
 
 	defer rows.Close() // nolint: errcheck,gosec
 
-	var items = make([]feed.ReadLater, 0, 32)
+	// var items = make([]feed.ReadLater, 0, 32)
+	var items = make(map[int64]feed.ReadLater, 32)
 
 	if rows.Next() {
 		var (
@@ -3268,14 +3282,15 @@ EXEC_QUERY:
 		item.ID = later.ItemID
 		later.Item = item
 
-		items = append(items, later)
+		// items = append(items, later)
+		items[later.ItemID] = later
 	}
 
 	return items, nil
 } // func (db *Database) ReadLaterGetUnread() ([]feed.ReadLater, error)
 
 // ReadLaterMarkRead marks a ReadLater note as read.
-func (db *Database) ReadLaterMarkRead(l *feed.ReadLater) error {
+func (db *Database) ReadLaterMarkRead(itemID int64) error {
 	const qid query.ID = query.ReadLaterMarkRead
 	var (
 		err    error
@@ -3324,13 +3339,13 @@ func (db *Database) ReadLaterMarkRead(l *feed.ReadLater) error {
 	stmt = tx.Stmt(stmt)
 
 EXEC_QUERY:
-	if _, err = stmt.Exec(l.ID); err != nil {
+	if _, err = stmt.Exec(itemID); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
 		} else {
 			err = fmt.Errorf("cannot mark ReadLater Note %d as Read: %s",
-				l.ID,
+				itemID,
 				err.Error())
 			db.log.Printf("[ERROR] %s\n", err.Error())
 			return err
@@ -3338,9 +3353,8 @@ EXEC_QUERY:
 	}
 
 	status = true
-	l.Read = true
 	return nil
-} // func (db *Database) ReadLaterMarkRead(l *feed.ReadLater) error
+} // func (db *Database) ReadLaterMarkRead(itemID int64) error
 
 // ReadLaterDelete deletes a ReadLater note from the database.
 func (db *Database) ReadLaterDelete(id int64) error {

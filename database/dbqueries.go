@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-03 10:25:12 krylon>
+// Time-stamp: <2021-03-05 09:51:37 krylon>
 
 package database
 
@@ -279,6 +279,7 @@ SELECT
     i.rating
 FROM read_later l
 INNER JOIN item i ON i.id = l.item_id
+ORDER BY l.deadline DESC
 `,
 	query.ReadLaterGetUnread: `
 SELECT
@@ -297,6 +298,7 @@ SELECT
 FROM read_later l
 INNER JOIN item i ON l.item_id = i.id
 WHERE l.read <> 1
+ORDER BY l.deadline DESC
 `,
 	query.ReadLaterMarkRead: `
 UPDATE read_later

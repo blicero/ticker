@@ -1,0 +1,92 @@
+{{ define "later_list" }}
+{{/* Created on 04. 03. 2021 */}}
+{{/* Time-stamp: <2021-03-04 20:41:40 krylon> */}}
+<table class="later">
+  <thead>
+    <tr>
+      <th>Deadline</th>
+      <th>Read</th>
+      <th>Time</th>
+      <th>Rating</th>
+      <th>Tags</th>
+      <th>Feed</th>
+      <th>Title</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {{ $class := cycle "even" "odd" }}
+    {{ $feeds := .FeedMap }}
+    {{ $dot := . }}
+    {{ range .Items }}
+    <tr
+      class="{{ $class.Next }}{{ if .Read }} read{{ else if .IsDue }} urgent{{ end }}"
+      id="item_{{ .Item.ID }}">
+      <td>
+        {{ fmt_time .Deadline }}
+      </td>
+      <td> <!-- Read -->
+        <input
+        type="checkbox"
+        id="later_mark_read_{{ .Item.ID }}"
+        onchange="read_later_mark_read({{ .Item.ID }}, '{{ js .Item.Title }}');"
+        {{ if .Read }}checked{{ end }}
+        />
+      </td>
+      <td> <!-- Time -->
+        {{ fmt_time .Item.Timestamp }}
+      </td>
+      <td id="item_rating_{{ .Item.ID }}"> <!-- Rating -->
+        <small>{{ .Item.RatingString }}</small><br />
+        {{ if not .Item.IsRated }}
+        <input
+        type="button"
+        value="Interesting"
+        onclick="rate_item({{ .Item.ID }}, 1);" />
+        &nbsp;|&nbsp;
+        <input
+        type="button"
+        value="Booooring"
+        onclick="rate_item({{ .Item.ID }}, 0);" />
+        <br />
+        {{ else }}
+        <input
+        type="button"
+        value="Unvote"
+        onclick="unvote_item({{ .Item.ID }});" />
+        <br />
+        {{ end }}
+        {{ if (le .Item.Rating 0.0) }}
+        <img src="/static/emo_boring.png" />
+        {{ else }}
+        <img src="/static/emo_interesting.png" />
+        {{ end }}
+      </td>
+      <td> <!-- Tags -->
+        <div id="tags_{{ .Item.ID }}">
+          {{ $item_id := .Item.ID }}
+          {{ range .Item.Tags }}
+          <a class="item_{{ $item_id }}_tag_{{ .ID }}" href="/tag/{{ .ID }}">{{ .Name }}</a>
+          <img class="item_{{ $item_id }}_tag_{{ .ID }}" src="/static/delete.png" onclick="untag({{ $item_id }}, {{ .ID }});" />
+          &nbsp;
+          {{ end }}
+        </div>
+        <br /><br />
+        {{ $arg := $dot.TagLinkData .Item }}
+        {{ template "tag_link_form" $arg }}
+      </td>
+      <td> <!-- Feed -->
+        <a href="/feed/{{ .Item.FeedID }}">
+          {{ (index $feeds .Item.FeedID).Name }}
+        </a>
+      </td>
+      <td> <!-- Title -->
+        <a href="{{ .Item.URL }}" target="_blank">
+          {{ .Item.Title }}
+        </a>
+      </td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}
