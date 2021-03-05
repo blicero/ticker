@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-02 12:23:17 krylon>
+// Time-stamp: <2021-03-05 14:31:17 krylon>
 
 //go:generate stringer -type=ID
 
@@ -53,6 +53,7 @@ const (
 	ReadLaterGetAll
 	ReadLaterGetUnread
 	ReadLaterMarkRead
+	ReadLaterMarkUnread
 	ReadLaterDelete
 	ReadLaterDeleteRead
 	ReadLaterSetDeadine

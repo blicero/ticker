@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-05 09:51:37 krylon>
+// Time-stamp: <2021-03-05 14:31:48 krylon>
 
 package database
 
@@ -303,6 +303,11 @@ ORDER BY l.deadline DESC
 	query.ReadLaterMarkRead: `
 UPDATE read_later
 SET read = 1
+WHERE item_id = ?
+`,
+	query.ReadLaterMarkUnread: `
+UPDATE read_later
+SET read = 0
 WHERE item_id = ?
 `,
 	query.ReadLaterDelete:     "DELETE FROM read_later WHERE item_id = ?",
