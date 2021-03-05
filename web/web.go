@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-05 14:36:22 krylon>
+// Time-stamp: <2021-03-05 16:38:53 krylon>
 
 package web
 
@@ -98,6 +98,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.web.ErrorLog = srv.log
 	srv.web.Handler = srv.router
 
+	srv.router.HandleFunc("/favicon.ico", srv.handleFavIco)
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{page:(?i)(?:index|main)?$}", srv.handleIndex)
 
@@ -959,6 +960,32 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 /////////////////////////////////////////
 ////////////// Other ////////////////////
 /////////////////////////////////////////
+
+func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		request.URL.EscapedPath())
+
+	const (
+		filename = "favicon.ico"
+		mimeType = "image/vnd.microsoft.icon"
+	)
+
+	w.Header().Set("Content-Type", mimeType)
+
+	if !common.Debug {
+		w.Header().Set("Cache-Control", "max-age=7200")
+	} else {
+		w.Header().Set("Cache-Control", "no-store, max-age=0")
+	}
+
+	if body, ok := htmlData.Static[filename]; ok {
+		w.WriteHeader(200)
+		_, _ = w.Write(body) // nolint: gosec
+	} else {
+		msg := fmt.Sprintf("ERROR - cannot find file %s", filename)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request)
 
 func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
