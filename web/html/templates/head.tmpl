@@ -1,24 +1,16 @@
 {{ define "head" }}
-{{/* Time-stamp: <2021-03-03 20:50:13 krylon> */}}
+{{/* Time-stamp: <2021-03-05 18:26:41 krylon> */}}
 <head>
   <title>{{ app_string }}@{{ hostname  }} - {{ .Title }}</title>
   
   <meta charset="utf-8">
 
-  <script type="text/javascript" src="/static/jquery-3.6.0.min.js">
-  </script>
-  
-  <script type="text/javascript" src="/static/underscore.js">
-  </script>
-
-  <script type="text/javascript" src="/static/sha512.min.js">
-  </script>
-
-  <script type="text/javascript" src="/static/settings.js">
-  </script>
-  
-  <script type="text/javascript" src="/static/interact.js">
-  </script>
+  <script src="/static/jquery-3.6.0.min.js"></script>
+  <script src="/static/bootstrap.bundle.min.js"></script>
+  <script src="/static/underscore.js"></script>
+  <script src="/static/sha512.min.js"></script>
+  <script src="/static/settings.js"></script>
+  <script src="/static/interact.js"></script>
 
   <script>
    $(document).ready(function() {
@@ -56,5 +48,8 @@
 
   <link rel="stylesheet" type="text/css" href="/static/style.css" />
   {{/* <link rel="stylesheet" type="text/css" href="/static/normalize.css" /> */}}
+  <link rel="stylesheet" type="text/css" href="/static/bootstrap.min.css" />
+  <link rel="stylesheet" href="/static/bootstrap-reboot.min.css" />
+  <link rel="stylesheet" href="/static/bootstrap-utilities.min.css" />
 </head>
 {{ end }}

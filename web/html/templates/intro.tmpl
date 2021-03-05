@@ -1,5 +1,5 @@
 {{ define "intro" }}
-{{/* Time-stamp: <2021-02-16 17:52:33 krylon> */}}
+{{/* Time-stamp: <2021-03-05 17:59:35 krylon> */}}
 <h1 id="page_title">{{ .Title }}</h1>
 <hr />
 
@@ -12,7 +12,7 @@
  });
 </script>
 
-<div class="debug">
+<div class="debug container-fluid">
   {{ app_string }} running on {{ hostname }} (built on {{ app_build }})<br />
   Template rendered on <time>{{ now }}</time><br />
   <div id="beacon" class="debug" onclick="beaconToggle();">
@@ -25,7 +25,7 @@
   &nbsp;
 </p>
 <details id="intro_details">
-  <table id="intro">
+  <table id="intro" class="container-fluid">
     <tbody>
       <tr>
         <td>
