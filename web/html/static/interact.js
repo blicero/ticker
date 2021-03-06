@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-06 01:55:56 krylon>
+// Time-stamp: <2021-03-06 18:21:41 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -608,3 +608,15 @@ function read_later_mark_read(item_id, item_title) {
         $(checkbox_id)[0].checked = !state;
     });
 } // function read_later_mark_read(item_id, item_title)
+
+function read_later_toggle_read_entries() {
+    const checkbox_id = "#hide_old";
+    const state = $(checkbox_id)[0].checked;
+    const query = "#read_later_list .read";
+
+    if (state) {
+        $(query).hide();
+    } else {
+        $(query).show();
+    }
+} // function read_later_toggle_read_entries()

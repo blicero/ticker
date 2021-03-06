@@ -1,6 +1,6 @@
 {{ define "later_all" }}
 {{/* Created on 04. 03. 2021 */}}
-{{/* Time-stamp: <2021-03-04 14:47:45 krylon> */}}
+{{/* Time-stamp: <2021-03-06 18:16:52 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -9,6 +9,15 @@
     {{ template "intro" . }}
 
     <h2>Read Later</h2>
+
+    <div>
+      Hide read entries? &nbsp;
+      <input
+      type="checkbox"
+      name="hide_old"
+      id="hide_old"
+      onclick="read_later_toggle_read_entries();" />
+    </div>
 
     {{ template "later_list" . }}
 

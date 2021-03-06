@@ -1,12 +1,12 @@
 {{ define "feed_form" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-02-16 18:00:57 krylon> */}}
+{{/* Time-stamp: <2021-03-06 18:06:40 krylon> */}}
 <form action="/feed/subscribe" method="post">
-  <table class="horizontal">
+  <table class="horizontal table">
     <tr>
       <th>Name</th>
       <td>
-        <input type="text" name="name" id="name" placeholder="Name" />
+        <input type="text" name="name" id="name" placeholder="Name" required />
       </td>
     </tr>
     <tr>

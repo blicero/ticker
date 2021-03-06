@@ -1,5 +1,5 @@
 {{ define "intro" }}
-{{/* Time-stamp: <2021-03-05 17:59:35 krylon> */}}
+{{/* Time-stamp: <2021-03-06 18:39:33 krylon> */}}
 <h1 id="page_title">{{ .Title }}</h1>
 <hr />
 
@@ -53,8 +53,8 @@
         <td>
           <h2 style="text-align:center;" onclick="toggleMsgDisplayVisible();">Messages</h2>
 
-          <div id="msg_display_div">
-            <table id="msg_display_tbl" class="horizontal spaced">
+          <div id="msg_display_div" class="container-fluid">
+            <table id="msg_display_tbl" class="horizontal spaced table">
               <tr>
                 <th>Maximum number of messages to display:</th>
                 <td>
@@ -84,7 +84,7 @@
             </table>
 
             <table
-              class="spaced"
+              class="spaced table"
               id="msg_tbl"
               {{ if (eq (len .Messages) 0) }}hidden="true"{{ end }}
               >
