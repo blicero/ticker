@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-05 14:31:48 krylon>
+// Time-stamp: <2021-03-06 20:32:35 krylon>
 
 package database
 
@@ -182,12 +182,19 @@ WHERE t.tag_id = ?
 `,
 	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
 	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",
-	query.FTSClear:        "DELETE FROM item_index",
-	query.TagCreate:       "INSERT INTO tag (name, description, parent) VALUES (?, ?, ?)",
-	query.TagDelete:       "DELETE FROM tag WHERE id = ?",
-	query.TagGetAll:       "SELECT id, name, description, parent FROM tag ORDER BY name",
-	query.TagGetByID:      "SELECT name, description, parent FROM tag WHERE id = ?",
-	query.TagGetByName:    "SELECT id, description, parent FROM tag WHERE name = ?",
+	query.ItemHasDuplicate: `
+SELECT
+    COUNT(id) AS cnt
+FROM item
+WHERE link = ?
+   OR (feed_id = ? AND title = ?)
+`,
+	query.FTSClear:     "DELETE FROM item_index",
+	query.TagCreate:    "INSERT INTO tag (name, description, parent) VALUES (?, ?, ?)",
+	query.TagDelete:    "DELETE FROM tag WHERE id = ?",
+	query.TagGetAll:    "SELECT id, name, description, parent FROM tag ORDER BY name",
+	query.TagGetByID:   "SELECT name, description, parent FROM tag WHERE id = ?",
+	query.TagGetByName: "SELECT id, description, parent FROM tag WHERE name = ?",
 	query.TagGetByItem: `
 SELECT
     t.id,

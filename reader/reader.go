@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-17 19:16:32 krylon>
+// Time-stamp: <2021-03-06 20:36:58 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -182,20 +182,22 @@ func (r *Reader) refresh() error {
 			len(items))
 
 		for _, i := range items {
-			var ref *feed.Item
-			r.log.Printf("[TRACE] Process Item %s (%s)\n",
-				i.Title,
-				i.URL)
-			if ref, err = r.db.ItemGetByURL(i.URL); err != nil {
-				var msg = fmt.Sprintf("Cannot check if Item %s is in databse: %s",
+			var dup bool
+
+			if dup, err = r.db.ItemHasDuplicate(&i); err != nil {
+				var msg = fmt.Sprintf("Cannot check if Item %s is in database: %s",
 					i.URL,
 					err.Error())
 				r.log.Printf("[ERROR] %s\n", msg)
 				r.sndMsg(msg)
 				return err
-			} else if ref != nil {
+			} else if dup {
 				continue
 			}
+
+			r.log.Printf("[TRACE] Add Item %s (%s)\n",
+				i.Title,
+				i.URL)
 
 			if err = r.db.ItemAdd(&i); err != nil {
 				var msg = fmt.Sprintf("Cannot save Item %q to database: %s",

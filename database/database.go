@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-05 14:32:15 krylon>
+// Time-stamp: <2021-03-06 20:31:42 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1827,6 +1827,59 @@ EXEC_QUERY:
 	i.ManuallyRated = false
 	return nil
 } // func (db *Database) ItemRatingClear(i *feed.Item) error
+
+// ItemHasDuplicate checks if a possible duplicate of the given Item already
+// exists in the database.
+func (db *Database) ItemHasDuplicate(i *feed.Item) (bool, error) {
+	const qid query.ID = query.ItemHasDuplicate
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return false, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(i.URL, i.FeedID, i.Title); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return false, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var cnt int64
+
+		if err = rows.Scan(&cnt); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return false, err
+		}
+
+		return cnt > 0, nil
+	}
+
+	err = fmt.Errorf("query %s should always return exactly one row",
+		qid)
+
+	db.log.Printf("[CANTHAPPEN] %s\n",
+		err.Error())
+
+	return false, err
+} // func (db *Database) ItemHasDuplicate(i *feed.Item) (bool, error)
 
 // FTSRebuild rebuilds the index used in the full-text search.
 func (db *Database) FTSRebuild() error {
