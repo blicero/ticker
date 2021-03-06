@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-05 14:55:22 krylon>
+// Time-stamp: <2021-03-06 01:55:56 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -460,7 +460,7 @@ function attach_tag(form_id, item_id) {
                          var div_id = `#tags_${item_id}`;
                          var div = $(div_id)[0];
 
-                         var tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" onclick="untag(${item_id}, ${tag_id});" /> &nbsp; `;
+                         var tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" role="button" onclick="untag(${item_id}, ${tag_id});" /> &nbsp; `;
 
                          div.innerHTML += tag;
 

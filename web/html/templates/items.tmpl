@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-03-05 18:03:51 krylon> */}}
+{{/* Time-stamp: <2021-03-06 01:54:02 krylon> */}}
 <table class="items table">
   <thead>
     <tr>
@@ -60,7 +60,11 @@
           {{ $item_id := .ID }}
           {{ range .Tags }}
           <a class="item_{{ $item_id }}_tag_{{ .ID }}" href="/tag/{{ .ID }}">{{ .Name }}</a>
-          <img class="item_{{ $item_id }}_tag_{{ .ID }}" src="/static/delete.png" onclick="untag({{ $item_id }}, {{ .ID }});" />
+          <img
+          class="item_{{ $item_id }}_tag_{{ .ID }}"
+          src="/static/delete.png"
+          role="button"
+          onclick="untag({{ $item_id }}, {{ .ID }});" />
           &nbsp;
           {{ end }}
         </div>
