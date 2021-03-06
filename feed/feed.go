@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-22 16:38:13 krylon>
+// Time-stamp: <2021-03-06 18:45:42 krylon>
 
 // Package feed provides the basic data type and logic to represent and interact
 // with RSS feeds.
@@ -145,12 +145,16 @@ func (f *Feed) Fetch() ([]Item, error) {
 		}
 	}
 
-	var items = make([]Item, len(fd.Items))
+	var (
+		now   = time.Now()
+		items = make([]Item, len(fd.Items))
+	)
 
 	for idx, item := range fd.Items {
-		if item.Date.IsZero() {
-			item.Date = time.Now()
+		if item.Date.IsZero() || item.Date.After(now) {
+			item.Date = now
 		}
+
 		if item.Content == "" {
 			item.Content = item.Summary
 		}
