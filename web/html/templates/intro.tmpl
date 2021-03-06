@@ -1,5 +1,5 @@
 {{ define "intro" }}
-{{/* Time-stamp: <2021-03-06 18:39:33 krylon> */}}
+{{/* Time-stamp: <2021-03-06 19:47:16 krylon> */}}
 <h1 id="page_title">{{ .Title }}</h1>
 <hr />
 
@@ -86,7 +86,7 @@
             <table
               class="spaced table"
               id="msg_tbl"
-              {{ if (eq (len .Messages) 0) }}hidden="true"{{ end }}
+              {{ if (eq (len .Messages) 0) }} style="display: none;"{{ end }}
               >
               <thead>
                 <tr>
