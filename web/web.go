@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-07 00:27:55 krylon>
+// Time-stamp: <2021-03-07 13:07:34 krylon>
 
 package web
 
@@ -66,6 +66,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 			msgBuf: krylib.CreateMessageBuffer(),
 			mimeTypes: map[string]string{
 				".css": "text/css",
+				".map": "application/json",
 				".js":  "text/javascript",
 				".png": "image/png",
 			},
@@ -280,6 +281,13 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
 	} else if data.Items, err = db.ItemGetRecent(recentCnt); err != nil {
 		msg = fmt.Sprintf("Cannot query all Items: %s",
 			err.Error())
@@ -317,6 +325,7 @@ func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
 	var (
 		err  error
 		tmpl *template.Template
+		db   *database.Database
 		msg  string
 		data = tmplDataIndex{
 			tmplDataBase: tmplDataBase{
@@ -327,10 +336,20 @@ func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
 		}
 	)
 
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		msg = fmt.Sprintf("Could not find template %q", tmplName)
 		srv.log.Println("[CRITICAL] " + msg)
 		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
 	}
 
@@ -461,6 +480,13 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
 	} else if data.Items, err = db.ItemGetByFeed(id, recentCnt); err != nil {
 		msg = fmt.Sprintf("Cannot query all Items: %s",
 			err.Error())
@@ -555,6 +581,13 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if data.AllTags, err = db.TagGetAll(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
@@ -703,6 +736,13 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, "/index", http.StatusFound)
 		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
 	}
 
 	data.FeedMap = make(map[int64]feed.Feed, len(feeds))
@@ -775,6 +815,13 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 		return
 	} else if data.AllTags, err = db.TagGetAll(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
@@ -917,6 +964,13 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
 	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		msg = fmt.Sprintf("Did not find template %s",
 			tmplName)
@@ -965,6 +1019,13 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 
 	if data.AllTags, err = db.TagGetAll(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Tags: %s", err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
