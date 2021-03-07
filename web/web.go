@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-05 23:02:14 krylon>
+// Time-stamp: <2021-03-07 00:27:55 krylon>
 
 package web
 
@@ -588,6 +588,21 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		)
 
 		if !math.IsNaN(item.Rating) {
+			if item.Rating == 1 {
+				data.Items[idx].Rating = math.Inf(1)
+			} else if item.Rating == 0 {
+				data.Items[idx].Rating = math.Inf(-1)
+			} else {
+				msg = fmt.Sprintf("Unexpected Rating for Item %s (%d): %f",
+					item.Title,
+					item.ID,
+					item.Rating)
+				srv.log.Println("[ERROR] " + msg)
+				srv.SendMessage(msg)
+				http.Redirect(w, r, r.Referer(), http.StatusFound)
+				return
+			}
+
 			continue
 		}
 
