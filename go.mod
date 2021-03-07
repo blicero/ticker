@@ -9,7 +9,9 @@ require (
 	github.com/blicero/krylib v0.0.0-20210224100727-002c413214d3
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/stemmer v0.0.0-20161207102402-66719a20c4b5
+	github.com/eaigner/shield v0.0.0-20130415142253-7e8e5f1f2c82 // indirect
 	github.com/endeveit/guesslanguage v0.0.0-20141216121003-b9ec07401dcb
+	github.com/garyburd/redigo v1.6.2 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/hashicorp/logutils v1.0.0
 	github.com/jaytaylor/html2text v0.0.0-20200412013138-3577fbdbcff7
