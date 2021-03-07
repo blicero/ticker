@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 17. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 22:28:43 krylon>
+// Time-stamp: <2021-03-06 23:02:32 krylon>
 
 // Package classifier implements semi-automatic rating of news items.
 package classifier
@@ -54,7 +54,7 @@ func New() (*Classifier, error) {
 		return nil, err
 	}
 
-	c.rev = bayesian.NewClassifier(bayesian.MultinomialTf)
+	c.rev = bayesian.NewClassifier(bayesian.MultinomialBoolean)
 
 	return c, nil
 } // func New() (*Classifier, error)
