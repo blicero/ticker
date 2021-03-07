@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-06 20:32:35 krylon>
+// Time-stamp: <2021-03-07 01:17:20 krylon>
 
 package database
 
@@ -179,6 +179,7 @@ SELECT
 FROM tag_link t
 INNER JOIN item i ON t.item_id = i.id
 WHERE t.tag_id = ?
+ORDER BY i.timestamp DESC
 `,
 	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
 	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",
@@ -230,6 +231,7 @@ SELECT
     parent
 FROM children
 WHERE id <> ?
+ORDER BY name
 `,
 	query.TagGetChildrenImmediate: `
 SELECT
@@ -238,6 +240,7 @@ SELECT
     description
 FROM tag
 WHERE parent = ?
+ORDER BY name
 `,
 	query.TagGetRoots: `
 SELECT
@@ -246,6 +249,7 @@ SELECT
     description
 FROM tag
 WHERE COALESCE(parent, 0) = 0
+ORDER BY name
 `,
 	query.TagNameUpdate:        "UPDATE tag SET name = ? WHERE id = ?",
 	query.TagDescriptionUpdate: "UPDATE tag SET description = ? WHERE id = ?",
