@@ -1,4 +1,4 @@
-/* Time-stamp: <2021-03-04 20:47:19 krylon> */
+/* Time-stamp: <2021-03-07 12:37:25 krylon> */
 
 body { 
     font-family: Arial,Helvetica,sans-serif;
@@ -10,13 +10,13 @@ h1 {
     text-align: center;
     text-decoration: underline;
     font-size: 36pt;
-   }
+}
 
 h2 {
     text-decoration: underline;
     text-align: center;
     font-size: 24pt;
-   }
+}
 
 *.footer {
     text-align: center;
