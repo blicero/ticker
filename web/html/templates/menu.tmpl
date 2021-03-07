@@ -1,37 +1,124 @@
 {{ define "menu" }}
-{{/* Time-stamp: <2021-03-07 13:00:52 krylon> */}}
+{{/* Time-stamp: <2021-03-07 16:46:30 krylon> */}}
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #D4D4D4">
   <div class="container-fluid">
-    <a href="/">Start</a>
-    <a href="/feed/form">Subscribe</a>
-    <a href="/items/0">Items</a>
-    <a href="/items/all">
-      <i><b>ALL</b></i> Items
-    </a>
-    <a href="/tag/all">Tags</a>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <ul class="navbar-nav">
 
-    <a href="/later/all">Bookmarks</a>
-    <input type="button"
-           class="small"
-           value="Perform DB maintenance"
-           onclick="db_maintenance();" />
-    <form>
-      <label for="hide_boring">Hide boring?</label>
-      <input type="checkbox"
-             name="hide_boring"
-             value="Hide Boring"
-             onclick="toggle_hide_boring();" />
-    </form>
-    <form action="/search" method="post" class="d-flex">
-      <input type="search"
-             name="query"
-             aria-label="Search"
-             placeholder="Search..." />
-      <input type="submit" value="Search" />
-    </form>
-    <input type="button"
-           value="Rebuild FTS"
-           onclick="rebuildFTS();" />
+        <li class="nav-item">
+          <a class="nav-link" href="/">Start</a>
+        </li>
+
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle"
+             href="#"
+             id="subscribeMenuLink"
+             role="button"
+             data-bs-toggle="dropdown"
+             aria-expanded="false">
+            Subscribe
+          </a>
+          <ul class="dropdown-menu" aria-labelledby="subscribeMenuLink">
+            <li>
+              <form class="dropdown-item" action="/feed/subscribe" method="post">
+                <table class="horizontal">
+                  <tr>
+                    <th>Name</th>
+                    <td>
+                      <input type="text" name="name" id="name" placeholder="Name" required />
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>URL</th>
+                    <td>
+                      <input
+                      type="url"
+                      name="url"
+                      id="url"
+                      placeholder="https://www.example.com/rss"
+                      required />
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Homepage</th>
+                    <td>
+                      <input
+                      type="url"
+                      name="homepage"
+                      id="homepage"
+                      placeholder="https://www.example.com/"
+                      required />
+                    </td>
+                  </tr>
+                  <tr>
+                    <th>Interval<br />(in seconds)</th>
+                    <td>
+                      <input type="number" name="interval" id="interval" value="900" min="0" max="10080" />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><input type="reset" value="Reset" /></td>
+                    <td><input type="submit" value="OK" /></td>
+                  </tr>
+                </table>
+            </li>
+          </ul>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="/items/0">Items</a>
+        </li>
+
+        <li class="nav-item">
+          <a href="/items/all" class="nav-link">
+            <i><b>ALL</b></i> Items
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a href="/tag/all" class="nav-link">Tags</a>
+        </li>
+
+        <li class="nav-item">
+          <a href="/later/all" class="nav-link">Bookmarks</a>
+        </li>
+
+        <li class="nav-item">
+          <input type="button"
+                 class="small navbar-link"
+                 value="Perform DB maintenance"
+                 onclick="db_maintenance();" />
+        </li>
+
+        <li class="nav-item">
+          <form>
+            <label for="hide_boring">Hide boring?</label>
+            <input type="checkbox"
+                   class="navbar-link"
+                   name="hide_boring"
+                   value="Hide Boring"
+                   onclick="toggle_hide_boring();" />
+          </form>
+        </li>
+
+        <li class="nav-item">
+          <form action="/search" method="post" class="d-flex navbar-link">
+            <input type="search"
+                   name="query"
+                   aria-label="Search"
+                   placeholder="Search..." />
+            <input type="submit" value="Search" />
+          </form>
+        </li>
+
+        <li class="nav-item">
+          <input type="button"
+                 class="navbar-link"
+                 value="Rebuild FTS"
+                 onclick="rebuildFTS();" />
+        </li>
+      </ul>
+    </div>
   </div>
 </nav>
 {{ end }}
