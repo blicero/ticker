@@ -1,0 +1,102 @@
+{{ define "feed_all" }}
+{{/* Created on 07. 03. 2021 */}}
+{{/* Time-stamp: <2021-03-07 22:20:37 krylon> */}}
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <script>
+     var feeds = {
+       {{ range .Feeds }}
+       {{ .ID }}: {
+         "url": "{{ js .URL }}",
+         "homepage": "{{ js .Homepage }}",
+         "interval": {{ .Interval.Seconds }},
+         "active": {{ .Active }},
+       },
+       {{ end }}
+     };
+    </script>
+
+    <form id="feed_form" style="display: none;">
+      <div class="row">
+        <label for="url" class="col">URL</label>
+        <input type="url"
+               class="col"
+               name="url"
+               id="form_url"
+               placeholder="https://www.example.com/rss"
+               required />
+      </div>
+      <div class="row">
+        <label for="homepage" class="col">Homepage</label>
+        <input type="url"
+               class="col"
+               name="homepage"
+               id="form_homepage"
+               placeholder="https://www.example.com/"
+               required />
+      </div>
+      <div class="row">
+        <label for="interval" class="col">Interval (minutes)</label>
+        <input type="number"
+               class="col"
+               name="interval"
+               id="form_interval"
+               value="15"
+               min="0"
+               max="10080" />
+      </div class="row">
+      <div class="form-check">
+        <label for="active" class="col">Active?</label>
+        <input type="checkbox"
+               class="col"
+               name="active"
+               id="form_active"
+               checked />
+      </div>
+      <div class="row">
+        <button type="button"
+                {{/* class="btn" */}} 
+                onclick="feed_submit();">
+          OK
+        </button>
+      </div>
+    </form>
+
+    <table class="feeds table table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>URL</th>
+          <th>Interval</th>
+          <th>Last Update</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{ range .Feeds }}
+        <tr>
+          <td>
+            <a href="{{ .Homepage }}" target="_blank">{{ .Name }}</a>
+            &nbsp;
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    onclick="edit_feed({{ .ID }});">
+              Edit
+            </button>
+          </td>
+          <td><a href="{{ .URL }}" target="_blank">{{ .URL }}</a></td>
+          <td>{{ .Interval }}</td>
+          <td>{{ fmt_time .LastUpdate }}</td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+
+    {{ template "footer" . }}
+  </body>
+</html>
+{{ end }}

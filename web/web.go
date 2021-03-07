@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-07 13:07:34 krylon>
+// Time-stamp: <2021-03-07 17:35:15 krylon>
 
 package web
 
@@ -132,6 +132,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{page:(?i)(?:index|main)?$}", srv.handleIndex)
 
+	srv.router.HandleFunc("/feed/all", srv.handleFeedAll)
 	srv.router.HandleFunc("/feed/form", srv.handleFeedForm)
 	srv.router.HandleFunc("/feed/subscribe", srv.handleFeedSubscribe)
 	srv.router.HandleFunc("/feed/{id:(?:\\d+)$}", srv.handleFeedDetails)
@@ -312,6 +313,84 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleFeedAll(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	const (
+		tmplName = "feed_all"
+	)
+
+	var (
+		err  error
+		msg  string
+		db   *database.Database
+		tmpl *template.Template
+		data = tmplDataIndex{
+			tmplDataBase: tmplDataBase{
+				Title: "Main",
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Could not find template %q", tmplName)
+		srv.log.Println("[CRITICAL] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Feeds, err = db.FeedGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot query all Feeds: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} /* else if data.Items, err = db.ItemGetRecent(recentCnt); err != nil {
+		msg = fmt.Sprintf("Cannot query all Items: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} */
+
+	// data.FeedMap = make(map[int64]feed.Feed, len(data.Feeds))
+	// for _, f := range data.Feeds {
+	// 	data.FeedMap[f.ID] = f
+	// }
+
+	data.Messages = srv.getMessages()
+
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleFeedAll(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle %s from %s\n",
