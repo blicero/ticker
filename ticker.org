@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-06 22:26:52 krylon>
+# Time-stamp: <2021-03-07 23:21:35 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,37 +13,40 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-06 Sa 22:26]
-   | Headline                    | Time      |         |         |         |       |      |
-   |-----------------------------+-----------+---------+---------+---------+-------+------|
-   | *Total time*                | *6d 5:50* |         |         |         |       |      |
-   |-----------------------------+-----------+---------+---------+---------+-------+------|
-   | Ticker                      | 6d 5:50   |         |         |         |       |      |
-   | \_  Main                    |           |    0:56 |         |         |       |      |
-   | \_    Shutdown              |           |         |    0:56 |         |       |      |
-   | \_  Components [15/21]      |           | 6d 4:54 |         |         |       |      |
-   | \_    Feed [5/6]            |           |         | 1d 4:37 |         |       |      |
-   | \_      Homepage            |           |         |         |    0:12 |       |      |
-   | \_      Rating [2/3]        |           |         |         | 1d 1:09 |       |      |
-   | \_        Web Frontend      |           |         |         |         | 12:09 |      |
-   | \_        Classifier        |           |         |         |         | 12:23 |      |
-   | \_    Database [1/1]        |           |         |   21:55 |         |       |      |
-   | \_      Due Feeds           |           |         |         |    1:26 |       |      |
-   | \_    Reader [2/2]          |           |         |   18:06 |         |       |      |
-   | \_      Timestamps          |           |         |         |    0:15 |       |      |
-   | \_      Pseudo-duplicates   |           |         |         |    2:01 |       |      |
-   | \_    Web interface [2/3]   |           |         |   23:24 |         |       |      |
-   | \_      Embed               |           |         |         |    3:00 |       |      |
-   | \_      Snazzy              |           |         |         |    1:29 |       |      |
-   | \_        Ooopsie           |           |         |         |         |  0:51 |      |
-   | \_          Read later form |           |         |         |         |       | 0:51 |
-   | \_    Tags [2/4]            |           |         | 1d 9:34 |         |       |      |
-   | \_      Database            |           |         |         |   10:59 |       |      |
-   | \_        Hierarchy         |           |         |         |         |  8:58 |      |
-   | \_      Web interface       |           |         |         |   20:45 |       |      |
-   | \_    Search [2/3]          |           |         |    3:30 |         |       |      |
-   | \_    Read Later [1/2]      |           |         |   19:48 |         |       |      |
-   | \_      Web interface       |           |         |         |   17:46 |       |      |
+   #+CAPTION: Clock summary at [2021-03-07 So 23:21]
+   | Headline                         | Time       |          |         |         |       |      |
+   |----------------------------------+------------+----------+---------+---------+-------+------|
+   | *Total time*                     | *6d 18:04* |          |         |         |       |      |
+   |----------------------------------+------------+----------+---------+---------+-------+------|
+   | Ticker                           | 6d 18:04   |          |         |         |       |      |
+   | \_  Main                         |            |     0:56 |         |         |       |      |
+   | \_    Shutdown                   |            |          |    0:56 |         |       |      |
+   | \_  Components [16/25]           |            | 6d 17:08 |         |         |       |      |
+   | \_    Feed [5/6]                 |            |          | 1d 6:52 |         |       |      |
+   | \_      Homepage                 |            |          |         |    0:12 |       |      |
+   | \_      Rating [2/3]             |            |          |         | 1d 3:24 |       |      |
+   | \_        Web Frontend           |            |          |         |         | 12:09 |      |
+   | \_        Classifier             |            |          |         |         | 14:38 |      |
+   | \_    Database [1/1]             |            |          |   21:55 |         |       |      |
+   | \_      Due Feeds                |            |          |         |    1:26 |       |      |
+   | \_    Reader [2/2]               |            |          |   18:06 |         |       |      |
+   | \_      Timestamps               |            |          |         |    0:15 |       |      |
+   | \_      Pseudo-duplicates        |            |          |         |    2:01 |       |      |
+   | \_    Web interface [3/7]        |            |          | 1d 8:58 |         |       |      |
+   | \_      Embed                    |            |          |         |    3:00 |       |      |
+   | \_      Snazzy [2/3]             |            |          |         |    4:04 |       |      |
+   | \_        Ooopsie [1/1]          |            |          |         |         |  0:51 |      |
+   | \_          Read later form      |            |          |         |         |       | 0:51 |
+   | \_        Subscribe              |            |          |         |         |  2:35 |      |
+   | \_      Limit description length |            |          |         |    0:26 |       |      |
+   | \_      Manage Feeds             |            |          |         |    6:33 |       |      |
+   | \_    Tags [2/4]                 |            |          | 1d 9:59 |         |       |      |
+   | \_      Database                 |            |          |         |   10:59 |       |      |
+   | \_        Hierarchy              |            |          |         |         |  8:58 |      |
+   | \_      Web interface            |            |          |         |   21:10 |       |      |
+   | \_    Search [2/3]               |            |          |    3:30 |         |       |      |
+   | \_    Read Later [1/2]           |            |          |   19:48 |         |       |      |
+   | \_      Web interface            |            |          |         |   17:46 |       |      |
    #+END:
 
 ** Questions
@@ -54,7 +57,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [15/21]
+** Components [16/25]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -94,6 +97,7 @@
       :END:
 ***** TODO Classifier
       :LOGBOOK:
+      CLOCK: [2021-03-06 Sa 22:34]--[2021-03-07 So 00:49] =>  2:15
       CLOCK: [2021-02-22 Mo 15:54]--[2021-02-22 Mo 16:56] =>  1:02
       CLOCK: [2021-02-19 Fr 20:25]--[2021-02-19 Fr 20:59] =>  0:34
       CLOCK: [2021-02-18 Do 20:07]--[2021-02-18 Do 23:59] =>  3:52
@@ -163,7 +167,7 @@
      it works.
      Simply skipping the Item if the headline already exists, is not a good
      idea, either, I should at least take the timestamps into consideration.
-*** Web interface [2/3]
+*** Web interface [3/7]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -204,7 +208,7 @@
      [2021-03-05 Fr 23:03]
      Seems to work. Now I have to build Go 1.16 from source on OpenBSD,
      because go:embed is still new.
-**** TODO Snazzy
+**** Snazzy [2/3]
      :LOGBOOK:
      CLOCK: [2021-03-06 Sa 17:56]--[2021-03-06 Sa 18:34] =>  0:38
      :END:
@@ -216,7 +220,11 @@
      ...
      Doesn't look like it. jquery-ui /might/ be what I am looking for, but it
      seems to be too much of a hassle.
-***** Ooopsie     
+     ...
+     I am using bootstrap now, still have to get into the whole bootstrap way
+     of doing things, but it seems nice enough, well-documented, and a
+     reasonably easy way of making the whole thing less of an eye sore.
+***** Ooopsie [1/1]
       I appear to have broken some things when trying to make them less ugly
 ****** DONE Read later form
        CLOSED: [2021-03-06 Sa 19:53]
@@ -226,6 +234,40 @@
        When I click the "Read Later"-button now ([2021-03-06 Sa 19:00]), the
        button disappears, and the spacing is adjusted as if to display the
        form, but the form remains hidden. :-?
+***** DONE [#B] Subscribe
+      CLOSED: [2021-03-07 So 16:43]
+      :LOGBOOK:
+      CLOCK: [2021-03-07 So 16:09]--[2021-03-07 So 16:43] =>  0:34
+      CLOCK: [2021-03-07 So 13:35]--[2021-03-07 So 15:36] =>  2:01
+      :END:
+      I would like the subscription form to be a pulldown-/popup-menu from the
+      navbar rather than a separate page.
+
+      [2021-03-07 So 16:42]
+      Yeah, it kind of works. The form still looks rather ugly, and I should
+      probably AJAX-ify it, but that was actually quite nice.
+***** TODO [#C] Menu / Navbar
+      I should overhaul the menu/navbar a little. It looks much better
+      already, but still could do with a little polishing.
+**** TODO [#E] Un-escape HTML?
+     This /sounds/ simple, but when I think about it, it is quite tricky,
+     actually.
+**** TODO [#D] Limit description length
+     :LOGBOOK:
+     CLOCK: [2021-03-07 So 01:55]--[2021-03-07 So 02:21] =>  0:26
+     :END:
+     Some RSS feeds have the unfortunate habit of dumping the entire article /
+     blog post in the description field of the RSS item. I would like to limit
+     the amount of text that is rendered for the description.
+     /Alternatively/, I could try to limit the amount of screen real estate
+     the description occupies, using CSS, bootstrap and such trickery. Could
+     be a nice opportunity to learn about these things.
+**** TODO [#C] Manage Feeds
+     :LOGBOOK:
+     CLOCK: [2021-03-07 So 16:48]--[2021-03-07 So 23:21] =>  6:33
+     :END:
+     I want to un-subscribe feeds and possibly change their data (name,
+     homepage, etc.).
 *** Tags [2/4]
     :LOGBOOK:
     CLOCK: [2021-03-02 Di 18:54]--[2021-03-02 Di 20:44] =>  1:50
@@ -253,6 +295,7 @@
       problem, I postpone this.
 **** TODO Web interface
      :LOGBOOK:
+     CLOCK: [2021-03-07 So 01:12]--[2021-03-07 So 01:37] =>  0:25
      CLOCK: [2021-03-03 Mi 13:25]--[2021-03-03 Mi 14:55] =>  1:30
      CLOCK: [2021-03-03 Mi 13:11]--[2021-03-03 Mi 13:20] =>  0:09
      CLOCK: [2021-03-03 Mi 12:50]--[2021-03-03 Mi 13:10] =>  0:20
