@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-07 16:30:17 krylon>
+// Time-stamp: <2021-03-08 22:33:45 krylon>
 
 package database
 
@@ -47,12 +47,21 @@ SELECT
 FROM feed
 WHERE id = ?
 `,
+	query.FeedSetActive: "UPDATE feed SET active = ? WHERE id = ?",
 	query.FeedSetTimestamp: `
 UPDATE feed
 SET refresh_timestamp = ?
 WHERE id = ?
 `,
 	query.FeedDelete: "DELETE FROM feed WHERE id = ?",
+	query.FeedModify: `
+UPDATE feed SET 
+    name		= ?, 
+    url			= ?, 
+    homepage		= ?, 
+    refresh_interval	= ?
+WHERE id = ?
+`,
 	query.ItemAdd: `
 INSERT INTO item (feed_id, link, title, description, timestamp)
 VALUES           (      ?,    ?,     ?,           ?,         ?)
