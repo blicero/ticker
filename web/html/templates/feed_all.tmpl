@@ -1,6 +1,6 @@
 {{ define "feed_all" }}
 {{/* Created on 07. 03. 2021 */}}
-{{/* Time-stamp: <2021-03-07 22:20:37 krylon> */}}
+{{/* Time-stamp: <2021-03-08 21:55:04 krylon> */}}
 <html>
   {{ template "head" . }}
 
@@ -11,6 +11,8 @@
      var feeds = {
        {{ range .Feeds }}
        {{ .ID }}: {
+         "id": {{ .ID }},
+         "name": "{{ js .Name }}",
          "url": "{{ js .URL }}",
          "homepage": "{{ js .Homepage }}",
          "interval": {{ .Interval.Seconds }},
@@ -21,6 +23,23 @@
     </script>
 
     <form id="feed_form" style="display: none;">
+      <div class="row">
+        <label class="col" for="id">ID</label>
+        <input type="text"
+               name="id"
+               class="col"
+               id="form_id"
+               disabled />
+      </div>
+      <div class="row">
+        <label for="name" class="col">Name</label>
+        <input type="name"
+               class="col"
+               name="name"
+               id="form_name"
+               placeholder="Name"
+               required />
+      </div>
       <div class="row">
         <label for="url" class="col">URL</label>
         <input type="url"
@@ -49,6 +68,7 @@
                min="0"
                max="10080" />
       </div class="row">
+      {{/*
       <div class="form-check">
         <label for="active" class="col">Active?</label>
         <input type="checkbox"
@@ -57,18 +77,28 @@
                id="form_active"
                checked />
       </div>
+      */}}
       <div class="row">
         <button type="button"
-                {{/* class="btn" */}} 
-                onclick="feed_submit();">
+                class="btn btn-secondary col"
+                onclicked="feed_form_reset();">
+          Cancel
+        </button>
+        
+        <button type="button"
+                class="btn btn-secondary col"
+                onclick="feed_form_submit();">
           OK
         </button>
       </div>
     </form>
 
+    <p>
+
     <table class="feeds table table-striped">
       <thead>
         <tr>
+          <th>Active</th>
           <th>Name</th>
           <th>URL</th>
           <th>Interval</th>
@@ -78,9 +108,17 @@
 
       <tbody>
         {{ range .Feeds }}
-        <tr>
+        <tr id="feed_{{ .ID }}">
+          <td class="form-check">
+            <input type="checkbox"
+                   id="feed_active_{{ .ID }}"
+                   onchange="toggle_feed_active({{ .ID }});"
+                   {{ if .Active }}checked{{ end }} />
+          </td>
           <td>
-            <a href="{{ .Homepage }}" target="_blank">{{ .Name }}</a>
+            <a id="homepage_{{ .ID }}"
+               href="{{ .Homepage }}"
+               target="_blank">{{ .Name }}</a>
             &nbsp;
             <button type="button"
                     class="btn btn-primary btn-sm"
@@ -88,9 +126,15 @@
               Edit
             </button>
           </td>
-          <td><a href="{{ .URL }}" target="_blank">{{ .URL }}</a></td>
-          <td>{{ .Interval }}</td>
-          <td>{{ fmt_time .LastUpdate }}</td>
+          <td>
+            <a id="url_{{ .ID }}"
+               href="{{ .URL }}"
+               target="_blank">
+              {{ .URL }}
+            </a>
+          </td>
+          <td id="interval_{{ .ID}}">{{ .Interval }}</td>
+          <td id="last_update_{{ .ID }}">{{ fmt_time .LastUpdate }}</td>
         </tr>
         {{ end }}
       </tbody>

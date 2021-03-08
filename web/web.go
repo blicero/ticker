@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-07 17:35:15 krylon>
+// Time-stamp: <2021-03-08 22:32:37 krylon>
 
 package web
 
@@ -156,6 +156,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/tag_link_delete", srv.handleTagLinkDelete)
 	srv.router.HandleFunc("/ajax/read_later_mark", srv.handleReadLaterMark)
 	srv.router.HandleFunc("/ajax/read_later_set_read/{id:(?:\\d+)}/{state:(?:\\d+)$}", srv.handleReadLaterSetRead)
+	srv.router.HandleFunc("/ajax/feed_update", srv.handleFeedUpdate)
+	srv.router.HandleFunc("/ajax/feed_set_active/{id:(?:\\d+)}/{active:(?:true|false)$}", srv.handleFeedActiveToggle)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -1797,3 +1799,140 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleReadLaterSetRead(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleFeedUpdate(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err                        error
+		db                         *database.Database
+		name, lnkFeed, lnkHomepage string
+		intervalStr, idStr         string
+		reply, msg                 string
+		seconds, id                int64
+		interval                   time.Duration
+		fd                         *feed.Feed
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Error parsing form data: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	name = r.FormValue("Name")
+	lnkFeed = r.FormValue("URL")
+	lnkHomepage = r.FormValue("Homepage")
+	intervalStr = r.FormValue("Interval")
+	idStr = r.FormValue("ID")
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse ID %q: %s",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if seconds, err = strconv.ParseInt(intervalStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse Interval %q: %s",
+			intervalStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	interval = time.Second * time.Duration(seconds)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if fd, err = db.FeedGetByID(id); err != nil {
+		msg = fmt.Sprintf("Cannot get Feed %d: %s",
+			id,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if fd == nil {
+		msg = fmt.Sprintf("Feed %d was not found in database",
+			id)
+		goto SEND_ERROR_MESSAGE
+	} else if err = db.FeedModify(fd, name, lnkFeed, lnkHomepage, interval); err != nil {
+		msg = fmt.Sprintf("Error updating Feed %s (%d): %s",
+			fd.Name,
+			fd.ID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	reply = `{ "Status": true, "Message": "Success" }`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleFeedUpdate(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleFeedActiveToggle(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	var (
+		err              error
+		db               *database.Database
+		idStr, activeStr string
+		msg, reply       string
+		id               int64
+		active           bool
+	)
+
+	vars := mux.Vars(r)
+
+	idStr = vars["id"]
+	activeStr = vars["active"]
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse ID %q: %s",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if active, err = strconv.ParseBool(activeStr); err != nil {
+		msg = fmt.Sprintf("Cannot parse flag %q: %s",
+			activeStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if err = db.FeedSetActive(id, active); err != nil {
+		msg = fmt.Sprintf("Cannot set active flag for Feed %d: %s",
+			id,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	reply = `{ "Status": true, "Message": "Success" }`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleFeedActiveToggle(w http.ResponseWriter, r *http.Request)

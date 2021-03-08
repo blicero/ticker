@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-07 22:09:12 krylon>
+// Time-stamp: <2021-03-08 22:04:35 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -38,6 +38,28 @@ function timeStampString(t) {
         " " + hour + ":" + minute + ":" + second;
     return s;
 } // function timeStampString(t)
+
+function fmtDuration(seconds) {
+    var minutes = 0, hours = 0;
+
+    while (seconds > 3599) {
+        hours++;
+        seconds -= 3600;
+    }
+
+    while (seconds > 59) {
+        minutes++;
+        seconds -= 60;
+    }
+
+    if (hours > 0) {
+        return `${hours}h${minutes}m${seconds}s`;
+    } else if (minutes > 0) {
+        return `${minutes}m${seconds}s`;
+    } else {
+        return `${seconds}s`;
+    }
+} // function fmtDuration(seconds)
 
 function beaconLoop() {
     try {
@@ -604,7 +626,7 @@ function read_later_mark_read(item_id, item_title) {
                     "json");
 
     req.fail(function(reply, status_text, xhr) {
-        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
+        console.log(`Error marking Item as Read: ${status_text} // ${reply}`);
         $(checkbox_id)[0].checked = !state;
     });
 } // function read_later_mark_read(item_id, item_title)
@@ -627,12 +649,84 @@ function edit_feed(feed_id) {
     const feed = feeds[feed_id];
 
     $("#form_url")[0].value = feed.url;
+    $("#form_name")[0].value = feed.name;
     $("#form_homepage")[0].value = feed.homepage;
     $("#form_interval")[0].value = feed.interval / 60;
-    $("#form_active")[0].checked = feed.active;
+    // $("#form_active")[0].checked = feed.active;
+    $("#form_id")[0].value = feed.id;
     $(form_id).show();
 } // function edit_feed(feed_id)
 
-function feed_submit() {
-    console.log("IMPLEMENTME: feed_submit()");
+function feed_form_submit() {
+    console.log("IMPLEMENTME: feed_form_submit()");
+
+    const id = $("#form_id")[0].value;
+    const name = $("#form_name")[0].value;
+    const url = $("#form_url")[0].value;
+    const homepage = $("#form_homepage")[0].value;
+    const interval = $("#form_interval")[0].value;
+    // const active = $("#form_active")[0].checked;
+
+    var feed = feeds[id];
+
+    var req = $.post("/ajax/feed_update",
+                     { "ID": id,
+                       "Name": name,
+                       "URL": url,
+                       "Homepage": homepage,
+                       "Interval": interval * 60,
+                       // "Active": active,
+                     },
+                     function(reply) {
+                         if (reply.Status) {
+                             console.log(`Successfully updated Feed ${name}`);
+
+                             var hp = $(`#homepage_${id}`)[0];
+                             hp.href = homepage;
+                             hp.innerHTML = name;
+
+                             var lnk = $(`#url_${id}`)[0];
+                             lnk.href = url;
+                             lnk.innerHTML = url;
+
+                             $(`#interval_${id}`)[0].innerHTML = fmtDuration(interval * 60);
+
+                             $("#feed_form").hide();
+                         } else {
+                             const msg = `Error updating Feed ${name}: ${reply.Message}`;
+                             console.log(msg);
+                             alert(msg);
+                         }
+                     },
+                     "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log(`Error updating Feed: ${status_text} // ${reply}`);
+        $(checkbox_id)[0].checked = !state;
+    });
 } // function feed_submit()
+
+function feed_form_reset() {
+    $("#feed_form")[0].reset();
+    $("#feed_form").hide();
+} // function feed_form_reset()
+
+function toggle_feed_active(feed_id) {
+    const checkbox_id = `#feed_active_${feed_id}`;
+    const active = $(checkbox_id)[0].checked;
+
+    var req = $.get(`/ajax/feed_set_active/${feed_id}/${active}`,
+                    {},
+                    function(reply) {
+                        if (!reply.Status) {
+                            $(checkbox_id)[0].checked = !active;
+                            alert(reply.Message);
+                        }
+                    },
+                    "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log(`Error toggling Feed ${feed_id}: ${status_text} // ${reply}`);
+        $(checkbox_id)[0].checked = !active;
+    });
+} // function toggle_feed_active(feed_id)
