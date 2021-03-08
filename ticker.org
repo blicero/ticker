@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-07 23:21:35 krylon>
+# Time-stamp: <2021-03-08 22:40:36 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,40 +13,40 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-07 So 23:21]
-   | Headline                         | Time       |          |         |         |       |      |
-   |----------------------------------+------------+----------+---------+---------+-------+------|
-   | *Total time*                     | *6d 18:04* |          |         |         |       |      |
-   |----------------------------------+------------+----------+---------+---------+-------+------|
-   | Ticker                           | 6d 18:04   |          |         |         |       |      |
-   | \_  Main                         |            |     0:56 |         |         |       |      |
-   | \_    Shutdown                   |            |          |    0:56 |         |       |      |
-   | \_  Components [16/25]           |            | 6d 17:08 |         |         |       |      |
-   | \_    Feed [5/6]                 |            |          | 1d 6:52 |         |       |      |
-   | \_      Homepage                 |            |          |         |    0:12 |       |      |
-   | \_      Rating [2/3]             |            |          |         | 1d 3:24 |       |      |
-   | \_        Web Frontend           |            |          |         |         | 12:09 |      |
-   | \_        Classifier             |            |          |         |         | 14:38 |      |
-   | \_    Database [1/1]             |            |          |   21:55 |         |       |      |
-   | \_      Due Feeds                |            |          |         |    1:26 |       |      |
-   | \_    Reader [2/2]               |            |          |   18:06 |         |       |      |
-   | \_      Timestamps               |            |          |         |    0:15 |       |      |
-   | \_      Pseudo-duplicates        |            |          |         |    2:01 |       |      |
-   | \_    Web interface [3/7]        |            |          | 1d 8:58 |         |       |      |
-   | \_      Embed                    |            |          |         |    3:00 |       |      |
-   | \_      Snazzy [2/3]             |            |          |         |    4:04 |       |      |
-   | \_        Ooopsie [1/1]          |            |          |         |         |  0:51 |      |
-   | \_          Read later form      |            |          |         |         |       | 0:51 |
-   | \_        Subscribe              |            |          |         |         |  2:35 |      |
-   | \_      Limit description length |            |          |         |    0:26 |       |      |
-   | \_      Manage Feeds             |            |          |         |    6:33 |       |      |
-   | \_    Tags [2/4]                 |            |          | 1d 9:59 |         |       |      |
-   | \_      Database                 |            |          |         |   10:59 |       |      |
-   | \_        Hierarchy              |            |          |         |         |  8:58 |      |
-   | \_      Web interface            |            |          |         |   21:10 |       |      |
-   | \_    Search [2/3]               |            |          |    3:30 |         |       |      |
-   | \_    Read Later [1/2]           |            |          |   19:48 |         |       |      |
-   | \_      Web interface            |            |          |         |   17:46 |       |      |
+   #+CAPTION: Clock summary at [2021-03-08 Mo 22:40]
+   | Headline                         | Time       |          |          |         |       |      |
+   |----------------------------------+------------+----------+----------+---------+-------+------|
+   | *Total time*                     | *6d 23:17* |          |          |         |       |      |
+   |----------------------------------+------------+----------+----------+---------+-------+------|
+   | Ticker                           | 6d 23:17   |          |          |         |       |      |
+   | \_  Main                         |            |     0:56 |          |         |       |      |
+   | \_    Shutdown                   |            |          |     0:56 |         |       |      |
+   | \_  Components [16/25]           |            | 6d 22:21 |          |         |       |      |
+   | \_    Feed [5/6]                 |            |          |  1d 6:52 |         |       |      |
+   | \_      Homepage                 |            |          |          |    0:12 |       |      |
+   | \_      Rating [2/3]             |            |          |          | 1d 3:24 |       |      |
+   | \_        Web Frontend           |            |          |          |         | 12:09 |      |
+   | \_        Classifier             |            |          |          |         | 14:38 |      |
+   | \_    Database [1/1]             |            |          |    21:55 |         |       |      |
+   | \_      Due Feeds                |            |          |          |    1:26 |       |      |
+   | \_    Reader [2/2]               |            |          |    18:06 |         |       |      |
+   | \_      Timestamps               |            |          |          |    0:15 |       |      |
+   | \_      Pseudo-duplicates        |            |          |          |    2:01 |       |      |
+   | \_    Web interface [3/7]        |            |          | 1d 14:11 |         |       |      |
+   | \_      Embed                    |            |          |          |    3:00 |       |      |
+   | \_      Snazzy [2/3]             |            |          |          |    4:04 |       |      |
+   | \_        Ooopsie [1/1]          |            |          |          |         |  0:51 |      |
+   | \_          Read later form      |            |          |          |         |       | 0:51 |
+   | \_        Subscribe              |            |          |          |         |  2:35 |      |
+   | \_      Limit description length |            |          |          |    0:26 |       |      |
+   | \_      Manage Feeds             |            |          |          |   11:46 |       |      |
+   | \_    Tags [2/4]                 |            |          |  1d 9:59 |         |       |      |
+   | \_      Database                 |            |          |          |   10:59 |       |      |
+   | \_        Hierarchy              |            |          |          |         |  8:58 |      |
+   | \_      Web interface            |            |          |          |   21:10 |       |      |
+   | \_    Search [2/3]               |            |          |     3:30 |         |       |      |
+   | \_    Read Later [1/2]           |            |          |    19:48 |         |       |      |
+   | \_      Web interface            |            |          |          |   17:46 |       |      |
    #+END:
 
 ** Questions
@@ -264,6 +264,9 @@
      be a nice opportunity to learn about these things.
 **** TODO [#C] Manage Feeds
      :LOGBOOK:
+     CLOCK: [2021-03-08 Mo 20:34]--[2021-03-08 Mo 22:40] =>  2:06
+     CLOCK: [2021-03-08 Mo 17:13]--[2021-03-08 Mo 20:06] =>  2:53
+     CLOCK: [2021-03-08 Mo 10:36]--[2021-03-08 Mo 10:50] =>  0:14
      CLOCK: [2021-03-07 So 16:48]--[2021-03-07 So 23:21] =>  6:33
      :END:
      I want to un-subscribe feeds and possibly change their data (name,
