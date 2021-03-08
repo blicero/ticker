@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-06 20:36:58 krylon>
+// Time-stamp: <2021-03-08 22:29:47 krylon>
 
 // Package reader implements the periodic updates of RSS feeds.
 package reader
@@ -21,7 +21,7 @@ import (
 
 // FIXME For testing, I set this value rather low. For production use, I
 //       should probably set this to a higher value.
-const checkDelay = time.Second * 1
+const checkDelay = time.Second * 5
 
 // Reader regularly checks the subscribed Feeds and stores any new Items in
 // the database.
