@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-09 20:04:33 krylon>
+# Time-stamp: <2021-03-09 21:34:20 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-09 Di 20:04]
+   #+CAPTION: Clock summary at [2021-03-09 Di 21:34]
    | Headline                         | Time      |         |          |         |       |      |
    |----------------------------------+-----------+---------+----------+---------+-------+------|
-   | *Total time*                     | *7d 1:04* |         |          |         |       |      |
+   | *Total time*                     | *7d 2:10* |         |          |         |       |      |
    |----------------------------------+-----------+---------+----------+---------+-------+------|
-   | Ticker                           | 7d 1:04   |         |          |         |       |      |
+   | Ticker                           | 7d 2:10   |         |          |         |       |      |
    | \_  Main                         |           |    0:56 |          |         |       |      |
    | \_    Shutdown                   |           |         |     0:56 |         |       |      |
-   | \_  Components [17/25]           |           | 7d 0:08 |          |         |       |      |
+   | \_  Components [20/25]           |           | 7d 1:14 |          |         |       |      |
    | \_    Feed [6/6]                 |           |         |  1d 8:39 |         |       |      |
    | \_      Homepage                 |           |         |          |    0:12 |       |      |
    | \_      Rating [3/3]             |           |         |          | 1d 5:11 |       |      |
@@ -32,13 +32,13 @@
    | \_    Reader [2/2]               |           |         |    18:06 |         |       |      |
    | \_      Timestamps               |           |         |          |    0:15 |       |      |
    | \_      Pseudo-duplicates        |           |         |          |    2:01 |       |      |
-   | \_    Web interface [3/7]        |           |         | 1d 14:11 |         |       |      |
+   | \_    Web interface [6/7]        |           |         | 1d 15:17 |         |       |      |
    | \_      Embed                    |           |         |          |    3:00 |       |      |
-   | \_      Snazzy [2/3]             |           |         |          |    4:04 |       |      |
+   | \_      Snazzy [3/3]             |           |         |          |    4:04 |       |      |
    | \_        Ooopsie [1/1]          |           |         |          |         |  0:51 |      |
    | \_          Read later form      |           |         |          |         |       | 0:51 |
    | \_        Subscribe              |           |         |          |         |  2:35 |      |
-   | \_      Limit description length |           |         |          |    0:26 |       |      |
+   | \_      Limit description length |           |         |          |    1:32 |       |      |
    | \_      Manage Feeds             |           |         |          |   11:46 |       |      |
    | \_    Tags [2/4]                 |           |         |  1d 9:59 |         |       |      |
    | \_      Database                 |           |         |          |   10:59 |       |      |
@@ -57,7 +57,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [17/25]
+** Components [20/25]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -170,7 +170,7 @@
      it works.
      Simply skipping the Item if the headline already exists, is not a good
      idea, either, I should at least take the timestamps into consideration.
-*** Web interface [3/7]
+*** Web interface [6/7]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -211,7 +211,7 @@
      [2021-03-05 Fr 23:03]
      Seems to work. Now I have to build Go 1.16 from source on OpenBSD,
      because go:embed is still new.
-**** Snazzy [2/3]
+**** Snazzy [3/3]
      :LOGBOOK:
      CLOCK: [2021-03-06 Sa 17:56]--[2021-03-06 Sa 18:34] =>  0:38
      :END:
@@ -249,14 +249,17 @@
       [2021-03-07 So 16:42]
       Yeah, it kind of works. The form still looks rather ugly, and I should
       probably AJAX-ify it, but that was actually quite nice.
-***** TODO [#C] Menu / Navbar
+***** DONE [#C] Menu / Navbar
+      CLOSED: [2021-03-09 Di 21:33]
       I should overhaul the menu/navbar a little. It looks much better
       already, but still could do with a little polishing.
 **** TODO [#E] Un-escape HTML?
      This /sounds/ simple, but when I think about it, it is quite tricky,
      actually.
-**** TODO [#D] Limit description length
+**** DONE [#D] Limit description length
+     CLOSED: [2021-03-09 Di 21:33]
      :LOGBOOK:
+     CLOCK: [2021-03-09 Di 20:27]--[2021-03-09 Di 21:33] =>  1:06
      CLOCK: [2021-03-07 So 01:55]--[2021-03-07 So 02:21] =>  0:26
      :END:
      Some RSS feeds have the unfortunate habit of dumping the entire article /
@@ -265,7 +268,12 @@
      /Alternatively/, I could try to limit the amount of screen real estate
      the description occupies, using CSS, bootstrap and such trickery. Could
      be a nice opportunity to learn about these things.
-**** TODO [#C] Manage Feeds
+
+     [2021-03-09 Di 20:27]
+     I am going to try using bootstrap for this purpose. I am not overly
+     optimistic, but let's see.
+**** DONE [#C] Manage Feeds
+     CLOSED: [2021-03-09 Di 21:34]
      :LOGBOOK:
      CLOCK: [2021-03-08 Mo 20:34]--[2021-03-08 Mo 22:40] =>  2:06
      CLOCK: [2021-03-08 Mo 17:13]--[2021-03-08 Mo 20:06] =>  2:53
