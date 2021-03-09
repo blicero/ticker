@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-08 22:32:37 krylon>
+// Time-stamp: <2021-03-09 19:30:03 krylon>
 
 package web
 
@@ -30,7 +30,6 @@ import (
 
 	"github.com/blicero/krylib"
 
-	"github.com/CyrusF/go-bayesian"
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/logutils"
 )
@@ -696,9 +695,9 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 
 	for idx, item := range data.Items {
 		var (
-			certain bool
-			score   map[bayesian.Class]float64
-			class   bayesian.Class
+			// certain bool
+			// score   map[bayesian.Class]float64
+			class string
 		)
 
 		if !math.IsNaN(item.Rating) {
@@ -718,29 +717,43 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 			}
 
 			continue
-		}
-
-		score, class, certain = rev.Classify(&item)
-
-		if certain {
-			switch class {
-			case classifier.Good:
-				data.Items[idx].Rating = score[class]
-			case classifier.Bad:
-				data.Items[idx].Rating = -score[class]
-			default:
-				srv.log.Printf("[CANTHAPPEN] Unexpected classification for news Item %d (%q): %s\n",
-					item.ID,
-					item.Title,
-					class)
-				continue
-			}
-
-			srv.log.Printf("[TRACE] Rate Item %d (%q) - %f\n",
-				item.ID,
+		} else if class, err = rev.Classify(&item); err != nil {
+			srv.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
 				item.Title,
-				data.Items[idx].Rating)
+				item.ID,
+				err.Error())
+		} else if class == classifier.Good {
+			data.Items[idx].Rating = 100
+		} else if class == classifier.Bad {
+			data.Items[idx].Rating = -100
+		} else {
+			srv.log.Printf("[ERROR] Unexpected classification for Item %s (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
 		}
+
+		// score, class, certain = rev.Classify(&item)
+
+		// if certain {
+		// 	switch class {
+		// 	case classifier.Good:
+		// 		data.Items[idx].Rating = score[class]
+		// 	case classifier.Bad:
+		// 		data.Items[idx].Rating = -score[class]
+		// 	default:
+		// 		srv.log.Printf("[CANTHAPPEN] Unexpected classification for news Item %d (%q): %s\n",
+		// 			item.ID,
+		// 			item.Title,
+		// 			class)
+		// 		continue
+		// 	}
+
+		// 	srv.log.Printf("[TRACE] Rate Item %d (%q) - %f\n",
+		// 		item.ID,
+		// 		item.Title,
+		// 		data.Items[idx].Rating)
+		// }
 	}
 
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {

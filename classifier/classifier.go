@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 17. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-06 23:02:32 krylon>
+// Time-stamp: <2021-03-09 20:01:47 krylon>
 
 // Package classifier implements semi-automatic rating of news items.
 package classifier
@@ -15,17 +15,13 @@ import (
 	"ticker/feed"
 	"ticker/logdomain"
 
-	"github.com/CyrusF/go-bayesian"
-	"github.com/bbalet/stopwords"
-	"github.com/dchest/stemmer/german"
-	"github.com/dchest/stemmer/porter2"
-	"github.com/endeveit/guesslanguage"
+	"github.com/n3integration/classifier/naive"
 )
 
 // Good and Bad are the two categories for rating news items.
 const (
-	Good bayesian.Class = "good"
-	Bad  bayesian.Class = "bad"
+	Good = "good"
+	Bad  = "bad"
 )
 
 var nonword = regexp.MustCompile(`\W+`)
@@ -34,7 +30,7 @@ var nonword = regexp.MustCompile(`\W+`)
 // rates news Items.
 type Classifier struct {
 	db  *database.Database
-	rev bayesian.Classifier
+	rev *naive.Classifier
 	log *log.Logger
 }
 
@@ -54,7 +50,7 @@ func New() (*Classifier, error) {
 		return nil, err
 	}
 
-	c.rev = bayesian.NewClassifier(bayesian.MultinomialBoolean)
+	c.rev = naive.New()
 
 	return c, nil
 } // func New() (*Classifier, error)
@@ -78,77 +74,86 @@ func (c *Classifier) Train() error {
 } // func (c *Classifier) Train() error
 
 func (c *Classifier) learn(items []feed.Item) {
-	var docs = make([]bayesian.Document, 0, len(items))
-
 	for _, item := range items {
-		var doc = bayesian.Document{
-			Tokens: c.tokenize(&item),
-		}
+		var (
+			err   error
+			class string
+			s     = nonword.ReplaceAllString(item.Plaintext(), " ")
+		)
 
 		if item.Rating >= 0.5 {
-			doc.Class = Good
+			class = Good
 		} else {
-			doc.Class = Bad
+			class = Bad
 		}
 
-		docs = append(docs, doc)
+		if err = c.rev.TrainString(s, class); err != nil {
+			c.log.Printf("[ERROR] Cannot traing Item %s (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+		}
 	}
-
-	c.rev.Learn(docs...)
 } // func (c *Classifier) learn(items []feed.Item)
 
 // Classify attempts to find a rating for a news item.
-func (c *Classifier) Classify(item *feed.Item) (map[bayesian.Class]float64, bayesian.Class, bool) {
+func (c *Classifier) Classify(item *feed.Item) (string, error) {
 	var (
-		ratings map[bayesian.Class]float64
-		class   bayesian.Class
-		certain bool
-		pieces  = c.tokenize(item)
+		err    error
+		rating string
+		p      = nonword.ReplaceAllString(item.Plaintext(), " ")
 	)
 
-	ratings, class, certain = c.rev.Classify(pieces...)
+	if rating, err = c.rev.ClassifyString(p); err != nil {
+		c.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
+			item.Title,
+			item.ID,
+			err.Error())
+		return "", err
+	}
 
-	return ratings, class, certain
+	return rating, nil
 } // func (c *Classifier) Classify(item *feed.Item) (map[bayesian.Class]float64, bayesian.Class, bool)
 
-func (c *Classifier) tokenize(item *feed.Item) []string {
-	var (
-		err        error
-		body, lang string
-	)
+// func (c *Classifier) tokenize(item *feed.Item) []string {
+// 	var (
+// 		err        error
+// 		body, lang string
+// 	)
 
-	body = item.Title + " " + item.Description
+// 	// body = item.Title + " " + item.Description
+// 	body = item.Plaintext()
 
-	if lang, err = guesslanguage.Guess(body); err != nil {
-		c.log.Printf("[ERROR] Cannot determine language of Item %q: %s\n",
-			item.Title,
-			err.Error())
-		lang = "en"
-	}
+// 	if lang, err = guesslanguage.Guess(body); err != nil {
+// 		c.log.Printf("[ERROR] Cannot determine language of Item %q: %s\n",
+// 			item.Title,
+// 			err.Error())
+// 		lang = "en"
+// 	}
 
-	body = stopwords.CleanString(body, lang, true)
+// 	body = stopwords.CleanString(body, lang, true)
 
-	var words = nonword.Split(body, -1)
+// 	var words = nonword.Split(body, -1)
 
-	var tokens = make([]string, len(words))
+// 	var tokens = make([]string, len(words))
 
-	for i, w := range words {
-		var s = stemWord(w, lang)
-		tokens[i] = s
-	}
+// 	for i, w := range words {
+// 		var s = stemWord(w, lang)
+// 		tokens[i] = s
+// 	}
 
-	return tokens
-} // func (c *Classifier) tokenize(item *feed.Item) []string
+// 	return tokens
+// } // func (c *Classifier) tokenize(item *feed.Item) []string
 
-func stemWord(word, lang string) string {
-	switch lang {
-	case "de":
-		return german.Stemmer.Stem(word)
-	case "en":
-		return porter2.Stemmer.Stem(word)
-	default:
-		// I will try this first, if it does now work out,
-		// I return word verbatim.
-		return porter2.Stemmer.Stem(word)
-	}
-} // func stem_word(word, lang string) string
+// func stemWord(word, lang string) string {
+// 	switch lang {
+// 	case "de":
+// 		return german.Stemmer.Stem(word)
+// 	case "en":
+// 		return porter2.Stemmer.Stem(word)
+// 	default:
+// 		// I will try this first, if it does now work out,
+// 		// I return word verbatim.
+// 		return porter2.Stemmer.Stem(word)
+// 	}
+// } // func stem_word(word, lang string) string
