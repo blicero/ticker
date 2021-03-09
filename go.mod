@@ -16,6 +16,7 @@ require (
 	github.com/hashicorp/logutils v1.0.0
 	github.com/jaytaylor/html2text v0.0.0-20200412013138-3577fbdbcff7
 	github.com/mattn/go-sqlite3 v1.14.6
+	github.com/mborgerson/GoTruncateHtml v0.0.0-20150507032438-125d9154cd1e // indirect
 	github.com/n3integration/classifier v0.4.0 // indirect
 	github.com/odeke-em/go-uuid v0.0.0-20151221120446-b211d769a9aa
 	github.com/olekukonko/tablewriter v0.0.5 // indirect

@@ -28,6 +28,8 @@ github.com/mattn/go-runewidth v0.0.9 h1:Lm995f3rfxdpd6TSmuVCHVb/QhupuXlYr8sCI/Qd
 github.com/mattn/go-runewidth v0.0.9/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/mattn/go-sqlite3 v1.14.6 h1:dNPt6NO46WmLVt2DLNpwczCmdV5boIZ6g/tlDrlRUbg=
 github.com/mattn/go-sqlite3 v1.14.6/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
+github.com/mborgerson/GoTruncateHtml v0.0.0-20150507032438-125d9154cd1e h1:x+Fx2zSKFLklebiQ+/UDT1BydkU1gOVU3IQ+jUNa4S4=
+github.com/mborgerson/GoTruncateHtml v0.0.0-20150507032438-125d9154cd1e/go.mod h1:mvQlKR3ZWvuE0jR2MLDzvlP2FLVkM+yqkg/+f0kWGPY=
 github.com/n3integration/classifier v0.4.0 h1:LMrYvQF7s25PuWm0wlZ3fvGLW+PKewP3FEDdpq/AdbA=
 github.com/n3integration/classifier v0.4.0/go.mod h1:puJKkNjLUHUBLINSlu2ZUMQU2kfzgGTDHvz3tCXPzJg=
 github.com/odeke-em/go-uuid v0.0.0-20151221120446-b211d769a9aa h1:XEhClAZN5U0GUTFRgRdPNgAKO4mP++S+zbqXH+Pr9nU=

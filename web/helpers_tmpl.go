@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2021-03-02 23:13:16 krylon>
+// Time-stamp: <2021-03-09 21:15:39 krylon>
 
 package web
 
@@ -17,6 +17,8 @@ import (
 	"text/template"
 	"ticker/common"
 	"time"
+
+	"github.com/mborgerson/GoTruncateHtml/truncatehtml"
 )
 
 ////////////////////////////////////
@@ -47,6 +49,7 @@ var funcmap = template.FuncMap{
 	"uuid":             common.GetUUID,
 	"concat":           concat,
 	"i64str":           i64str,
+	"truncate":         truncateHTML,
 }
 
 type generator struct {
@@ -257,3 +260,23 @@ func concat(s1, s2 string) string {
 func i64str(i int64) string {
 	return strconv.FormatInt(i, 10)
 } // func i64str(i int64) string
+
+func truncateHTML(s string, maxlen int) string {
+	const ellipsis = "..."
+	var (
+		err    error
+		output []byte
+		input  = []byte(s)
+	)
+
+	if len(s) <= maxlen {
+		return s
+	} else if output, err = truncatehtml.TruncateHtml(input, maxlen, ellipsis); err != nil {
+		fmt.Fprintf(os.Stderr,
+			"Cannot truncate HTML: %s\n",
+			err.Error())
+		return s
+	}
+
+	return string(output)
+} // func truncateHTML(s string, maxlen int) string
