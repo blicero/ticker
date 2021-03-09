@@ -1,4 +1,4 @@
-/* Time-stamp: <2021-03-07 12:37:25 krylon> */
+/* Time-stamp: <2021-03-09 08:32:42 krylon> */
 
 body { 
     font-family: Arial,Helvetica,sans-serif;
@@ -28,7 +28,8 @@ h2 {
 }
 
 *.boring {
-    font-size: 10pt;
+    // font-size: 10pt;
+    filter: opacity(50%);
 }
 
 *.read {
