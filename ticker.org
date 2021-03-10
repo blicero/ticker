@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-09 21:34:20 krylon>
+# Time-stamp: <2021-03-10 15:06:22 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-09 Di 21:34]
+   #+CAPTION: Clock summary at [2021-03-10 Mi 15:06]
    | Headline                         | Time      |         |          |         |       |      |
    |----------------------------------+-----------+---------+----------+---------+-------+------|
-   | *Total time*                     | *7d 2:10* |         |          |         |       |      |
+   | *Total time*                     | *7d 9:29* |         |          |         |       |      |
    |----------------------------------+-----------+---------+----------+---------+-------+------|
-   | Ticker                           | 7d 2:10   |         |          |         |       |      |
+   | Ticker                           | 7d 9:29   |         |          |         |       |      |
    | \_  Main                         |           |    0:56 |          |         |       |      |
    | \_    Shutdown                   |           |         |     0:56 |         |       |      |
-   | \_  Components [20/25]           |           | 7d 1:14 |          |         |       |      |
+   | \_  Components [21/25]           |           | 7d 8:33 |          |         |       |      |
    | \_    Feed [6/6]                 |           |         |  1d 8:39 |         |       |      |
    | \_      Homepage                 |           |         |          |    0:12 |       |      |
    | \_      Rating [3/3]             |           |         |          | 1d 5:11 |       |      |
@@ -40,11 +40,11 @@
    | \_        Subscribe              |           |         |          |         |  2:35 |      |
    | \_      Limit description length |           |         |          |    1:32 |       |      |
    | \_      Manage Feeds             |           |         |          |   11:46 |       |      |
-   | \_    Tags [2/4]                 |           |         |  1d 9:59 |         |       |      |
+   | \_    Tags [2/4]                 |           |         | 1d 17:18 |         |       |      |
    | \_      Database                 |           |         |          |   10:59 |       |      |
    | \_        Hierarchy              |           |         |          |         |  8:58 |      |
-   | \_      Web interface            |           |         |          |   21:10 |       |      |
-   | \_    Search [2/3]               |           |         |     3:30 |         |       |      |
+   | \_      Web interface            |           |         |          | 1d 4:29 |       |      |
+   | \_    Search [3/3]               |           |         |     3:30 |         |       |      |
    | \_    Read Later [1/2]           |           |         |    19:48 |         |       |      |
    | \_      Web interface            |           |         |          |   17:46 |       |      |
    #+END:
@@ -57,7 +57,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [20/25]
+** Components [21/25]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -309,6 +309,9 @@
       problem, I postpone this.
 **** TODO Web interface
      :LOGBOOK:
+     CLOCK: [2021-03-10 Mi 10:33]--[2021-03-10 Mi 15:06] =>  4:33
+     CLOCK: [2021-03-10 Mi 09:43]--[2021-03-10 Mi 09:49] =>  0:06
+     CLOCK: [2021-03-09 Di 22:10]--[2021-03-10 Mi 00:50] =>  2:40
      CLOCK: [2021-03-07 So 01:12]--[2021-03-07 So 01:37] =>  0:25
      CLOCK: [2021-03-03 Mi 13:25]--[2021-03-03 Mi 14:55] =>  1:30
      CLOCK: [2021-03-03 Mi 13:11]--[2021-03-03 Mi 13:20] =>  0:09
@@ -321,16 +324,21 @@
      CLOCK: [2021-02-24 Mi 21:47]--[2021-02-25 Do 00:16] =>  2:29
      :END:     
 **** TODO Suggestions
-*** Search [2/3]
+*** Search [3/3]
     :LOGBOOK:
     CLOCK: [2021-02-23 Di 20:00]--[2021-02-23 Di 23:30] =>  3:30
     :END:
     I want to support full text search if possible. And it should be possible,
     SQLite has support for that. In fact, I think I already used it once, but
     I am somewhat fuzzy on the details.
-**** TODO Moar!
+**** SUSPENDED [#F] Moar!
+     CLOSED: [2021-03-09 Di 21:52]
      I would like to be able to search by tags, feeds, time... that's going to
      be tedious.
+
+     [2021-03-09 Di 21:51]
+     So far, I have only used the search once or twice, so it is not a high
+     priority.
 **** DONE Database
      CLOSED: [2021-02-23 Di 23:30]
      I /might/ have to clean up the item data before feeding it to the FTS
