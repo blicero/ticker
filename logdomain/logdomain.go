@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-17 21:58:00 krylon>
+// Time-stamp: <2021-03-10 21:09:34 krylon>
 
 // Package logdomain provides constants to identify the different
 // "areas" of the application that perform logging.
@@ -21,6 +21,7 @@ const (
 	Database
 	Feed
 	Reader
+	Tag
 	Web
 )
 
@@ -33,6 +34,7 @@ func AllDomains() []ID {
 		Database,
 		Feed,
 		Reader,
+		Tag,
 		Web,
 	}
 } // func AllDomains() []ID
