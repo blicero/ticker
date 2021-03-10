@@ -2,11 +2,12 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-09 19:30:03 krylon>
+// Time-stamp: <2021-03-10 14:48:18 krylon>
 
 package web
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"errors"
@@ -157,6 +158,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/read_later_set_read/{id:(?:\\d+)}/{state:(?:\\d+)$}", srv.handleReadLaterSetRead)
 	srv.router.HandleFunc("/ajax/feed_update", srv.handleFeedUpdate)
 	srv.router.HandleFunc("/ajax/feed_set_active/{id:(?:\\d+)}/{active:(?:true|false)$}", srv.handleFeedActiveToggle)
+	srv.router.HandleFunc("/ajax/items_by_tag/{id:(?:\\d+)$}", srv.handleItemsByTag)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -1949,3 +1951,192 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleFeedActiveToggle(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const tmplName = "items"
+
+	type response struct {
+		Status  bool
+		Message string
+	}
+
+	var (
+		err               error
+		db                *database.Database
+		tmpl              *template.Template
+		idStr, msg, reply string
+		id                int64
+		buf               bytes.Buffer
+		res               response
+		t                 *tag.Tag
+		rev               *classifier.Classifier
+		raw               []byte
+		data              = tmplDataItems{
+			tmplDataBase: tmplDataBase{
+				Title: "Items",
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	vars := mux.Vars(r)
+
+	idStr = vars["id"]
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("[ERROR] Cannot parse Tag ID %q: %s\n",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Did not find template %q", tmplName)
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if t, err = db.TagGetByID(id); err != nil {
+		msg = fmt.Sprintf("Cannot get Tag %d: %s",
+			id,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if t == nil {
+		msg = fmt.Sprintf("Tag %d was not found",
+			id)
+		goto SEND_ERROR_MESSAGE
+	} else if rev, err = classifier.New(); err != nil {
+		msg = fmt.Sprintf("Cannot create Classifier: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if data.Items, err = db.ItemGetByTagRecursive(t); err != nil {
+		msg = fmt.Sprintf("Cannot load Items for Tag %s (%d): %s",
+			t.Name,
+			id,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	if err = rev.Train(); err != nil {
+		msg = fmt.Sprintf("Cannot train Classifier: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
+		msg = fmt.Sprintf("Cannot get all Feeds: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	for idx, item := range data.Items {
+		var (
+			// certain bool
+			// score   map[bayesian.Class]float64
+			class string
+		)
+
+		if !math.IsNaN(item.Rating) {
+			if item.Rating == 1 {
+				data.Items[idx].Rating = math.Inf(1)
+			} else if item.Rating == 0 {
+				data.Items[idx].Rating = math.Inf(-1)
+			} else {
+				msg = fmt.Sprintf("Unexpected Rating for Item %s (%d): %f",
+					item.Title,
+					item.ID,
+					item.Rating)
+				srv.log.Println("[ERROR] " + msg)
+				srv.SendMessage(msg)
+				http.Redirect(w, r, r.Referer(), http.StatusFound)
+				return
+			}
+
+			continue
+		} else if class, err = rev.Classify(&item); err != nil {
+			srv.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+		} else if class == classifier.Good {
+			data.Items[idx].Rating = 100
+		} else if class == classifier.Bad {
+			data.Items[idx].Rating = -100
+		} else {
+			srv.log.Printf("[ERROR] Unexpected classification for Item %s (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+		}
+
+		// score, class, certain = rev.Classify(&item)
+
+		// if certain {
+		// 	switch class {
+		// 	case classifier.Good:
+		// 		data.Items[idx].Rating = score[class]
+		// 	case classifier.Bad:
+		// 		data.Items[idx].Rating = -score[class]
+		// 	default:
+		// 		srv.log.Printf("[CANTHAPPEN] Unexpected classification for news Item %d (%q): %s\n",
+		// 			item.ID,
+		// 			item.Title,
+		// 			class)
+		// 		continue
+		// 	}
+
+		// 	srv.log.Printf("[TRACE] Rate Item %d (%q) - %f\n",
+		// 		item.ID,
+		// 		item.Title,
+		// 		data.Items[idx].Rating)
+		// }
+	}
+
+	if err = tmpl.Execute(&buf, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %s: %s",
+			tmplName,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	res.Status = true
+	res.Message = buf.String()
+
+	if raw, err = json.Marshal(&res); err != nil {
+		msg = fmt.Sprintf("Cannot serialize response: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if _, err = w.Write(raw); err != nil {
+		msg = fmt.Sprintf("Cannot send message to client %s: %s",
+			r.RemoteAddr,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.log.Printf("[ERROR] %s\n", msg)
+	}
+
+	return
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request)

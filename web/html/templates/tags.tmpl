@@ -1,6 +1,6 @@
 {{ define "tags" }}
 {{/* Created on 24. 02. 2021 */}}
-{{/* Time-stamp: <2021-03-04 15:47:26 krylon> */}}
+{{/* Time-stamp: <2021-03-10 15:02:45 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -12,11 +12,23 @@
 
     <hr />
 
-    <ul>
-      {{ range .Tags }}
-      {{ template "tag_view" . }}&nbsp;
-      {{ end }}
-    </ul>
+    <div class="container">
+      <div class="row">
+        <div class="col-sm">
+          <ul>
+            {{ range .Tags }}
+            {{ template "tag_view" . }}&nbsp;
+            {{ end }}
+          </ul>
+        </div>
+
+        <div id="item_div" class="col-6">
+          <small>
+            Put Items here
+          </small>
+        </div>
+      </div>
+    </div>
 
     {{ template "footer" }}
   </body>
