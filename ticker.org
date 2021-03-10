@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-10 15:06:22 krylon>
+# Time-stamp: <2021-03-10 20:31:33 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-10 Mi 15:06]
+   #+CAPTION: Clock summary at [2021-03-10 Mi 20:31]
    | Headline                         | Time      |         |          |         |       |      |
    |----------------------------------+-----------+---------+----------+---------+-------+------|
-   | *Total time*                     | *7d 9:29* |         |          |         |       |      |
+   | *Total time*                     | *7d 9:45* |         |          |         |       |      |
    |----------------------------------+-----------+---------+----------+---------+-------+------|
-   | Ticker                           | 7d 9:29   |         |          |         |       |      |
+   | Ticker                           | 7d 9:45   |         |          |         |       |      |
    | \_  Main                         |           |    0:56 |          |         |       |      |
    | \_    Shutdown                   |           |         |     0:56 |         |       |      |
-   | \_  Components [21/25]           |           | 7d 8:33 |          |         |       |      |
+   | \_  Components [22/25]           |           | 7d 8:49 |          |         |       |      |
    | \_    Feed [6/6]                 |           |         |  1d 8:39 |         |       |      |
    | \_      Homepage                 |           |         |          |    0:12 |       |      |
    | \_      Rating [3/3]             |           |         |          | 1d 5:11 |       |      |
@@ -40,10 +40,10 @@
    | \_        Subscribe              |           |         |          |         |  2:35 |      |
    | \_      Limit description length |           |         |          |    1:32 |       |      |
    | \_      Manage Feeds             |           |         |          |   11:46 |       |      |
-   | \_    Tags [2/4]                 |           |         | 1d 17:18 |         |       |      |
+   | \_    Tags [3/4]                 |           |         | 1d 17:34 |         |       |      |
    | \_      Database                 |           |         |          |   10:59 |       |      |
    | \_        Hierarchy              |           |         |          |         |  8:58 |      |
-   | \_      Web interface            |           |         |          | 1d 4:29 |       |      |
+   | \_      Web interface            |           |         |          | 1d 4:45 |       |      |
    | \_    Search [3/3]               |           |         |     3:30 |         |       |      |
    | \_    Read Later [1/2]           |           |         |    19:48 |         |       |      |
    | \_      Web interface            |           |         |          |   17:46 |       |      |
@@ -57,7 +57,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [21/25]
+** Components [22/25]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -282,7 +282,7 @@
      :END:
      I want to un-subscribe feeds and possibly change their data (name,
      homepage, etc.).
-*** Tags [2/4]
+*** Tags [3/4]
     :LOGBOOK:
     CLOCK: [2021-03-02 Di 18:54]--[2021-03-02 Di 20:44] =>  1:50
     :END:
@@ -307,8 +307,10 @@
       ...
       That is surprisingly tricky, and given the fact it is not such a big
       problem, I postpone this.
-**** TODO Web interface
+**** DONE Web interface
+     CLOSED: [2021-03-10 Mi 20:31]
      :LOGBOOK:
+     CLOCK: [2021-03-10 Mi 20:15]--[2021-03-10 Mi 20:31] =>  0:16
      CLOCK: [2021-03-10 Mi 10:33]--[2021-03-10 Mi 15:06] =>  4:33
      CLOCK: [2021-03-10 Mi 09:43]--[2021-03-10 Mi 09:49] =>  0:06
      CLOCK: [2021-03-09 Di 22:10]--[2021-03-10 Mi 00:50] =>  2:40
