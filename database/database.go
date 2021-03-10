@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-08 22:30:52 krylon>
+// Time-stamp: <2021-03-10 13:38:15 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1828,6 +1828,78 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) ItemGetByTag(t *tag.Tag) ([]feed.Item, error)
+
+// ItemGetByTagRecursive returns all Items marked with the given Tag or any
+// of its children (recursively, obviously).
+func (db *Database) ItemGetByTagRecursive(t *tag.Tag) ([]feed.Item, error) {
+	const qid query.ID = query.ItemGetByTagRecursive
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(t.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var items = make([]feed.Item, 0, 64)
+
+	for rows.Next() {
+		var (
+			item   feed.Item
+			rating *float64
+			stamp  int64
+		)
+
+		if err = rows.Scan(
+			&item.ID,
+			&item.FeedID,
+			&item.URL,
+			&item.Title,
+			&item.Description,
+			&stamp,
+			&item.Read,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+			return nil, err
+		} else if rating != nil {
+			item.ManuallyRated = true
+			item.Rating = *rating
+		} else {
+			item.Rating = math.NaN()
+		}
+		item.Timestamp = time.Unix(stamp, 0)
+		items = append(items, item)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetByTagRecursive(t *tag.Tag) ([]feed.Item, error)
 
 // ItemRatingSet sets an Item's Rating.
 func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error {

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-08 22:33:45 krylon>
+// Time-stamp: <2021-03-10 10:40:45 krylon>
 
 package database
 
@@ -189,6 +189,38 @@ FROM tag_link t
 INNER JOIN item i ON t.item_id = i.id
 WHERE t.tag_id = ?
 ORDER BY i.timestamp DESC
+`,
+	query.ItemGetByTagRecursive: `
+WITH RECURSIVE children(id, name, description, parent) AS (
+    SELECT
+        id,
+        name,
+        description,
+        parent
+    FROM tag WHERE id = ?
+    UNION ALL
+    SELECT
+        tag.id,
+        tag.name,
+        tag.description,
+        tag.parent
+    FROM tag, children
+    WHERE tag.parent = children.id
+)
+
+SELECT
+    i.id,
+    i.feed_id,
+    i.link,
+    i.title,
+    i.description,
+    i.timestamp,
+    i.read,
+    i.rating
+FROM children c
+INNER JOIN tag_link l ON c.id = l.tag_id
+INNER JOIN item i ON l.item_id = i.id
+INNER JOIN feed f ON i.feed_id = f.id
 `,
 	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
 	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",
