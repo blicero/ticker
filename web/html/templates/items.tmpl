@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-03-11 17:00:26 krylon> */}}
+{{/* Time-stamp: <2021-03-11 19:14:33 krylon> */}}
 <table class="items table">
   <thead>
     <tr>
@@ -68,11 +68,13 @@
           onclick="untag({{ $item_id }}, {{ .ID }});" />
           &nbsp;
           {{ end }}
+        </div>
+        <div class="suggest" id="tag_suggest_{{ .ID }}">
           {{ $sugg := index $sugglist .ID }}
           {{ if gt (len $sugg) 0 }}
           <br />
           {{ range $sugg }}
-          {{ .Name }} ({{ .Score }})&nbsp;
+          {{ .Name }} ({{ fmt_float .Score }})&nbsp;
           {{ end }}
           {{ end }}
         </div>

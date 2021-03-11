@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-11 17:56:09 krylon>
+// Time-stamp: <2021-03-11 21:44:15 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -129,14 +129,29 @@ func (adv *Advisor) Suggest(item *feed.Item) map[string]SuggestedTag {
 	var (
 		sugg map[string]SuggestedTag
 		res  map[bayesian.Class]float64
+		// class   bayesian.Class
+		// certain bool
 	)
 
 	res, _, _ = adv.cls.Classify(adv.tokenize(item)...)
 
 	sugg = make(map[string]SuggestedTag, len(res))
 
+	// if certain {
+	// 	// var t = adv.tags[string(class)]
+	// 	sugg[string(class)] = SuggestedTag{
+	// 		Tag:   adv.tags[string(class)],
+	// 		Score: res[class],
+	// 	}
+	// 	return sugg
+	// }
+
 	for c, r := range res {
-		adv.log.Printf("[TRACE] Item %q (%d): Tag %q -> %.2f\n",
+		// if r < 0 {
+		// 	continue
+		// }
+
+		adv.log.Printf("[TRACE] SUGGEST Item %q (%d): Tag %q -> %.2f\n",
 			item.Title,
 			item.ID,
 			c,

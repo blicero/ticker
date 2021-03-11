@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-11 10:21:49 krylon>
+// Time-stamp: <2021-03-11 18:41:40 krylon>
 
 package web
 
@@ -12,8 +12,6 @@ import (
 )
 
 func (srv *Server) suggestTags(items []feed.Item) (map[int64]map[string]advisor.SuggestedTag, error) {
-	srv.log.Println("[ERROR] suggestTags: IMPLEMENTME!!!")
-
 	var (
 		err error
 		adv *advisor.Advisor
