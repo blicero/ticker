@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-10 14:48:18 krylon>
+// Time-stamp: <2021-03-11 11:00:09 krylon>
 
 package web
 
@@ -298,6 +298,13 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
+	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
+		msg = fmt.Sprintf("Cannot generate suggestions: %s\n",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+		return
 	}
 
 	data.FeedMap = make(map[int64]feed.Feed, len(data.Feeds))
@@ -370,18 +377,7 @@ func (srv *Server) handleFeedAll(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
-	} /* else if data.Items, err = db.ItemGetRecent(recentCnt); err != nil {
-		msg = fmt.Sprintf("Cannot query all Items: %s",
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	} */
-
-	// data.FeedMap = make(map[int64]feed.Feed, len(data.Feeds))
-	// for _, f := range data.Feeds {
-	// 	data.FeedMap[f.ID] = f
-	// }
+	}
 
 	data.Messages = srv.getMessages()
 
@@ -575,6 +571,12 @@ func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
+	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
+		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
 	}
 
 	data.FeedMap = map[int64]feed.Feed{id: *data.Feed}
@@ -660,6 +662,12 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
 		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
+		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
 		return
 	} else if data.AllTags, err = db.TagGetAll(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
@@ -862,6 +870,12 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
+	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
+		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
 	}
 
 	data.Messages = srv.getMessages()
@@ -1059,6 +1073,12 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
+		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
 		return
 	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
@@ -2019,6 +2039,12 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 			id,
 			err.Error())
 		goto SEND_ERROR_MESSAGE
+	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
+		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
 	} else if data.AllTags, err = db.TagGetAll(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
@@ -2084,28 +2110,6 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 				item.ID,
 				err.Error())
 		}
-
-		// score, class, certain = rev.Classify(&item)
-
-		// if certain {
-		// 	switch class {
-		// 	case classifier.Good:
-		// 		data.Items[idx].Rating = score[class]
-		// 	case classifier.Bad:
-		// 		data.Items[idx].Rating = -score[class]
-		// 	default:
-		// 		srv.log.Printf("[CANTHAPPEN] Unexpected classification for news Item %d (%q): %s\n",
-		// 			item.ID,
-		// 			item.Title,
-		// 			class)
-		// 		continue
-		// 	}
-
-		// 	srv.log.Printf("[TRACE] Rate Item %d (%q) - %f\n",
-		// 		item.ID,
-		// 		item.Title,
-		// 		data.Items[idx].Rating)
-		// }
 	}
 
 	if err = tmpl.Execute(&buf, &data); err != nil {

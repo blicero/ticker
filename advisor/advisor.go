@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-10 22:28:18 krylon>
+// Time-stamp: <2021-03-11 17:56:09 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -26,6 +26,12 @@ import (
 
 var nonword = regexp.MustCompile(`\W+`)
 
+// SuggestedTag is a suggestion to attach a specific Tag to a specific Item.
+type SuggestedTag struct {
+	tag.Tag
+	Score float64
+}
+
 // Advisor can suggest Tags for News Items.
 type Advisor struct {
 	db   *database.Database
@@ -39,7 +45,7 @@ func NewAdvisor() (*Advisor, error) {
 	var (
 		err error
 		adv = &Advisor{
-			cls: bayesian.NewClassifier(bayesian.MultinomialTf),
+			// cls: bayesian.NewClassifier(bayesian.MultinomialTf),
 		}
 	)
 
@@ -112,24 +118,36 @@ func (adv *Advisor) Train() error {
 		}
 	}
 
+	adv.cls = bayesian.NewClassifier(bayesian.MultinomialTf)
 	adv.cls.Learn(docs...)
 
 	return nil
 } // func (adv *Advisor) Train() error
 
 // Suggest returns a map Tags and how likely they apply to the given Item.
-func (adv *Advisor) Suggest(item *feed.Item) map[string]float64 {
+func (adv *Advisor) Suggest(item *feed.Item) map[string]SuggestedTag {
 	var (
-		sugg map[string]float64
+		sugg map[string]SuggestedTag
 		res  map[bayesian.Class]float64
 	)
 
 	res, _, _ = adv.cls.Classify(adv.tokenize(item)...)
 
-	sugg = make(map[string]float64, len(res))
+	sugg = make(map[string]SuggestedTag, len(res))
 
 	for c, r := range res {
-		sugg[string(c)] = r
+		adv.log.Printf("[TRACE] Item %q (%d): Tag %q -> %.2f\n",
+			item.Title,
+			item.ID,
+			c,
+			r)
+
+		var t = adv.tags[string(c)]
+
+		sugg[t.Name] = SuggestedTag{
+			Tag:   t,
+			Score: r,
+		}
 	}
 
 	return sugg

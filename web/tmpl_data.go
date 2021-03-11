@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-03-07 02:42:12 krylon>
+// Time-stamp: <2021-03-11 00:25:44 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -11,6 +11,7 @@ package web
 import (
 	"crypto/sha512"
 	"fmt"
+	"ticker/advisor"
 	"ticker/common"
 	"ticker/feed"
 	"ticker/tag"
@@ -44,13 +45,14 @@ func (m *message) Checksum() string {
 } // func (m *message) Checksum() string
 
 type tmplDataBase struct {
-	Title        string
-	Messages     []message
-	Debug        bool
-	TestMsgGen   bool
-	URL          string
-	AllTags      []tag.Tag
-	TagHierarchy []tag.Tag
+	Title          string
+	Messages       []message
+	Debug          bool
+	TestMsgGen     bool
+	URL            string
+	AllTags        []tag.Tag
+	TagHierarchy   []tag.Tag
+	TagSuggestions map[int64]map[string]advisor.SuggestedTag
 }
 
 // TagLinkData returns data for use in the tag_link_form template.
