@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-10 22:29:04 krylon>
+# Time-stamp: <2021-03-12 00:50:26 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-10 Mi 22:29]
+   #+CAPTION: Clock summary at [2021-03-12 Fr 00:50]
    | Headline                         | Time       |          |          |         |       |      |
    |----------------------------------+------------+----------+----------+---------+-------+------|
-   | *Total time*                     | *7d 11:26* |          |          |         |       |      |
+   | *Total time*                     | *7d 19:46* |          |          |         |       |      |
    |----------------------------------+------------+----------+----------+---------+-------+------|
-   | Ticker                           | 7d 11:26   |          |          |         |       |      |
+   | Ticker                           | 7d 19:46   |          |          |         |       |      |
    | \_  Main                         |            |     0:56 |          |         |       |      |
    | \_    Shutdown                   |            |          |     0:56 |         |       |      |
-   | \_  Components [22/25]           |            | 7d 10:30 |          |         |       |      |
+   | \_  Components [22/25]           |            | 7d 18:50 |          |         |       |      |
    | \_    Feed [6/6]                 |            |          |  1d 8:39 |         |       |      |
    | \_      Homepage                 |            |          |          |    0:12 |       |      |
    | \_      Rating [3/3]             |            |          |          | 1d 5:11 |       |      |
@@ -40,11 +40,11 @@
    | \_        Subscribe              |            |          |          |         |  2:35 |      |
    | \_      Limit description length |            |          |          |    1:32 |       |      |
    | \_      Manage Feeds             |            |          |          |   11:46 |       |      |
-   | \_    Tags [3/4]                 |            |          | 1d 19:15 |         |       |      |
+   | \_    Tags [3/4]                 |            |          |  2d 3:35 |         |       |      |
    | \_      Database                 |            |          |          |   10:59 |       |      |
    | \_        Hierarchy              |            |          |          |         |  8:58 |      |
    | \_      Web interface            |            |          |          | 1d 4:45 |       |      |
-   | \_      Suggestions              |            |          |          |    1:41 |       |      |
+   | \_      Suggestions              |            |          |          |   10:01 |       |      |
    | \_    Search [3/3]               |            |          |     3:30 |         |       |      |
    | \_    Read Later [1/2]           |            |          |    19:48 |         |       |      |
    | \_      Web interface            |            |          |          |   17:46 |       |      |
@@ -328,6 +328,11 @@
      :END:     
 **** TODO Suggestions
      :LOGBOOK:
+     CLOCK: [2021-03-11 Do 21:37]--[2021-03-12 Fr 00:50] =>  3:13
+     CLOCK: [2021-03-11 Do 18:19]--[2021-03-11 Do 19:45] =>  1:26
+     CLOCK: [2021-03-11 Do 16:30]--[2021-03-11 Do 18:08] =>  1:38
+     CLOCK: [2021-03-11 Do 10:35]--[2021-03-11 Do 11:52] =>  1:17
+     CLOCK: [2021-03-10 Mi 23:09]--[2021-03-10 Mi 23:55] =>  0:46
      CLOCK: [2021-03-10 Mi 20:47]--[2021-03-10 Mi 22:28] =>  1:41
      :END:
      I would like to automatically suggest Tags, based on what Tags have been
