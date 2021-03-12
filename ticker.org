@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-12 00:50:26 krylon>
+# Time-stamp: <2021-03-12 22:16:51 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,41 +13,41 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-12 Fr 00:50]
-   | Headline                         | Time       |          |          |         |       |      |
-   |----------------------------------+------------+----------+----------+---------+-------+------|
-   | *Total time*                     | *7d 19:46* |          |          |         |       |      |
-   |----------------------------------+------------+----------+----------+---------+-------+------|
-   | Ticker                           | 7d 19:46   |          |          |         |       |      |
-   | \_  Main                         |            |     0:56 |          |         |       |      |
-   | \_    Shutdown                   |            |          |     0:56 |         |       |      |
-   | \_  Components [22/25]           |            | 7d 18:50 |          |         |       |      |
-   | \_    Feed [6/6]                 |            |          |  1d 8:39 |         |       |      |
-   | \_      Homepage                 |            |          |          |    0:12 |       |      |
-   | \_      Rating [3/3]             |            |          |          | 1d 5:11 |       |      |
-   | \_        Web Frontend           |            |          |          |         | 12:09 |      |
-   | \_        Classifier             |            |          |          |         | 16:25 |      |
-   | \_    Database [1/1]             |            |          |    21:55 |         |       |      |
-   | \_      Due Feeds                |            |          |          |    1:26 |       |      |
-   | \_    Reader [2/2]               |            |          |    18:06 |         |       |      |
-   | \_      Timestamps               |            |          |          |    0:15 |       |      |
-   | \_      Pseudo-duplicates        |            |          |          |    2:01 |       |      |
-   | \_    Web interface [6/7]        |            |          | 1d 15:17 |         |       |      |
-   | \_      Embed                    |            |          |          |    3:00 |       |      |
-   | \_      Snazzy [3/3]             |            |          |          |    4:04 |       |      |
-   | \_        Ooopsie [1/1]          |            |          |          |         |  0:51 |      |
-   | \_          Read later form      |            |          |          |         |       | 0:51 |
-   | \_        Subscribe              |            |          |          |         |  2:35 |      |
-   | \_      Limit description length |            |          |          |    1:32 |       |      |
-   | \_      Manage Feeds             |            |          |          |   11:46 |       |      |
-   | \_    Tags [3/4]                 |            |          |  2d 3:35 |         |       |      |
-   | \_      Database                 |            |          |          |   10:59 |       |      |
-   | \_        Hierarchy              |            |          |          |         |  8:58 |      |
-   | \_      Web interface            |            |          |          | 1d 4:45 |       |      |
-   | \_      Suggestions              |            |          |          |   10:01 |       |      |
-   | \_    Search [3/3]               |            |          |     3:30 |         |       |      |
-   | \_    Read Later [1/2]           |            |          |    19:48 |         |       |      |
-   | \_      Web interface            |            |          |          |   17:46 |       |      |
+   #+CAPTION: Clock summary at [2021-03-12 Fr 22:16]
+   | Headline                         | Time      |         |          |         |       |      |
+   |----------------------------------+-----------+---------+----------+---------+-------+------|
+   | *Total time*                     | *8d 1:11* |         |          |         |       |      |
+   |----------------------------------+-----------+---------+----------+---------+-------+------|
+   | Ticker                           | 8d 1:11   |         |          |         |       |      |
+   | \_  Main                         |           |    0:56 |          |         |       |      |
+   | \_    Shutdown                   |           |         |     0:56 |         |       |      |
+   | \_  Components [23/25]           |           | 8d 0:15 |          |         |       |      |
+   | \_    Feed [6/6]                 |           |         |  1d 8:39 |         |       |      |
+   | \_      Homepage                 |           |         |          |    0:12 |       |      |
+   | \_      Rating [3/3]             |           |         |          | 1d 5:11 |       |      |
+   | \_        Web Frontend           |           |         |          |         | 12:09 |      |
+   | \_        Classifier             |           |         |          |         | 16:25 |      |
+   | \_    Database [1/1]             |           |         |    21:55 |         |       |      |
+   | \_      Due Feeds                |           |         |          |    1:26 |       |      |
+   | \_    Reader [2/2]               |           |         |    18:06 |         |       |      |
+   | \_      Timestamps               |           |         |          |    0:15 |       |      |
+   | \_      Pseudo-duplicates        |           |         |          |    2:01 |       |      |
+   | \_    Web interface [6/7]        |           |         | 1d 20:42 |         |       |      |
+   | \_      Embed                    |           |         |          |    3:00 |       |      |
+   | \_      Snazzy [3/3]             |           |         |          |    4:04 |       |      |
+   | \_        Ooopsie [1/1]          |           |         |          |         |  0:51 |      |
+   | \_          Read later form      |           |         |          |         |       | 0:51 |
+   | \_        Subscribe              |           |         |          |         |  2:35 |      |
+   | \_      Limit description length |           |         |          |    1:32 |       |      |
+   | \_      Manage Feeds             |           |         |          |   17:11 |       |      |
+   | \_    Tags [3/4]                 |           |         |  2d 3:35 |         |       |      |
+   | \_      Database                 |           |         |          |   10:59 |       |      |
+   | \_        Hierarchy              |           |         |          |         |  8:58 |      |
+   | \_      Web interface            |           |         |          | 1d 4:45 |       |      |
+   | \_      Suggestions              |           |         |          |   10:01 |       |      |
+   | \_    Search [3/3]               |           |         |     3:30 |         |       |      |
+   | \_    Read Later [2/2]           |           |         |    19:48 |         |       |      |
+   | \_      Web interface            |           |         |          |   17:46 |       |      |
    #+END:
 
 ** Questions
@@ -58,7 +58,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [22/25]
+** Components [23/25]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -276,6 +276,7 @@
 **** DONE [#C] Manage Feeds
      CLOSED: [2021-03-09 Di 21:34]
      :LOGBOOK:
+     CLOCK: [2021-03-12 Fr 16:51]--[2021-03-12 Fr 22:16] =>  5:25
      CLOCK: [2021-03-08 Mo 20:34]--[2021-03-08 Mo 22:40] =>  2:06
      CLOCK: [2021-03-08 Mo 17:13]--[2021-03-08 Mo 20:06] =>  2:53
      CLOCK: [2021-03-08 Mo 10:36]--[2021-03-08 Mo 10:50] =>  0:14
@@ -365,7 +366,7 @@
      requires support in the web interface.
 **** DONE Web interface
      CLOSED: [2021-02-23 Di 23:30]
-*** Read Later [1/2]
+*** Read Later [2/2]
     :LOGBOOK:
     CLOCK: [2021-03-02 Di 17:19]--[2021-03-02 Di 18:22] =>  1:03
     CLOCK: [2021-03-02 Di 14:45]--[2021-03-02 Di 15:05] =>  0:20
@@ -375,7 +376,8 @@
     not get lost.
 **** DONE Database
      CLOSED: [2021-03-03 Mi 10:23]
-**** TODO [#F] Web interface
+**** DONE [#F] Web interface
+     CLOSED: [2021-03-12 Fr 16:51]
      :LOGBOOK:
      CLOCK: [2021-03-05 Fr 16:21]--[2021-03-05 Fr 18:38] =>  2:17
      CLOCK: [2021-03-05 Fr 14:21]--[2021-03-05 Fr 15:03] =>  0:42
