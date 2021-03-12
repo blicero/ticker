@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-03-11 00:25:44 krylon>
+// Time-stamp: <2021-03-12 18:04:42 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -67,13 +67,6 @@ type tmplDataIndex struct {
 	tmplDataBase
 	FeedMap map[int64]feed.Feed
 	Feeds   []feed.Feed
-	Items   []feed.Item
-}
-
-type tmplDataFeedDetails struct {
-	tmplDataBase
-	FeedMap map[int64]feed.Feed
-	Feed    *feed.Feed
 	Items   []feed.Item
 }
 

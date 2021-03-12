@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-11 11:00:09 krylon>
+// Time-stamp: <2021-03-12 18:07:08 krylon>
 
 package web
 
@@ -40,7 +40,6 @@ var assets embed.FS
 
 const (
 	defaultPoolSize = 4
-	recentCnt       = 20
 )
 
 // Server implements the web interface
@@ -53,7 +52,6 @@ type Server struct {
 	tmpl      *template.Template
 	mimeTypes map[string]string
 	pool      *database.Pool
-	// rev       *classifier.Classifier
 }
 
 // Create creates a new Server instance.
@@ -135,7 +133,6 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/feed/all", srv.handleFeedAll)
 	srv.router.HandleFunc("/feed/form", srv.handleFeedForm)
 	srv.router.HandleFunc("/feed/subscribe", srv.handleFeedSubscribe)
-	srv.router.HandleFunc("/feed/{id:(?:\\d+)$}", srv.handleFeedDetails)
 
 	srv.router.HandleFunc("/items/{page:(?:\\d+|all)$}", srv.handleItems)
 
@@ -159,6 +156,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/feed_update", srv.handleFeedUpdate)
 	srv.router.HandleFunc("/ajax/feed_set_active/{id:(?:\\d+)}/{active:(?:true|false)$}", srv.handleFeedActiveToggle)
 	srv.router.HandleFunc("/ajax/items_by_tag/{id:(?:\\d+)$}", srv.handleItemsByTag)
+	srv.router.HandleFunc("/ajax/items_by_feed/{id:(?:\\d+)$}", srv.handleItemsByFeed)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -500,100 +498,6 @@ func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, dstURL, http.StatusFound)
 } // func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request)
 
-func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle %s from %s\n",
-		r.URL,
-		r.RemoteAddr)
-
-	const tmplName = "feed_details"
-
-	var (
-		err        error
-		msg, idStr string
-		id         int64
-		db         *database.Database
-		tmpl       *template.Template
-		data       = tmplDataFeedDetails{
-			tmplDataBase: tmplDataBase{
-				Debug: common.Debug,
-				URL:   r.URL.String(),
-			},
-		}
-	)
-
-	vars := mux.Vars(r)
-
-	idStr = vars["id"]
-
-	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
-		msg = fmt.Sprintf("Cannot parse ID %q: %s",
-			idStr,
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, "/index", http.StatusFound)
-		return
-	}
-
-	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
-		msg = fmt.Sprintf("Could not find template %q", tmplName)
-		srv.log.Println("[CRITICAL] " + msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	}
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if data.Feed, err = db.FeedGetByID(id); err != nil {
-		msg = fmt.Sprintf("Cannot query all Feeds: %s",
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
-		msg = fmt.Sprintf("Cannot load all Tags: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
-		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.Items, err = db.ItemGetByFeed(id, recentCnt); err != nil {
-		msg = fmt.Sprintf("Cannot query all Items: %s",
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
-		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	}
-
-	data.FeedMap = map[int64]feed.Feed{id: *data.Feed}
-
-	data.Title = data.Feed.Name
-	data.Messages = srv.getMessages()
-
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
-	if err = tmpl.Execute(w, &data); err != nil {
-		msg = fmt.Sprintf("Error rendering template %q: %s",
-			tmplName,
-			err.Error())
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-	}
-} // func (srv *Server) handleFeedDetails(w http.ResponseWriter, r *http.Request)
-
 func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
 		r.URL.EscapedPath())
@@ -704,11 +608,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for idx, item := range data.Items {
-		var (
-			// certain bool
-			// score   map[bayesian.Class]float64
-			class string
-		)
+		var class string
 
 		if !math.IsNaN(item.Rating) {
 			if item.Rating == 1 {
@@ -742,28 +642,6 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 				item.ID,
 				err.Error())
 		}
-
-		// score, class, certain = rev.Classify(&item)
-
-		// if certain {
-		// 	switch class {
-		// 	case classifier.Good:
-		// 		data.Items[idx].Rating = score[class]
-		// 	case classifier.Bad:
-		// 		data.Items[idx].Rating = -score[class]
-		// 	default:
-		// 		srv.log.Printf("[CANTHAPPEN] Unexpected classification for news Item %d (%q): %s\n",
-		// 			item.ID,
-		// 			item.Title,
-		// 			class)
-		// 		continue
-		// 	}
-
-		// 	srv.log.Printf("[TRACE] Rate Item %d (%q) - %f\n",
-		// 		item.ID,
-		// 		item.Title,
-		// 		data.Items[idx].Rating)
-		// }
 	}
 
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
@@ -2058,17 +1936,11 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 	if err = rev.Train(); err != nil {
 		msg = fmt.Sprintf("Cannot train Classifier: %s",
 			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, "/index", http.StatusFound)
-		return
+		goto SEND_ERROR_MESSAGE
 	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
+		goto SEND_ERROR_MESSAGE
 	}
 
 	for idx, item := range data.Items {
@@ -2144,3 +2016,157 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const tmplName = "items"
+
+	type response struct {
+		Status  bool
+		Message string
+	}
+
+	var (
+		err               error
+		db                *database.Database
+		tmpl              *template.Template
+		idStr, msg, reply string
+		id                int64
+		buf               bytes.Buffer
+		res               response
+		t                 *tag.Tag
+		rev               *classifier.Classifier
+		raw               []byte
+		data              = tmplDataItems{
+			tmplDataBase: tmplDataBase{
+				Title: "Items",
+				Debug: common.Debug,
+				URL:   r.URL.String(),
+			},
+		}
+	)
+
+	vars := mux.Vars(r)
+
+	idStr = vars["id"]
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("[ERROR] Cannot parse Tag ID %q: %s\n",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Did not find template %q", tmplName)
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if rev, err = classifier.New(); err != nil {
+		msg = fmt.Sprintf("Cannot create Classifier: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if data.Items, err = db.ItemGetByFeed(id, -1); err != nil {
+		msg = fmt.Sprintf("Cannot load Items for Tag %s (%d): %s",
+			t.Name,
+			id,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
+		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot load all Tags: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
+		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	if err = rev.Train(); err != nil {
+		msg = fmt.Sprintf("Cannot train Classifier: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
+		msg = fmt.Sprintf("Cannot get all Feeds: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	for idx, item := range data.Items {
+		var class string
+
+		if !math.IsNaN(item.Rating) {
+			if item.Rating == 1 {
+				data.Items[idx].Rating = math.Inf(1)
+			} else if item.Rating == 0 {
+				data.Items[idx].Rating = math.Inf(-1)
+			} else {
+				msg = fmt.Sprintf("Unexpected Rating for Item %s (%d): %f",
+					item.Title,
+					item.ID,
+					item.Rating)
+				srv.log.Println("[ERROR] " + msg)
+				srv.SendMessage(msg)
+				http.Redirect(w, r, r.Referer(), http.StatusFound)
+				return
+			}
+
+			continue
+		} else if class, err = rev.Classify(&item); err != nil {
+			srv.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+		} else if class == classifier.Good {
+			data.Items[idx].Rating = 100
+		} else if class == classifier.Bad {
+			data.Items[idx].Rating = -100
+		} else {
+			srv.log.Printf("[ERROR] Unexpected classification for Item %s (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+		}
+	}
+
+	if err = tmpl.Execute(&buf, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %s: %s",
+			tmplName,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	res.Status = true
+	res.Message = buf.String()
+
+	if raw, err = json.Marshal(&res); err != nil {
+		msg = fmt.Sprintf("Cannot serialize response: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if _, err = w.Write(raw); err != nil {
+		msg = fmt.Sprintf("Cannot send message to client %s: %s",
+			r.RemoteAddr,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.log.Printf("[ERROR] %s\n", msg)
+	}
+
+	return
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request)

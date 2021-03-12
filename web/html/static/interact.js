@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-10 14:46:17 krylon>
+// Time-stamp: <2021-03-12 18:09:52 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -739,6 +739,7 @@ function display_tag_items(tag_id) {
                      function(reply) {
                          if (reply.Status) {
                              $("#item_div")[0].innerHTML = reply.Message;
+                             shrink_images();
                          } else {
                              console.log(reply.Message);
                              alert(reply.Message);
@@ -750,3 +751,48 @@ function display_tag_items(tag_id) {
         console.log(`Error getting Items: ${status_text} - ${xhr}`);
     });
 } // function display_tag_items(tag_id)
+
+// Found here: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio#14731922
+function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight) {
+    var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+
+    return { width: srcWidth*ratio, height: srcHeight*ratio };
+} // function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight)
+
+function shrink_images() {
+    const selector = "table.items img";
+    const maxHeight = 300;
+    const maxWidth = 300;
+
+    $(selector).each(function() {
+        var img = $(this)[0];
+        if (img.width > maxWidth || img.height > maxHeight) {
+            var size = shrink_img(img.width, img.height, maxWidth, maxHeight);
+
+            img.width = size.width;
+            img.height = size.height;
+        }
+    });
+} // function shrink_images()
+
+function load_feed_items(feed_id) {
+    const div_id = "#item_div";
+    const url = `/ajax/items_by_feed/${feed_id}`;
+
+    var req = $.get(url,
+                     {},
+                     function(reply) {
+                         if (reply.Status) {
+                             $("#item_div")[0].innerHTML = reply.Message;
+                             shrink_images();
+                         } else {
+                             console.log(reply.Message);
+                             alert(reply.Message);
+                         }
+                     },
+                     "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        console.log(`Error getting Items: ${status_text} - ${xhr}`);
+    });
+} // function load_feed_items(feed_id)

@@ -1,6 +1,6 @@
 {{ define "feed_all" }}
 {{/* Created on 07. 03. 2021 */}}
-{{/* Time-stamp: <2021-03-08 21:55:04 krylon> */}}
+{{/* Time-stamp: <2021-03-12 18:03:18 krylon> */}}
 <html>
   {{ template "head" . }}
 
@@ -68,20 +68,10 @@
                min="0"
                max="10080" />
       </div class="row">
-      {{/*
-      <div class="form-check">
-        <label for="active" class="col">Active?</label>
-        <input type="checkbox"
-               class="col"
-               name="active"
-               id="form_active"
-               checked />
-      </div>
-      */}}
       <div class="row">
         <button type="button"
                 class="btn btn-secondary col"
-                onclicked="feed_form_reset();">
+                onclick="feed_form_reset();">
           Cancel
         </button>
         
@@ -121,9 +111,14 @@
                target="_blank">{{ .Name }}</a>
             &nbsp;
             <button type="button"
-                    class="btn btn-primary btn-sm"
+                    class="btn btn-sm btn-primary btn-sm"
                     onclick="edit_feed({{ .ID }});">
               Edit
+            </button>
+            <button type="button"
+                    class="btn btn-sm btn-link"
+                    onclick="load_feed_items({{ .ID }});">
+              Items
             </button>
           </td>
           <td>
@@ -139,6 +134,9 @@
         {{ end }}
       </tbody>
     </table>
+
+    <div class="container-fluid" id="item_div">
+    </div>
 
     {{ template "footer" . }}
   </body>
