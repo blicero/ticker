@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-10 13:38:15 krylon>
+// Time-stamp: <2021-03-12 17:58:27 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1561,7 +1561,12 @@ EXEC_QUERY:
 
 	defer rows.Close() // nolint: errcheck,gosec
 
-	var items = make([]feed.Item, 0, limit)
+	var allocSize int
+	if limit > 0 {
+		allocSize = int(limit)
+	}
+
+	var items = make([]feed.Item, 0, allocSize)
 
 	for rows.Next() {
 		var (
