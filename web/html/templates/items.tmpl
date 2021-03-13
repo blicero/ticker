@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-03-12 17:12:56 krylon> */}}
+{{/* Time-stamp: <2021-03-13 16:02:29 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -8,10 +8,10 @@
   <thead>
     <tr>
       <th>Time</th>
-      <th>Rating</th>
-      <th>Tags</th>
       <th>Feed</th>
       <th>Title</th>
+      <th>Rating</th>
+      <th>Tags</th>
       <th>Summary</th>
     </tr>
   </thead>
@@ -32,6 +32,14 @@
         onclick="read_later_show({{ .ID }});" />
         <br />
         {{ template "later_form" . }}
+      </td>
+            <td><a href="/feed/{{ .FeedID }}">
+        {{ (index $feeds .FeedID).Name }}
+      </a></td>
+      <td>
+        <a href="{{ .URL }}" target="_blank">
+          {{ .Title }}
+        </a>
       </td>
       <td id="item_rating_{{ .ID }}">
         <small>{{ .RatingString }}</small><br />
@@ -84,14 +92,6 @@
         <br /><br />
         {{ $arg := $dot.TagLinkData . }}
         {{ template "tag_link_form" $arg }}
-      </td>
-      <td><a href="/feed/{{ .FeedID }}">
-        {{ (index $feeds .FeedID).Name }}
-      </a></td>
-      <td>
-        <a href="{{ .URL }}" target="_blank">
-          {{ .Title }}
-        </a>
       </td>
       <td>
         {{ truncate .Description 500 }}
