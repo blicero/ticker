@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-12 18:07:08 krylon>
+// Time-stamp: <2021-03-13 15:26:36 krylon>
 
 package web
 
@@ -493,9 +493,9 @@ func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var dstURL = fmt.Sprintf("/feed/%d", f.ID)
+	//var dstURL = fmt.Sprintf("/feed/%d", f.ID)
 
-	http.Redirect(w, r, dstURL, http.StatusFound)
+	http.Redirect(w, r, r.Referer(), http.StatusFound)
 } // func (srv *Server) handleFeedSubscribe(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
@@ -516,7 +516,6 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		rev                 *classifier.Classifier
 		data                = tmplDataItems{
 			tmplDataBase: tmplDataBase{
-				Title: "Main",
 				Debug: common.Debug,
 				URL:   r.URL.String(),
 			},
@@ -538,9 +537,11 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if pageNo != -1 {
+		data.Title = fmt.Sprintf("Items page %d", pageNo+1)
 		cnt = itemCnt
 		offset = itemCnt * pageNo
 	} else {
+		data.Title = "All Items"
 		cnt = -1
 	}
 
