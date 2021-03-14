@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-03-13 16:02:29 krylon> */}}
+{{/* Time-stamp: <2021-03-14 16:51:01 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -94,7 +94,21 @@
         {{ template "tag_link_form" $arg }}
       </td>
       <td>
-        {{ truncate .Description 500 }}
+        {{/* {{ truncate .Description 500 }} */}}
+        {{ if gt (len .Description) 500 }}
+        <button class="btn btn-primary"
+                data-bs-toggle="collapse"
+                href="#collapse_item_{{ .ID }}"
+                aria-expanded="false"
+                aria-controls="#collapse_item_{{ .ID }}">
+          Description
+        </button>
+        <div class="collapse" id="collapse_item_{{ .ID }}">
+          {{ .Description }}
+        </div>
+        {{ else }}
+        {{ .Description }}
+        {{ end }}
       </td>
     </tr>
     {{ end }}
