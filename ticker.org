@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-13 17:51:15 krylon>
+# Time-stamp: <2021-03-14 16:55:06 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-13 Sa 17:51]
+   #+CAPTION: Clock summary at [2021-03-14 So 16:55]
    | Headline                               | Time      |         |          |         |       |      |
    |----------------------------------------+-----------+---------+----------+---------+-------+------|
-   | *Total time*                           | *8d 3:39* |         |          |         |       |      |
+   | *Total time*                           | *8d 3:53* |         |          |         |       |      |
    |----------------------------------------+-----------+---------+----------+---------+-------+------|
-   | Ticker                                 | 8d 3:39   |         |          |         |       |      |
+   | Ticker                                 | 8d 3:53   |         |          |         |       |      |
    | \_  Main                               |           |    0:56 |          |         |       |      |
    | \_    Shutdown                         |           |         |     0:56 |         |       |      |
-   | \_  Components [23/26]                 |           | 8d 2:43 |          |         |       |      |
+   | \_  Components [24/26]                 |           | 8d 2:57 |          |         |       |      |
    | \_    Feed [6/6]                       |           |         |  1d 8:39 |         |       |      |
    | \_      Homepage                       |           |         |          |    0:12 |       |      |
    | \_      Rating [3/3]                   |           |         |          | 1d 5:11 |       |      |
@@ -32,8 +32,8 @@
    | \_    Reader [2/2]                     |           |         |    18:06 |         |       |      |
    | \_      Timestamps                     |           |         |          |    0:15 |       |      |
    | \_      Pseudo-duplicates              |           |         |          |    2:01 |       |      |
-   | \_    Web interface [6/7]              |           |         | 1d 23:10 |         |       |      |
-   | \_      Various small-ish improvements |           |         |          |    2:28 |       |      |
+   | \_    Web interface [7/8]              |           |         | 1d 23:24 |         |       |      |
+   | \_      Various small-ish improvements |           |         |          |    2:42 |       |      |
    | \_      Embed                          |           |         |          |    3:00 |       |      |
    | \_      Snazzy [3/3]                   |           |         |          |    4:04 |       |      |
    | \_        Ooopsie [1/1]                |           |         |          |         |  0:51 |      |
@@ -59,7 +59,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [23/26]
+** Components [24/26]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -172,7 +172,7 @@
      it works.
      Simply skipping the Item if the headline already exists, is not a good
      idea, either, I should at least take the timestamps into consideration.
-*** Web interface [6/7]
+*** Web interface [7/8]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -186,8 +186,10 @@
     CLOCK: [2021-02-12 Fr 17:21]--[2021-02-12 Fr 19:04] =>  1:43
     CLOCK: [2021-02-12 Fr 15:23]--[2021-02-12 Fr 16:34] =>  1:11
     :END:
-**** TODO Various small-ish improvements
+**** DONE Various small-ish improvements
+     CLOSED: [2021-03-14 So 16:54]
      :LOGBOOK:
+     CLOCK: [2021-03-14 So 16:40]--[2021-03-14 So 16:54] =>  0:14
      CLOCK: [2021-03-13 Sa 15:23]--[2021-03-13 Sa 17:51] =>  2:28
      :END:
 **** DONE Embed
