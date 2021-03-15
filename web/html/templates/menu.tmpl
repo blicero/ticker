@@ -1,5 +1,5 @@
 {{ define "menu" }}
-{{/* Time-stamp: <2021-03-07 18:29:02 krylon> */}}
+{{/* Time-stamp: <2021-03-15 18:54:41 krylon> */}}
 <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #D4D4D4">
   <div class="container-fluid">
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
@@ -87,23 +87,14 @@
           <a href="/later/all" class="nav-link">Bookmarks</a>
         </li>
 
+        {{/*
         <li class="nav-item">
           <input type="button"
                  class="btn btn-light small navbar-link"
                  value="Perform DB maintenance"
                  onclick="db_maintenance();" />
         </li>
-
-        <li class="nav-item">
-          <form>
-            <label for="hide_boring">Hide boring?</label>
-            <input type="checkbox"
-                   class="navbar-link"
-                   name="hide_boring"
-                   value="Hide Boring"
-                   onclick="toggle_hide_boring();" />
-          </form>
-        </li>
+        */}}
 
         <li class="nav-item">
           <form action="/search" method="post" class="d-flex navbar-link">
@@ -116,10 +107,28 @@
         </li>
 
         <li class="nav-item">
+          <a class="nav-link" href="/search_more">
+            More Search
+          </a>
+        </li>
+
+        {{/*
+        <li class="nav-item">
           <input type="button"
                  class="btn btn-light navbar-link"
                  value="Rebuild FTS"
                  onclick="rebuildFTS();" />
+        </li>
+        */}}
+
+        <li class="nav-item">
+          <label class="nav-link" for="hide_boring">Hide boring?</label>
+          <input type="checkbox"
+                 id="hide_boring"
+                 class="nav-link"
+                 name="hide_boring"
+                 value="Hide Boring"
+                 onclick="toggle_hide_boring();" />
         </li>
       </ul>
     </div>
