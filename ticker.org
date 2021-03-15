@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-14 16:55:06 krylon>
+# Time-stamp: <2021-03-15 20:59:49 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -59,7 +59,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [24/26]
+** Components [23/26]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -345,15 +345,17 @@
      :END:
      I would like to automatically suggest Tags, based on what Tags have been
      assigned to other Items.
-*** Search [3/3]
+*** Search [2/3]
     :LOGBOOK:
     CLOCK: [2021-02-23 Di 20:00]--[2021-02-23 Di 23:30] =>  3:30
     :END:
     I want to support full text search if possible. And it should be possible,
     SQLite has support for that. In fact, I think I already used it once, but
     I am somewhat fuzzy on the details.
-**** SUSPENDED [#F] Moar!
-     CLOSED: [2021-03-09 Di 21:52]
+**** TODO [#F] Moar!
+     :LOGBOOK:
+     CLOCK: [2021-03-15 Mo 16:40]--[2021-03-15 Mo 20:59] =>  4:19
+     :END:
      I would like to be able to search by tags, feeds, time... that's going to
      be tedious.
 
