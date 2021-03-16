@@ -1,6 +1,6 @@
 {{ define "search" }}
 {{/* Created on 15. 03. 2021 */}}
-{{/* Time-stamp: <2021-03-15 20:52:16 krylon> */}}
+{{/* Time-stamp: <2021-03-16 13:56:29 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -9,18 +9,47 @@
     {{ template "intro" . }}
 
     <form action="/search_more" method="post">
-      <div class="container-fluid">
+      <script>
+       var tag_list = {};
+
+       function toggle_search_tag(tag_id) {
+         const checkbox_id = `#search_tag_${tag_id}`;
+         var checkbox = $(checkbox_id)[0];
+
+         if (checkbox.checked) {
+           tag_list[tag_id] = true;
+         } else {
+           delete(tag_list[tag_id]);
+         }
+
+         $("#search_tag_id_list")[0].value = _.keys(tag_list).sort().join();
+       }
+
+       function reset_search_form() {
+         const msg = "reset_search_form() - IMPLEMENT ME!!!";
+         console.log(msg);
+         alert(msg);
+       }
+      </script>
+
+      <input type="hidden"
+             id="search_tag_id_list"
+             name="search_tag_id_list"
+             value="" />
+
+      <div class="container-fluid gap-2">
         <div class="row">
           <div class="col">
             <label for="search_terms">Search</label>
             <input type="text"
+                   class="form-control"
                    id="search_terms"
                    placeholder="Search..." />
           </div>
           <div class="col">
             <div class="dropdown">
               <button type="button"
-                      class="btn dropdown-toggle"
+                      class="btn dropdown-toggle form-control"
                       id="search_tag_toggle_btn"
                       role="button"
                       data-bs-toggle="dropdown"
@@ -28,18 +57,35 @@
                 Tags
               </button>
 
-              <ul class="dropdown-menu"
+              <ul class="dropdown-menu form-control"
                   aria-labelledby="search_tag_toggle_btn">
                 {{ range .AllTags }}
                 <li class="dropdown-item">
                   <label for="search_tag_{{ .ID }}">{{ .Name }}</label>
                   <input type="checkbox"
                          id="search_tag_{{ .ID }}"
+                         onchange="toggle_search_tag({{ .ID }});"
                          />
                 </li>
                 {{ end }}
               </ul>
             </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <input type="submit"
+                   class="btn btn-sm btn-primary"
+                   value="Search" />
+            &nbsp;
+            <input type="button"
+                   class="btn btn-sm btn-primary"
+                   value="Reset"
+                   onclick="reset_search_form();" />
+          </div>
+          <div class="col">
+            &nbsp;
           </div>
         </div>
       </div>
