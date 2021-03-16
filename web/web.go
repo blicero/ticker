@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-15 18:57:01 krylon>
+// Time-stamp: <2021-03-16 13:12:07 krylon>
 
 package web
 
@@ -796,6 +796,17 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 		msg = "Actual search is not implemented, yet."
 		srv.SendMessage(msg)
 		msg = ""
+
+		if err = r.ParseForm(); err != nil {
+			msg = fmt.Sprintf("Cannot parse form data: %s\n",
+				err.Error())
+			srv.log.Printf("[ERROR] %s\n", msg)
+			srv.SendMessage(msg)
+		}
+
+		var listStr = r.FormValue("search_tag_id_list")
+		srv.log.Printf("[DEBUG] Tag list to search: %s\n",
+			listStr)
 	}
 
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
