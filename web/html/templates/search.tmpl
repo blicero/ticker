@@ -1,6 +1,6 @@
 {{ define "search" }}
 {{/* Created on 15. 03. 2021 */}}
-{{/* Time-stamp: <2021-03-16 13:56:29 krylon> */}}
+{{/* Time-stamp: <2021-03-16 23:06:39 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -90,6 +90,10 @@
         </div>
       </div>
     </form>
+
+    <div class="container-fluid" id="results">
+      {{ template "items" . }}
+    </div>
     
     {{ template "footer" }}
   </body>

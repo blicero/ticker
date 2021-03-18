@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-16 13:12:07 krylon>
+// Time-stamp: <2021-03-17 21:17:28 krylon>
 
 package web
 
@@ -792,23 +792,6 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 		}
 	)
 
-	if strings.ToLower(r.Method) == "post" {
-		msg = "Actual search is not implemented, yet."
-		srv.SendMessage(msg)
-		msg = ""
-
-		if err = r.ParseForm(); err != nil {
-			msg = fmt.Sprintf("Cannot parse form data: %s\n",
-				err.Error())
-			srv.log.Printf("[ERROR] %s\n", msg)
-			srv.SendMessage(msg)
-		}
-
-		var listStr = r.FormValue("search_tag_id_list")
-		srv.log.Printf("[DEBUG] Tag list to search: %s\n",
-			listStr)
-	}
-
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		msg = fmt.Sprintf("Cannot find template %s: %s",
 			tmplName,
@@ -821,6 +804,26 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
+
+	if strings.ToLower(r.Method) == "post" {
+		msg = "Actual search is not implemented, yet."
+		srv.SendMessage(msg)
+		// msg = ""
+
+		if err = r.ParseForm(); err != nil {
+			msg = fmt.Sprintf("Cannot parse form data: %s\n",
+				err.Error())
+			srv.log.Printf("[ERROR] %s\n", msg)
+			srv.SendMessage(msg)
+		}
+
+		var listStr = r.FormValue("search_tag_id_list")
+		srv.log.Printf("[DEBUG] Tag list to search: %s\n",
+			listStr)
+		// var strList = strings.Split(listStr, ",")
+		// var tagList = make([]int64, len(strList))
+
+	}
 
 	if feeds, err = db.FeedGetAll(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
