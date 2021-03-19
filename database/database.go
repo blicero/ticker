@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-12 17:58:27 krylon>
+// Time-stamp: <2021-03-19 01:26:01 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1758,6 +1758,95 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) ItemGetFTS(fts string) ([]feed.Item, error)
+
+// ItemGetSearchExtended performs an extended search on the database,
+// retrieving Items by a search string and a list of tags.
+func (db *Database) ItemGetSearchExtended(qstr string, tags []int64) ([]feed.Item, error) {
+	const qid query.ID = query.ItemGetSearchExtended
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(qstr); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var items = make([]feed.Item, 0, 32)
+	var tmap = make(map[int64]bool, len(tags))
+
+	for _, tid := range tags {
+		tmap[tid] = true
+	}
+
+	for rows.Next() {
+		var (
+			item   feed.Item
+			rating *float64
+			stamp  int64
+		)
+
+		if err = rows.Scan(
+			&item.ID,
+			&item.FeedID,
+			&item.URL,
+			&item.Title,
+			&item.Description,
+			&stamp,
+			&item.Read,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+			return nil, err
+		}
+
+		var isTagged bool
+
+		for _, t := range item.Tags {
+			if tmap[t.ID] {
+				isTagged = true
+			}
+		}
+
+		if !isTagged {
+			continue
+		} else if rating != nil {
+			item.ManuallyRated = true
+			item.Rating = *rating
+		} else {
+			item.Rating = math.NaN()
+		}
+		item.Timestamp = time.Unix(stamp, 0)
+		items = append(items, item)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetSearchExtended(qstr string, tags []int64) ([]feed.Item, error)
 
 // ItemGetByTag fetches all Items the given Tag is attached to.
 //

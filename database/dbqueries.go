@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-10 20:33:43 krylon>
+// Time-stamp: <2021-03-18 22:55:30 krylon>
 
 package database
 
@@ -161,6 +161,37 @@ FROM item_index x
 INNER JOIN item i ON x.link = i.link
 WHERE item_index MATCH ?
 ORDER BY i.timestamp DESC, i.title ASC
+`,
+	query.ItemGetSearchExtended: `
+WITH items1 AS (
+SELECT
+    i.id,
+    i.feed_id,
+    i.link,
+    i.title,
+    i.description,
+    i.timestamp,
+    i.read,
+    i.rating
+FROM item_index x
+INNER JOIN item i ON x.link = i.link
+WHERE item_index MATCH ?
+ORDER BY i.timestamp DESC, i.title ASC
+)
+
+SELECT DISTINCT
+        i.id,
+        i.feed_id,
+        i.link,
+        i.title,
+        i.description,
+        i.timestamp,
+        i.read,
+        i.rating
+FROM tag_link l
+INNER JOIN items1 i ON l.item_id = i.id
+-- WHERE l.tag_id = ?
+ORDER BY i.timestamp DESC
 `,
 	query.ItemGetContent: `
 SELECT
