@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-17 21:17:28 krylon>
+// Time-stamp: <2021-03-19 01:06:41 krylon>
 
 package web
 
@@ -820,9 +820,31 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 		var listStr = r.FormValue("search_tag_id_list")
 		srv.log.Printf("[DEBUG] Tag list to search: %s\n",
 			listStr)
-		// var strList = strings.Split(listStr, ",")
-		// var tagList = make([]int64, len(strList))
+		var strList = strings.Split(listStr, ",")
+		var tagList = make([]int64, len(strList))
+		var qstr = r.FormValue("search_terms")
 
+		for idx, tstr := range strList {
+			if tagList[idx], err = strconv.ParseInt(tstr, 10, 64); err != nil {
+				msg = fmt.Sprintf("Cannot parse Tag ID %q: %s",
+					tstr,
+					err.Error())
+				srv.log.Println("[ERROR] " + msg)
+				srv.SendMessage(msg)
+				http.Redirect(w, r, r.Referer(), http.StatusFound)
+				return
+			}
+		}
+
+		if data.Items, err = db.ItemGetSearchExtended(qstr, tagList); err != nil {
+			msg = fmt.Sprintf("Cannot search for Items matching %q: %s",
+				qstr,
+				err.Error())
+			srv.log.Println("[ERROR] " + msg)
+			srv.SendMessage(msg)
+			http.Redirect(w, r, r.Referer(), http.StatusFound)
+			return
+		}
 	}
 
 	if feeds, err = db.FeedGetAll(); err != nil {
