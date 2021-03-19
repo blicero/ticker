@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-19 01:26:01 krylon>
+// Time-stamp: <2021-03-19 01:34:04 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1827,9 +1827,13 @@ EXEC_QUERY:
 
 		var isTagged bool
 
-		for _, t := range item.Tags {
-			if tmap[t.ID] {
-				isTagged = true
+		if len(tags) == 0 {
+			isTagged = true
+		} else {
+			for _, t := range item.Tags {
+				if tmap[t.ID] {
+					isTagged = true
+				}
 			}
 		}
 

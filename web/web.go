@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-19 01:06:41 krylon>
+// Time-stamp: <2021-03-19 01:39:48 krylon>
 
 package web
 
@@ -808,7 +808,6 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 	if strings.ToLower(r.Method) == "post" {
 		msg = "Actual search is not implemented, yet."
 		srv.SendMessage(msg)
-		// msg = ""
 
 		if err = r.ParseForm(); err != nil {
 			msg = fmt.Sprintf("Cannot parse form data: %s\n",
@@ -817,22 +816,27 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 			srv.SendMessage(msg)
 		}
 
-		var listStr = r.FormValue("search_tag_id_list")
-		srv.log.Printf("[DEBUG] Tag list to search: %s\n",
-			listStr)
-		var strList = strings.Split(listStr, ",")
-		var tagList = make([]int64, len(strList))
 		var qstr = r.FormValue("search_terms")
+		var listStr = r.FormValue("search_tag_id_list")
+		var tagList []int64
+		srv.log.Printf("[DEBUG] Tag list to search: %q\n",
+			listStr)
 
-		for idx, tstr := range strList {
-			if tagList[idx], err = strconv.ParseInt(tstr, 10, 64); err != nil {
-				msg = fmt.Sprintf("Cannot parse Tag ID %q: %s",
-					tstr,
-					err.Error())
-				srv.log.Println("[ERROR] " + msg)
-				srv.SendMessage(msg)
-				http.Redirect(w, r, r.Referer(), http.StatusFound)
-				return
+		if listStr != "" {
+			var strList = strings.Split(listStr, ",")
+
+			tagList = make([]int64, len(strList))
+
+			for idx, tstr := range strList {
+				if tagList[idx], err = strconv.ParseInt(tstr, 10, 64); err != nil {
+					msg = fmt.Sprintf("Cannot parse Tag ID %q: %s",
+						tstr,
+						err.Error())
+					srv.log.Println("[ERROR] " + msg)
+					srv.SendMessage(msg)
+					http.Redirect(w, r, r.Referer(), http.StatusFound)
+					return
+				}
 			}
 		}
 
