@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-19 01:34:04 krylon>
+// Time-stamp: <2021-03-20 17:14:55 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1761,7 +1761,7 @@ EXEC_QUERY:
 
 // ItemGetSearchExtended performs an extended search on the database,
 // retrieving Items by a search string and a list of tags.
-func (db *Database) ItemGetSearchExtended(qstr string, tags []int64) ([]feed.Item, error) {
+func (db *Database) ItemGetSearchExtended(qstr string, tags []int64, begin, end time.Time) ([]feed.Item, error) {
 	const qid query.ID = query.ItemGetSearchExtended
 	var (
 		err  error
@@ -1780,7 +1780,7 @@ func (db *Database) ItemGetSearchExtended(qstr string, tags []int64) ([]feed.Ite
 	var rows *sql.Rows
 
 EXEC_QUERY:
-	if rows, err = stmt.Query(qstr); err != nil {
+	if rows, err = stmt.Query(qstr, begin.Unix(), end.Unix()); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY

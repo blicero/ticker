@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-19 01:39:48 krylon>
+// Time-stamp: <2021-03-20 17:13:55 krylon>
 
 package web
 
@@ -805,6 +805,7 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
+	// I should REALLY factor this out into a separate method!
 	if strings.ToLower(r.Method) == "post" {
 		msg = "Actual search is not implemented, yet."
 		srv.SendMessage(msg)
@@ -840,7 +841,55 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if data.Items, err = db.ItemGetSearchExtended(qstr, tagList); err != nil {
+		// Filter by date/time range ?
+
+		var filterByDateStr = r.FormValue("search_by_date")
+		var beginDateStr = r.FormValue("begin_date")
+		var beginTimeStr = r.FormValue("begin_time")
+		var endDateStr = r.FormValue("end_date")
+		var endTimeStr = r.FormValue("end_time")
+		var begin, end time.Time
+
+		srv.log.Printf("[DEBUG] Filter by date? %s --> %s / %s to %s / %s\n",
+			filterByDateStr,
+			beginDateStr,
+			beginTimeStr,
+			endDateStr,
+			endTimeStr)
+
+		if filterByDateStr == "on" {
+			if beginTimeStr == "" {
+				beginTimeStr = "00:00"
+			}
+			if endTimeStr == "" {
+				endTimeStr = "23:59"
+			}
+
+			var begStr = beginDateStr + " " + beginTimeStr
+			var endStr = endDateStr + " " + endTimeStr
+
+			if begin, err = time.Parse(common.TimestampFormatMinute, begStr); err != nil {
+				msg = fmt.Sprintf("Cannot parse timestamp %q: %s",
+					begStr,
+					err.Error())
+				srv.log.Println("[ERROR] " + msg)
+				srv.SendMessage(msg)
+				http.Redirect(w, r, r.Referer(), http.StatusFound)
+				return
+			} else if end, err = time.Parse(common.TimestampFormatMinute, endStr); err != nil {
+				msg = fmt.Sprintf("Cannot parse timestamp %q: %s",
+					endStr,
+					err.Error())
+				srv.log.Println("[ERROR] " + msg)
+				srv.SendMessage(msg)
+				http.Redirect(w, r, r.Referer(), http.StatusFound)
+				return
+			}
+		} else {
+			end = time.Now().Add(time.Hour * 24 * 365)
+		}
+
+		if data.Items, err = db.ItemGetSearchExtended(qstr, tagList, begin, end); err != nil {
 			msg = fmt.Sprintf("Cannot search for Items matching %q: %s",
 				qstr,
 				err.Error())

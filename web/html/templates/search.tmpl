@@ -1,6 +1,6 @@
 {{ define "search" }}
 {{/* Created on 15. 03. 2021 */}}
-{{/* Time-stamp: <2021-03-19 01:05:22 krylon> */}}
+{{/* Time-stamp: <2021-03-20 16:19:43 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -8,7 +8,7 @@
   <body>
     {{ template "intro" . }}
 
-    <form action="/search_more" method="post">
+    <form id="search_criteria" action="/search_more" method="post">
       <script>
        var tag_list = {};
 
@@ -26,9 +26,11 @@
        }
 
        function reset_search_form() {
-         const msg = "reset_search_form() - IMPLEMENT ME!!!";
-         console.log(msg);
-         alert(msg);
+         $("#search_by_date").prop("checked", false);
+         $("#search_terms").val("");
+         $(".filter_time").val("");
+         $(".filter_time").attr("disabled", true);
+         $("#tag_list input").prop("checked", false);
        }
       </script>
 
@@ -38,7 +40,7 @@
              value="" />
 
       <div class="container-fluid gap-2">
-        <div class="row">
+        <div class="row p-2 align-self-start">
           <div class="col">
             <label for="search_terms">Search</label>
             <input type="text"
@@ -47,18 +49,19 @@
                    name="search_terms"
                    placeholder="Search..." />
           </div>
-          <div class="col">
-            <div class="dropdown">
+          <div class="col align-self-start">
+            <div class="dropdown align-self-start">
               <button type="button"
                       class="btn dropdown-toggle form-control"
                       id="search_tag_toggle_btn"
                       role="button"
+                      style="text-align: left;"
                       data-bs-toggle="dropdown"
                       aria-expaned="false">
                 Tags
               </button>
 
-              <ul class="dropdown-menu form-control"
+              <ul id="tag_list" class="dropdown-menu form-control"
                   aria-labelledby="search_tag_toggle_btn">
                 {{ range .AllTags }}
                 <li class="dropdown-item">
@@ -74,7 +77,59 @@
           </div>
         </div>
 
-        <div class="row">
+        <div class="row p-2">
+          <div class="col">
+            <script>
+             function toggle_date_input() {
+               const checkbox = $("#search_by_date")[0];
+
+               if (checkbox.checked) {
+                 $(".filter_time").each(function() {
+                   $(this).attr("disabled", false);
+                 });
+               } else {
+                 $(".filter_time").each(function() {
+                   $(this).attr("disabled", true);
+                   $(this).val("");
+                 });
+               }
+             } // function toggle_date_input()
+            </script>
+            <label for="search_by_date">Filter by Date?</label>
+            <input type="checkbox"
+                   id="search_by_date"
+                   name="search_by_date"
+                   onchange="toggle_date_input();" />
+            <br />
+            <label for="begin_date">Begin</label>
+            <input type="date"
+                   name="begin_date"
+                   class="filter_time"
+                   id="begin_date"
+                   disabled />
+            <input type="time"
+                   name="begin_time"
+                   class="filter_time"
+                   id="begin_time"
+                   disabled />
+            <br />
+            <label for="end_date">End</label>
+            <input type="date"
+                   name="end_date"
+                   class="filter_time"
+                   id="end_date"
+                   disabled />
+            <input type="time"
+                   name="end_time"
+                   class="filter_time"
+                   id="end_time"
+                   disabled />
+          </div>
+          <div class="col">
+          </div>
+        </div>
+
+        <div class="row p-2">
           <div class="col">
             <input type="submit"
                    class="btn btn-sm btn-primary"

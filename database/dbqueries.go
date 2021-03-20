@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-18 22:55:30 krylon>
+// Time-stamp: <2021-03-20 17:14:33 krylon>
 
 package database
 
@@ -190,7 +190,7 @@ SELECT DISTINCT
         i.rating
 FROM tag_link l
 INNER JOIN items1 i ON l.item_id = i.id
--- WHERE l.tag_id = ?
+WHERE i.timestamp BETWEEN ? AND ?
 ORDER BY i.timestamp DESC
 `,
 	query.ItemGetContent: `
