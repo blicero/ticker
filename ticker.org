@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-20 18:54:12 krylon>
+# Time-stamp: <2021-03-20 22:29:16 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -334,7 +334,7 @@
      CLOCK: [2021-02-25 Do 16:12]--[2021-02-26 Fr 00:13] =>  8:01
      CLOCK: [2021-02-25 Do 00:45]--[2021-02-25 Do 03:22] =>  2:37
      CLOCK: [2021-02-24 Mi 21:47]--[2021-02-25 Do 00:16] =>  2:29
-     :END:     
+     :END:
 **** TODO Suggestions
      :LOGBOOK:
      CLOCK: [2021-03-11 Do 21:37]--[2021-03-12 Fr 00:50] =>  3:13
@@ -346,6 +346,12 @@
      :END:
      I would like to automatically suggest Tags, based on what Tags have been
      assigned to other Items.
+
+     [2021-03-20 Sa 22:27]
+     I have a basic mechanism in place, but I am unsure how to integrate it
+     into the UI. Currently, I just display the tags and the scores the
+     Bayesian classifier came up with. It's not very helpful, takes up a lot
+     space, and it is not very pleasing to the eye.
 *** Search [3/3]
     :LOGBOOK:
     CLOCK: [2021-02-23 Di 20:00]--[2021-02-23 Di 23:30] =>  3:30
