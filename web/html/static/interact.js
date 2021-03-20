@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-12 18:09:52 krylon>
+// Time-stamp: <2021-03-20 20:05:10 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -198,7 +198,7 @@ function adjustMsgCheckInterval() {
     var intervalField = $("#msg_check_interval")[0];
     if (intervalField.checkValidity()) {
         var interval = intervalField.valueAsNumber;
-        intervalField.setInterval(interval);
+        // intervalField.setInterval(interval); // ???
         saveSetting("messages", "interval", interval);
     }
 } // function adjustMsgCheckInterval()
