@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-04-01 18:25:12 krylon>
+// Time-stamp: <2021-04-01 18:35:00 krylon>
 
 // +build ignore
 
@@ -373,7 +373,7 @@ func worker(n int, op string, pkgq <-chan string, errq chan<- error, wg *sync.Wa
 			// 	"run",
 			// 	pkg)
 		} else if op == "test" {
-			if runtime.GOOS == "openbsd" || runtime.GOARCH == "386" || runtime.GOARCH == "armv6l" {
+			if runtime.GOOS == "openbsd" || runtime.GOARCH == "386" || runtime.GOARCH == "arm" {
 				cmd = exec.Command("go", op, "-v", "-timeout", "30m", pkg)
 			} else {
 				cmd = exec.Command("go", op, "-v", "-timeout", "30m", "-race", pkg)
