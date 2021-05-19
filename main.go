@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-17 19:47:41 krylon>
+// Time-stamp: <2021-05-17 18:52:00 krylon>
 
 package main
 
@@ -14,6 +14,8 @@ import (
 	"ticker/common"
 	"ticker/reader"
 	"ticker/web"
+
+	"github.com/pkg/profile"
 )
 
 func main() {
@@ -38,6 +40,8 @@ func main() {
 		)
 		os.Exit(1)
 	}
+
+	defer profile.Start(profile.ProfilePath(common.BaseDir), profile.CPUProfile).Stop()
 
 	if rdr, err = reader.New(msgq); err != nil {
 		fmt.Fprintf(
