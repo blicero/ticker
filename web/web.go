@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-20 17:13:55 krylon>
+// Time-stamp: <2021-05-17 18:38:19 krylon>
 
 package web
 
@@ -17,6 +17,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -159,6 +160,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/feed_set_active/{id:(?:\\d+)}/{active:(?:true|false)$}", srv.handleFeedActiveToggle)
 	srv.router.HandleFunc("/ajax/items_by_tag/{id:(?:\\d+)$}", srv.handleItemsByTag)
 	srv.router.HandleFunc("/ajax/items_by_feed/{id:(?:\\d+)$}", srv.handleItemsByFeed)
+	srv.router.HandleFunc("/ajax/shutdown", srv.handleShutdown)
 
 	if !common.Debug {
 		srv.web.SetKeepAlivesEnabled(keepAlive)
@@ -2342,3 +2344,51 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleShutdown(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	var (
+		err                          error
+		msg, reply                   string
+		areYouSure, areYouReallySure bool
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Error parsing form data: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	// { AreYouSure: true, AreYouReallySure: true }
+
+	areYouSure = r.FormValue("AreYouSure") == "true"
+	areYouReallySure = r.FormValue("AreYouReallySure") == "true"
+
+	if areYouSure && areYouReallySure {
+		srv.log.Println("[INFO] Shutting down server")
+		reply = `{ "Status": true, "Message": "Success" }`
+		go func() {
+			time.Sleep(time.Millisecond * 250)
+			srv.Close()
+			os.Exit(0)
+		}()
+	} else {
+		reply = `{ "Status": false, "Message": "You're not sure about that, now, are you?" }`
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleShutdown(w http.ResponseWriter, r *http.Request)

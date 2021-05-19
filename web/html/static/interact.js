@@ -1,4 +1,4 @@
-// Time-stamp: <2021-03-20 20:05:10 krylon>
+// Time-stamp: <2021-05-15 17:36:00 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -796,3 +796,28 @@ function load_feed_items(feed_id) {
         console.log(`Error getting Items: ${status_text} - ${xhr}`);
     });
 } // function load_feed_items(feed_id)
+
+function shutdown_server() {
+    const url = "/ajax/shutdown";
+
+    if (!confirm("Shut down server?")) {
+        return false;
+    }
+
+    var req = $.get(url,
+                    { AreYouSure: true, AreYouReallySure: true },
+                    function(reply) {
+                        if (!reply.Status) {
+                            const msg = `Error shutting down Server: ${reply.Message}`;
+                            console.log(msg)
+                            alert(msg);
+                        }
+                    },
+                    "json");
+
+    req.fail(function(reply, status_text, xhr) {
+        const  msg = `Error getting Items: ${status_text} - ${xhr}`;
+        console.log(msg);
+        alert(msg);
+    });
+} // function shutdown_server()
