@@ -17,7 +17,6 @@ require (
 	github.com/n3integration/classifier v0.4.0
 	github.com/odeke-em/go-uuid v0.0.0-20151221120446-b211d769a9aa
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/pkg/profile v1.6.0
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	golang.org/x/net v0.0.0-20210224082022-3d97a244fca7 // indirect
 	golang.org/x/text v0.3.5 // indirect

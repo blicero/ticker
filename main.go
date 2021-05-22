@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-17 18:52:00 krylon>
+// Time-stamp: <2021-05-22 15:31:22 krylon>
 
 package main
 
@@ -14,8 +14,6 @@ import (
 	"ticker/common"
 	"ticker/reader"
 	"ticker/web"
-
-	"github.com/pkg/profile"
 )
 
 func main() {
@@ -41,7 +39,32 @@ func main() {
 		os.Exit(1)
 	}
 
-	defer profile.Start(profile.ProfilePath(common.BaseDir), profile.CPUProfile).Stop()
+	// if common.Debug {
+	// 	var profh *os.File
+	// 	var profPath = filepath.Join(common.BaseDir, "cpu.pprof")
+
+	// 	fmt.Printf("Writing profiling data to %s\n", profPath)
+
+	// 	if profh, err = os.Create(profPath); err != nil {
+	// 		fmt.Fprintf(os.Stderr, "Error opening profiling output %s: %s\n",
+	// 			profPath, err.Error())
+	// 		os.Exit(1)
+	// 	}
+	// 	defer func() {
+	// 		if e := profh.Close(); e != nil {
+	// 			fmt.Fprintf(os.Stderr, "ERROR closing %s: %s\n",
+	// 				profPath,
+	// 				e.Error())
+	// 		}
+	// 	}()
+
+	// 	runtime.SetCPUProfileRate(250)
+	// 	if err = pprof.StartCPUProfile(profh); err != nil {
+	// 		fmt.Fprintf(os.Stderr, "Error starting profiler: %s\n", err.Error())
+	// 		os.Exit(1)
+	// 	}
+	// 	defer pprof.StopCPUProfile()
+	// }
 
 	if rdr, err = reader.New(msgq); err != nil {
 		fmt.Fprintf(
