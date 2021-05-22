@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-17 18:38:19 krylon>
+// Time-stamp: <2021-05-22 17:56:39 krylon>
 
 package web
 
@@ -22,6 +22,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template"
 	"ticker/classifier"
 	"ticker/common"
@@ -54,6 +55,8 @@ type Server struct {
 	tmpl      *template.Template
 	mimeTypes map[string]string
 	pool      *database.Pool
+	clsItem   *classifier.Classifier
+	clsLock   sync.RWMutex
 }
 
 // Create creates a new Server instance.
@@ -79,12 +82,17 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 		srv.log.Printf("[ERROR] Cannot create DB pool: %s\n",
 			err.Error())
 		return nil, err
-	} /* else if srv.rev, err = classifier.New(); err != nil {
+	} else if srv.clsItem, err = classifier.New(); err != nil {
 		srv.log.Printf("[ERROR] Cannot create Classifier: %s\n",
 			err.Error())
 		srv.pool.Close()
 		return nil, err
-	} */
+	} else if err = srv.clsItem.Train(); err != nil {
+		srv.log.Printf("[ERROR] Cannot train Classifier: %s\n",
+			err.Error())
+		srv.pool.Close()
+		return nil, err
+	}
 
 	const tmplFolder = "html/templates"
 	var templates []fs.DirEntry
@@ -146,6 +154,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/tag/{id:(?:\\d+)$}", srv.handleTagDetails)
 
 	srv.router.HandleFunc("/later/all", srv.handleReadLaterAll)
+
+	srv.router.HandleFunc("/classifier/train", srv.handleClassifierTrain)
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
@@ -216,6 +226,22 @@ func (srv *Server) Close() error {
 
 	return nil
 } // func (srv *Server) Close() error
+
+func (srv *Server) retrain() error {
+	var (
+		err error
+	)
+
+	srv.clsLock.Lock()
+	defer srv.clsLock.Unlock()
+
+	if err = srv.clsItem.Train(); err != nil {
+		srv.log.Printf("[ERROR] Cannot train Classifier: %s\n",
+			err.Error())
+	}
+
+	return err
+} // func (srv *Server) retrain() error
 
 // nolint: unused
 func (srv *Server) getMessages() []message {
@@ -517,7 +543,6 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		pageNo, cnt, offset int64
 		db                  *database.Database
 		tmpl                *template.Template
-		rev                 *classifier.Classifier
 		data                = tmplDataItems{
 			tmplDataBase: tmplDataBase{
 				Debug: common.Debug,
@@ -556,14 +581,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if rev, err = classifier.New(); err != nil {
-		msg = fmt.Sprintf("Cannot create Classifier: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, "/index", http.StatusFound)
-		return
-	} else if data.Items, err = db.ItemGetAll(cnt, offset); err != nil {
+	if data.Items, err = db.ItemGetAll(cnt, offset); err != nil {
 		msg = fmt.Sprintf("Cannot load Items (%d / offset %d) from database: %s",
 			itemCnt,
 			offset,
@@ -596,14 +614,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		data.Next = strconv.FormatInt(pageNo+1, 10)
 	}
 
-	if err = rev.Train(); err != nil {
-		msg = fmt.Sprintf("Cannot train Classifier: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, "/index", http.StatusFound)
-		return
-	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
+	if data.FeedMap, err = db.FeedGetMap(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
@@ -611,6 +622,9 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
 	}
+
+	srv.clsLock.RLock()
+	defer srv.clsLock.RUnlock()
 
 	for idx, item := range data.Items {
 		var class string
@@ -632,7 +646,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 			}
 
 			continue
-		} else if class, err = rev.Classify(&item); err != nil {
+		} else if class, err = srv.clsItem.Classify(&item); err != nil {
 			srv.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
 				item.Title,
 				item.ID,
@@ -1228,7 +1242,20 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		srv.sendErrorMessage(w, msg)
 	}
-} // func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.request)
+} // func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	var err error
+
+	if err = srv.retrain(); err != nil {
+		srv.SendMessage(err.Error())
+	}
+
+	http.Redirect(w, r, r.Referer(), http.StatusFound)
+} // func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request)
 
 /////////////////////////////////////////
 ////////////// Other ////////////////////
@@ -2044,7 +2071,6 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 		buf               bytes.Buffer
 		res               response
 		t                 *tag.Tag
-		rev               *classifier.Classifier
 		raw               []byte
 		data              = tmplDataItems{
 			tmplDataBase: tmplDataBase{
@@ -2081,10 +2107,6 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 		msg = fmt.Sprintf("Tag %d was not found",
 			id)
 		goto SEND_ERROR_MESSAGE
-	} else if rev, err = classifier.New(); err != nil {
-		msg = fmt.Sprintf("Cannot create Classifier: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
 	} else if data.Items, err = db.ItemGetByTagRecursive(t); err != nil {
 		msg = fmt.Sprintf("Cannot load Items for Tag %s (%d): %s",
 			t.Name,
@@ -2105,24 +2127,17 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
 			err.Error())
 		goto SEND_ERROR_MESSAGE
-	}
-
-	if err = rev.Train(); err != nil {
-		msg = fmt.Sprintf("Cannot train Classifier: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
 	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
 		goto SEND_ERROR_MESSAGE
 	}
 
+	srv.clsLock.RLock()
+	defer srv.clsLock.RUnlock()
+
 	for idx, item := range data.Items {
-		var (
-			// certain bool
-			// score   map[bayesian.Class]float64
-			class string
-		)
+		var class string
 
 		if !math.IsNaN(item.Rating) {
 			if item.Rating == 1 {
@@ -2141,7 +2156,7 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 			}
 
 			continue
-		} else if class, err = rev.Classify(&item); err != nil {
+		} else if class, err = srv.clsItem.Classify(&item); err != nil {
 			srv.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
 				item.Title,
 				item.ID,
@@ -2211,7 +2226,6 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 		buf               bytes.Buffer
 		res               response
 		t                 *tag.Tag
-		rev               *classifier.Classifier
 		raw               []byte
 		data              = tmplDataItems{
 			tmplDataBase: tmplDataBase{
@@ -2239,11 +2253,7 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if rev, err = classifier.New(); err != nil {
-		msg = fmt.Sprintf("Cannot create Classifier: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	} else if data.Items, err = db.ItemGetByFeed(id, -1); err != nil {
+	if data.Items, err = db.ItemGetByFeed(id, -1); err != nil {
 		msg = fmt.Sprintf("Cannot load Items for Tag %s (%d): %s",
 			t.Name,
 			id,
@@ -2263,17 +2273,14 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
 			err.Error())
 		goto SEND_ERROR_MESSAGE
-	}
-
-	if err = rev.Train(); err != nil {
-		msg = fmt.Sprintf("Cannot train Classifier: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
 	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
 		goto SEND_ERROR_MESSAGE
 	}
+
+	srv.clsLock.RLock()
+	defer srv.clsLock.RUnlock()
 
 	for idx, item := range data.Items {
 		var class string
@@ -2295,7 +2302,7 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 			}
 
 			continue
-		} else if class, err = rev.Classify(&item); err != nil {
+		} else if class, err = srv.clsItem.Classify(&item); err != nil {
 			srv.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
 				item.Title,
 				item.ID,

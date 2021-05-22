@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 17. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-09 20:01:47 krylon>
+// Time-stamp: <2021-05-22 16:38:09 krylon>
 
 // Package classifier implements semi-automatic rating of news items.
 package classifier
@@ -68,6 +68,7 @@ func (c *Classifier) Train() error {
 		return err
 	}
 
+	c.rev = naive.New()
 	c.learn(items)
 
 	return nil
