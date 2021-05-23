@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-22 17:56:39 krylon>
+// Time-stamp: <2021-05-23 17:25:35 krylon>
 
 package web
 
@@ -24,6 +24,7 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"ticker/advisor"
 	"ticker/classifier"
 	"ticker/common"
 	"ticker/database"
@@ -56,6 +57,7 @@ type Server struct {
 	mimeTypes map[string]string
 	pool      *database.Pool
 	clsItem   *classifier.Classifier
+	clsTags   *advisor.Advisor
 	clsLock   sync.RWMutex
 }
 
@@ -91,6 +93,14 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 		srv.log.Printf("[ERROR] Cannot train Classifier: %s\n",
 			err.Error())
 		srv.pool.Close()
+		return nil, err
+	} else if srv.clsTags, err = advisor.NewAdvisor(); err != nil {
+		srv.log.Printf("[ERROR] Cannot create Advisor: %s\n",
+			err.Error())
+		return nil, err
+	} else if err = srv.clsTags.Train(); err != nil {
+		srv.log.Printf("[ERROR] Cannot train Advisor: %s\n",
+			err.Error())
 		return nil, err
 	}
 
@@ -237,6 +247,9 @@ func (srv *Server) retrain() error {
 
 	if err = srv.clsItem.Train(); err != nil {
 		srv.log.Printf("[ERROR] Cannot train Classifier: %s\n",
+			err.Error())
+	} else if err = srv.clsTags.Train(); err != nil {
+		srv.log.Printf("[ERROR] Cannot train Tag Classifier: %s\n",
 			err.Error())
 	}
 
