@@ -1,4 +1,4 @@
-/* Time-stamp: <2021-03-11 19:11:38 krylon> */
+/* Time-stamp: <2021-05-23 12:11:50 krylon> */
 
 body { 
     font-family: Arial,Helvetica,sans-serif;
@@ -28,14 +28,11 @@ h2 {
 }
 
 *.boring {
-    // font-size: 10pt;
     filter: opacity(50%);
 }
 
 *.read {
-    /* background-color: #888888; */
     filter: blur(2px);
-    /* font-size: smaller; */
 }
 
 *.suggest {
@@ -158,11 +155,3 @@ div.body {
     font-family: monospace;
     font-weight: bold;
 }
-
-/* #note_preview { */
-/*     padding-left: 10px; */
-/* } */
-
-/* tr.reminder_cleared * { */
-/*     text-decoration: line-through; */
-/* } */
