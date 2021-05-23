@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-05-15 23:48:07 krylon>
+# Time-stamp: <2021-05-23 20:41:35 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,43 +13,48 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-05-09 So 19:27]
-   | Headline                               | Time      |         |          |         |       |      |
-   |----------------------------------------+-----------+---------+----------+---------+-------+------|
-   | *Total time*                           | *9d 1:57* |         |          |         |       |      |
-   |----------------------------------------+-----------+---------+----------+---------+-------+------|
-   | Ticker                                 | 9d 1:57   |         |          |         |       |      |
-   | \_  Main                               |           |    0:56 |          |         |       |      |
-   | \_    Shutdown                         |           |         |     0:56 |         |       |      |
-   | \_  Components [24/26]                 |           | 9d 1:01 |          |         |       |      |
-   | \_    Feed [6/6]                       |           |         |  1d 8:39 |         |       |      |
-   | \_      Homepage                       |           |         |          |    0:12 |       |      |
-   | \_      Rating [3/3]                   |           |         |          | 1d 5:11 |       |      |
-   | \_        Web Frontend                 |           |         |          |         | 12:09 |      |
-   | \_        Classifier                   |           |         |          |         | 16:25 |      |
-   | \_    Database [1/1]                   |           |         |    21:55 |         |       |      |
-   | \_      Due Feeds                      |           |         |          |    1:26 |       |      |
-   | \_    Reader [2/2]                     |           |         |    18:06 |         |       |      |
-   | \_      Timestamps                     |           |         |          |    0:15 |       |      |
-   | \_      Pseudo-duplicates              |           |         |          |    2:01 |       |      |
-   | \_    Web interface [7/8]              |           |         | 1d 23:24 |         |       |      |
-   | \_      Various small-ish improvements |           |         |          |    2:42 |       |      |
-   | \_      Embed                          |           |         |          |    3:00 |       |      |
-   | \_      Snazzy [3/3]                   |           |         |          |    4:04 |       |      |
-   | \_        Ooopsie [1/1]                |           |         |          |         |  0:51 |      |
-   | \_          Read later form            |           |         |          |         |       | 0:51 |
-   | \_        Subscribe                    |           |         |          |         |  2:35 |      |
-   | \_      Limit description length       |           |         |          |    1:32 |       |      |
-   | \_      Manage Feeds                   |           |         |          |   17:11 |       |      |
-   | \_    Tags [3/4]                       |           |         |  2d 4:46 |         |       |      |
-   | \_      Database                       |           |         |          |   10:59 |       |      |
-   | \_        Hierarchy                    |           |         |          |         |  8:58 |      |
-   | \_      Web interface                  |           |         |          | 1d 4:45 |       |      |
-   | \_      Suggestions                    |           |         |          |   11:12 |       |      |
-   | \_    Search [3/3]                     |           |         |  1d 0:23 |         |       |      |
-   | \_      Moar!                          |           |         |          |   20:53 |       |      |
-   | \_    Read Later [2/2]                 |           |         |    19:48 |         |       |      |
-   | \_      Web interface                  |           |         |          |   17:46 |       |      |
+   #+CAPTION: Clock summary at [2021-05-23 So 20:40]
+   | Headline                               | Time       |         |         |         |       |      |
+   |----------------------------------------+------------+---------+---------+---------+-------+------|
+   | *Total time*                           | *9d 23:09* |         |         |         |       |      |
+   |----------------------------------------+------------+---------+---------+---------+-------+------|
+   | Ticker                                 | 9d 23:09   |         |         |         |       |      |
+   | \_  Main                               |            |    0:56 |         |         |       |      |
+   | \_    Shutdown                         |            |         |    0:56 |         |       |      |
+   | \_  Components [24/27]                 |            | 9d 7:16 |         |         |       |      |
+   | \_    Feed [6/6]                       |            |         | 1d 8:39 |         |       |      |
+   | \_      Homepage                       |            |         |         |    0:12 |       |      |
+   | \_      Rating [3/3]                   |            |         |         | 1d 5:11 |       |      |
+   | \_        Web Frontend                 |            |         |         |         | 12:09 |      |
+   | \_        Classifier                   |            |         |         |         | 16:25 |      |
+   | \_    Database [1/1]                   |            |         |   21:55 |         |       |      |
+   | \_      Due Feeds                      |            |         |         |    1:26 |       |      |
+   | \_    Reader [2/2]                     |            |         |   18:06 |         |       |      |
+   | \_      Timestamps                     |            |         |         |    0:15 |       |      |
+   | \_      Pseudo-duplicates              |            |         |         |    2:01 |       |      |
+   | \_    Web interface [7/9]              |            |         | 2d 5:39 |         |       |      |
+   | \_      Various small-ish improvements |            |         |         |    8:57 |       |      |
+   | \_        Shutdown                     |            |         |         |         |  6:15 |      |
+   | \_      Embed                          |            |         |         |    3:00 |       |      |
+   | \_      Snazzy [3/3]                   |            |         |         |    4:04 |       |      |
+   | \_        Ooopsie [1/1]                |            |         |         |         |  0:51 |      |
+   | \_          Read later form            |            |         |         |         |       | 0:51 |
+   | \_        Subscribe                    |            |         |         |         |  2:35 |      |
+   | \_      Limit description length       |            |         |         |    1:32 |       |      |
+   | \_      Manage Feeds                   |            |         |         |   17:11 |       |      |
+   | \_    Tags [3/4]                       |            |         | 2d 4:46 |         |       |      |
+   | \_      Database                       |            |         |         |   10:59 |       |      |
+   | \_        Hierarchy                    |            |         |         |         |  8:58 |      |
+   | \_      Web interface                  |            |         |         | 1d 4:45 |       |      |
+   | \_      Suggestions                    |            |         |         |   11:12 |       |      |
+   | \_    Search [3/3]                     |            |         | 1d 0:23 |         |       |      |
+   | \_      Moar!                          |            |         |         |   20:53 |       |      |
+   | \_    Read Later [2/2]                 |            |         |   19:48 |         |       |      |
+   | \_      Web interface                  |            |         |         |   17:46 |       |      |
+   | \_  Tedious tasks                      |            |   14:57 |         |         |       |      |
+   | \_    Performance [2/2]                |            |         |   14:57 |         |       |      |
+   | \_      Advisor                        |            |         |         |    4:06 |       |      |
+   | \_      Profiling                      |            |         |         |    7:01 |       |      |
    #+END:
 
 ** Questions
@@ -426,3 +431,29 @@
       Well, either /that/, or I adapt the items.tmpl template to accomodate
       both use cases. But that sounds exceedingly tedious.
 ** Tedious tasks
+*** Performance [2/2]
+    :LOGBOOK:
+    CLOCK: [2021-05-19 Mi 21:16]--[2021-05-20 Do 01:06] =>  3:50
+    :END:
+    After running the application on my Raspberry Pi and my home server, I
+    have noticed that performance is not super awesome.
+**** DONE Advisor
+     CLOSED: [2021-05-23 So 20:40]
+     :LOGBOOK:
+     CLOCK: [2021-05-23 So 16:34]--[2021-05-23 So 20:40] =>  4:06
+     :END:
+     I moved the Classifiers to the web.Server so they don't get re-trained on
+     every request. Big performance gain.
+**** CANCELLED Profiling
+     CLOSED: [2021-05-23 So 12:05]
+     :LOGBOOK:
+     CLOCK: [2021-05-22 Sa 14:40]--[2021-05-22 Sa 15:26] =>  0:46
+     CLOCK: [2021-05-21 Fr 15:40]--[2021-05-21 Fr 19:16] =>  3:36
+     CLOCK: [2021-05-20 Do 17:10]--[2021-05-20 Do 19:49] =>  2:39
+     :END:
+     Before I start optimizing around just for the fun of it, I should find
+     out where I best start.
+     ...
+     [2021-05-23 So 12:04]
+     That did not work out well /at all/. I think the problem is that I pull
+     in C code via SQLite. :-(
