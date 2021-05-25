@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-11 21:44:15 krylon>
+// Time-stamp: <2021-05-25 11:17:33 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -170,18 +170,12 @@ func (adv *Advisor) Suggest(item *feed.Item) map[string]SuggestedTag {
 
 func (adv *Advisor) tokenize(item *feed.Item) []string {
 	var (
-		err        error
 		body, lang string
 	)
 
-	body = item.Title + " " + item.Description
+	// body = item.Title + " " + item.Description
 
-	if lang, err = guesslanguage.Guess(body); err != nil {
-		adv.log.Printf("[ERROR] Cannot determine language of Item %q: %s\n",
-			item.Title,
-			err.Error())
-		lang = "en"
-	}
+	lang, body = adv.getLanguage(item.Title, item.Description)
 
 	body = stopwords.CleanString(body, lang, true)
 
@@ -196,6 +190,35 @@ func (adv *Advisor) tokenize(item *feed.Item) []string {
 
 	return tokens
 } // func (c *Advisor) tokenize(item *feed.Item) []string
+
+func (adv *Advisor) getLanguage(title, description string) (lng, fullText string) {
+	const defaultLang = "en"
+	var (
+		err        error
+		lang, body string
+	)
+
+	body = title + " " + description
+
+	defer func() {
+		if x := recover(); x != nil {
+			adv.log.Printf("[CRITICAL] Panic in getLanguage for Item %q: %s\n",
+				title,
+				x)
+			lng = defaultLang
+			fullText = body
+		}
+	}()
+
+	if lang, err = guesslanguage.Guess(body); err != nil {
+		adv.log.Printf("[ERROR] Cannot determine language of Item %q: %s\n",
+			title,
+			err.Error())
+		lang = defaultLang
+	}
+
+	return lang, body
+} // func getLanguage(title, description string) (string, string)
 
 func stemWord(word, lang string) string {
 	switch lang {
