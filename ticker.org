@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-05-25 18:44:00 krylon>
+# Time-stamp: <2021-05-27 14:21:53 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,12 +13,12 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-05-25 Di 18:43]
+   #+CAPTION: Clock summary at [2021-05-27 Do 14:21]
    | Headline                               | Time       |         |         |         |       |      |
    |----------------------------------------+------------+---------+---------+---------+-------+------|
-   | *Total time*                           | *10d 0:58* |         |         |         |       |      |
+   | *Total time*                           | *10d 1:49* |         |         |         |       |      |
    |----------------------------------------+------------+---------+---------+---------+-------+------|
-   | Ticker                                 | 10d 0:58   |         |         |         |       |      |
+   | Ticker                                 | 10d 1:49   |         |         |         |       |      |
    | \_  Main                               |            |    0:56 |         |         |       |      |
    | \_    Shutdown                         |            |         |    0:56 |         |       |      |
    | \_  Components [24/27]                 |            | 9d 7:16 |         |         |       |      |
@@ -55,8 +55,8 @@
    | \_    Performance [2/2]                |            |         |   14:57 |         |       |      |
    | \_      Advisor                        |            |         |         |    4:06 |       |      |
    | \_      Profiling                      |            |         |         |    7:01 |       |      |
-   | \_  Bugs                               |            |    1:49 |         |         |       |      |
-   | \_    Panic in Language Guesser        |            |         |    1:49 |         |       |      |
+   | \_  Bugs                               |            |    2:40 |         |         |       |      |
+   | \_    Panic in Language Guesser        |            |         |    2:40 |         |       |      |
    #+END:
 
 ** Questions
@@ -460,8 +460,10 @@
      That did not work out well /at all/. I think the problem is that I pull
      in C code via SQLite. :-(
 ** Bugs
-*** TODO Panic in Language Guesser
+*** DONE Panic in Language Guesser
+    CLOSED: [2021-05-27 Do 14:21]
     :LOGBOOK:
+    CLOCK: [2021-05-27 Do 13:30]--[2021-05-27 Do 14:21] =>  0:51
     CLOCK: [2021-05-25 Di 09:53]--[2021-05-25 Di 11:42] =>  1:49
     :END:
     I get the following panic:
