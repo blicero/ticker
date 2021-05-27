@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-25 11:17:33 krylon>
+// Time-stamp: <2021-05-27 14:20:07 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -11,6 +11,7 @@ package advisor
 import (
 	"log"
 	"regexp"
+	"runtime"
 	"ticker/common"
 	"ticker/database"
 	"ticker/feed"
@@ -129,28 +130,13 @@ func (adv *Advisor) Suggest(item *feed.Item) map[string]SuggestedTag {
 	var (
 		sugg map[string]SuggestedTag
 		res  map[bayesian.Class]float64
-		// class   bayesian.Class
-		// certain bool
 	)
 
 	res, _, _ = adv.cls.Classify(adv.tokenize(item)...)
 
 	sugg = make(map[string]SuggestedTag, len(res))
 
-	// if certain {
-	// 	// var t = adv.tags[string(class)]
-	// 	sugg[string(class)] = SuggestedTag{
-	// 		Tag:   adv.tags[string(class)],
-	// 		Score: res[class],
-	// 	}
-	// 	return sugg
-	// }
-
 	for c, r := range res {
-		// if r < 0 {
-		// 	continue
-		// }
-
 		adv.log.Printf("[TRACE] SUGGEST Item %q (%d): Tag %q -> %.2f\n",
 			item.Title,
 			item.ID,
@@ -202,9 +188,12 @@ func (adv *Advisor) getLanguage(title, description string) (lng, fullText string
 
 	defer func() {
 		if x := recover(); x != nil {
-			adv.log.Printf("[CRITICAL] Panic in getLanguage for Item %q: %s\n",
+			var buf [2048]byte
+			var cnt = runtime.Stack(buf[:], false)
+			adv.log.Printf("[CRITICAL] Panic in getLanguage for Item %q: %s\n%s",
 				title,
-				x)
+				x,
+				string(buf[:cnt]))
 			lng = defaultLang
 			fullText = body
 		}
