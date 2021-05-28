@@ -1,4 +1,4 @@
-// Time-stamp: <2021-05-15 17:36:00 krylon>
+// Time-stamp: <2021-05-28 20:20:19 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -390,6 +390,7 @@ function rate_item(item_id, new_rating) {
 
                          content += `<br /><input
         type="button"
+        class="btn btn-secondary"
         value="Unvote"
         onclick="unvote_item(${item_id});" />`;
 
@@ -426,7 +427,9 @@ function unvote_item(item_id) {
         });
 
     req.fail(function(reply, status_text, xhr) {
-        console.log("Error unrating Item at " + addr + ": "  + status_text);
+        let msg = "Error unrating Item at " + addr + ": "  + status_text;
+        console.log(msg);
+        alert(msg);
     });
 } // function unvote_item(item_id)
 

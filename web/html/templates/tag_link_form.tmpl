@@ -1,6 +1,6 @@
 {{ define "tag_link_form" }}
 {{/* Created on 25. 02. 2021 */}}
-{{/* Time-stamp: <2021-05-28 17:17:52 krylon> */}}
+{{/* Time-stamp: <2021-05-28 20:13:43 krylon> */}}
 {{ $id := concat "tag_menu_item_" (i64str .Item.ID) }}
 <div class="tag_link_form">
   <select id="{{ $id }}">
@@ -9,6 +9,9 @@
     <option id="{{ $id }}_opt_{{ .ID }}" {{ if ($item.HasTag .ID) }}style="display:none;" {{ end }}value="{{ .ID }}">{{ .Name }}</option>
     {{ end }}
   </select>
-  <input type="button" value="Add" onclick="attach_tag('{{ $id }}', {{ .Item.ID }});" />
+  <input type="button"
+         class="btn btn-secondary"
+         value="Add"
+         onclick="attach_tag('{{ $id }}', {{ .Item.ID }});" />
 </div>
 {{ end }}
