@@ -1,4 +1,4 @@
-/* Time-stamp: <2021-05-23 12:11:50 krylon> */
+/* Time-stamp: <2021-05-28 17:17:32 krylon> */
 
 body { 
     font-family: Arial,Helvetica,sans-serif;
@@ -20,7 +20,7 @@ h2 {
 
 *.footer {
     text-align: center;
-    font-size: 12pt;
+    font-size: 10pt;
 }
 
 *.error {
@@ -96,7 +96,7 @@ div.menubar a:visited { color: #6E6E6E; }
     background-color: #f8f7c2;
 }
 
-table { font-size: 14pt; }
+table { font-size: 12pt; }
 
 table.horizontal * th { text-align: right; }
 table.horizontal * td { text-align: left; }
@@ -154,4 +154,8 @@ div.body {
 *.placeholder {
     font-family: monospace;
     font-weight: bold;
+}
+
+*.tag_link_form {
+    font-size: smaller;
 }
