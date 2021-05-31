@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-05-28 20:59:04 krylon>
+# Time-stamp: <2021-05-31 09:50:26 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -69,7 +69,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [26/28]
+** Components [27/31]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -182,7 +182,7 @@
      it works.
      Simply skipping the Item if the headline already exists, is not a good
      idea, either, I should at least take the timestamps into consideration.
-*** Web interface [9/10]
+*** Web interface [10/13]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -196,6 +196,18 @@
     CLOCK: [2021-02-12 Fr 17:21]--[2021-02-12 Fr 19:04] =>  1:43
     CLOCK: [2021-02-12 Fr 15:23]--[2021-02-12 Fr 16:34] =>  1:11
     :END:
+**** Handling Images [0/2]
+     Sometimes, item bodies contain images, which makes loading slow, and it
+     also can make the layout awkward when these images are large in size.
+***** TODO Prefetch images and such                                 :feature:
+      Sometimes the bodies of Items contain img links, which makes loading the
+      web interface much slower, especially if they are large.
+      It would be nice if I could prefetch those images, store them locally and
+      rewrite the item bodies to use the local URL.
+***** TODO Scale images                                             :feature:
+      Didn't I do that already?
+      Anyway, it would be nice to just display small(er) images and resize
+      them on click or something.
 **** DONE Various small-ish improvements
      CLOSED: [2021-03-14 So 16:54]
      :LOGBOOK:
