@@ -1,4 +1,4 @@
-// Time-stamp: <2021-05-28 20:20:19 krylon>
+// Time-stamp: <2021-05-31 09:48:25 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -26,21 +26,21 @@ function timeStampString(t) {
     }
 
     // (1900 + d.getYear()) + "-" + d.getMonth() + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
-    var year = t.getYear() + 1900;
-    var month = fmtDateNumber(t.getMonth() + 1);
-    var day = fmtDateNumber(t.getDate());
-    var hour = fmtDateNumber(t.getHours());
-    var minute = fmtDateNumber(t.getMinutes());
-    var second = fmtDateNumber(t.getSeconds());
+    const year = t.getYear() + 1900;
+    const month = fmtDateNumber(t.getMonth() + 1);
+    const day = fmtDateNumber(t.getDate());
+    const hour = fmtDateNumber(t.getHours());
+    const minute = fmtDateNumber(t.getMinutes());
+    const second = fmtDateNumber(t.getSeconds());
 
-    var s =
+    const s =
         year + "-" + month + "-" + day +
         " " + hour + ":" + minute + ":" + second;
     return s;
 } // function timeStampString(t)
 
 function fmtDuration(seconds) {
-    var minutes = 0, hours = 0;
+    let minutes = 0, hours = 0;
 
     while (seconds > 3599) {
         hours++;
@@ -757,7 +757,7 @@ function display_tag_items(tag_id) {
 
 // Found here: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio#14731922
 function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight) {
-    var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+    const = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
 
     return { width: srcWidth*ratio, height: srcHeight*ratio };
 } // function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight)
@@ -768,9 +768,9 @@ function shrink_images() {
     const maxWidth = 300;
 
     $(selector).each(function() {
-        var img = $(this)[0];
+        let img = $(this)[0];
         if (img.width > maxWidth || img.height > maxHeight) {
-            var size = shrink_img(img.width, img.height, maxWidth, maxHeight);
+            const size = shrink_img(img.width, img.height, maxWidth, maxHeight);
 
             img.width = size.width;
             img.height = size.height;
