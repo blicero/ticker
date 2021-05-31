@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-02 14:51:31 krylon>
+// Time-stamp: <2021-05-31 15:41:31 krylon>
 
 package database
 
@@ -31,6 +31,7 @@ CREATE TABLE item (
     timestamp           INTEGER NOT NULL,
     read                INTEGER NOT NULL DEFAULT 0,
     rating              REAL,
+    prefetch            INTEGER NOT NULL DEFAULT 0,
     
     CHECK (rating IS NULL OR (rating BETWEEN 0.0 AND 1.0)),
     CONSTRAINT feed_link_uniq UNIQUE (feed_id, link),

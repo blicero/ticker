@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-18 18:49:46 krylon>
+// Time-stamp: <2021-05-31 15:54:05 krylon>
 
 //go:generate stringer -type=ID
 
@@ -33,9 +33,11 @@ const (
 	ItemGetContent
 	ItemGetByTag
 	ItemGetByTagRecursive
+	ItemGetPrefetch
 	ItemRatingSet
 	ItemRatingClear
 	ItemHasDuplicate
+	ItemPrefetchSet
 	FTSClear
 	TagCreate
 	TagDelete

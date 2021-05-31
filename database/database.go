@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-20 17:14:55 krylon>
+// Time-stamp: <2021-05-31 16:33:44 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1998,6 +1998,144 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) ItemGetByTagRecursive(t *tag.Tag) ([]feed.Item, error)
+
+// ItemGetPrefetch fetches a number of Items that have not been processed
+// for prefetching, yet.
+func (db *Database) ItemGetPrefetch(lim int) ([]feed.Item, error) {
+	const qid query.ID = query.ItemGetPrefetch
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(lim); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var items = make([]feed.Item, 0, lim)
+
+	for rows.Next() {
+		var (
+			item   feed.Item
+			rating *float64
+			stamp  int64
+		)
+
+		if err = rows.Scan(
+			&item.ID,
+			&item.FeedID,
+			&item.URL,
+			&item.Title,
+			&item.Description,
+			&stamp,
+			&item.Read,
+			&rating); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		} else if item.Tags, err = db.TagGetByItem(item.ID); err != nil {
+			db.log.Printf("[ERROR] Cannot load tags for Item %q (%d): %s\n",
+				item.Title,
+				item.ID,
+				err.Error())
+			return nil, err
+		} else if rating != nil {
+			item.ManuallyRated = true
+			item.Rating = *rating
+		} else {
+			item.Rating = math.NaN()
+		}
+		item.Timestamp = time.Unix(stamp, 0)
+		items = append(items, item)
+	}
+
+	return items, nil
+} // func (db *Database) ItemGetPrefetch(lim int) ([]feed.Item, error)
+
+func (db *Database) ItemPrefetchSet(i *feed.Item, description string) error {
+	const qid query.ID = query.ItemPrefetchSet
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(description, i.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("Cannot rate Item %s (%s): %s",
+				i.Title,
+				i.URL,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	i.Description = description
+	return nil
+} // func (db *Database) ItemPrefetchSet(i *feed.Item, body string) error
 
 // ItemRatingSet sets an Item's Rating.
 func (db *Database) ItemRatingSet(i *feed.Item, rating float64) error {

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-28 21:36:42 krylon>
+// Time-stamp: <2021-05-31 15:01:57 krylon>
 
 // Package common contain definitions used throughout the application
 package common
@@ -118,14 +118,23 @@ var LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppNa
 // DbPath is the filename of the database.
 var DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
 
+// CacheDir is the folder where prefetched images are stored.
+var CacheDir = filepath.Join(BaseDir, "cache")
+
 // InitApp performs some basic preparations for the application to run.
 // Currently, this means creating the BaseDir folder.
 func InitApp() error {
-	err := os.Mkdir(BaseDir, 0700)
-	if err != nil {
+	var err error
+
+	if err = os.Mkdir(BaseDir, 0700); err != nil {
 		if !os.IsExist(err) {
-			msg := fmt.Sprintf("Error creating BASE_DIR %s: %s", BaseDir, err.Error())
-			return errors.New(msg)
+			return fmt.Errorf("Error creating BaseDir %s: %s", BaseDir, err.Error())
+		}
+	} else if err = os.Mkdir(CacheDir, 0700); err != nil {
+		if !os.IsExist(err) {
+			return fmt.Errorf("Error creating CacheDir %s: %s",
+				CacheDir,
+				err.Error())
 		}
 	}
 
@@ -147,6 +156,7 @@ func SetBaseDir(path string) error {
 	BaseDir = path
 	LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppName)))
 	DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
+	CacheDir = filepath.Join(BaseDir, "cache")
 
 	var (
 		err error

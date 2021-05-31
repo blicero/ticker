@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-03-20 17:14:33 krylon>
+// Time-stamp: <2021-05-31 15:54:29 krylon>
 
 package database
 
@@ -254,6 +254,21 @@ INNER JOIN item i ON l.item_id = i.id
 INNER JOIN feed f ON i.feed_id = f.id
 ORDER BY i.timestamp DESC
 `,
+	query.ItemGetPrefetch: `
+SELECT id,
+       feed_id,
+       link,
+       title,
+       description,
+       timestamp,
+       read,
+       rating
+FROM item
+WHERE prefetch <> 1
+ORDER BY timestamp
+LIMIT ?
+`,
+	query.ItemPrefetchSet: "UPDATE item SET description = ?, prefetch = 1 WHERE id = ?",
 	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
 	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",
 	query.ItemHasDuplicate: `
