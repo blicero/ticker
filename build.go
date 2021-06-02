@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-01 01:06:45 krylon>
+// Time-stamp: <2021-06-02 14:24:20 krylon>
 
 // +build ignore
 
@@ -64,6 +64,7 @@ var candidates = map[string][]string{
 		"classifier",
 		"database",
 		"feed",
+		"prefetch",
 		"reader",
 		"web",
 	},
