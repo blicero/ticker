@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 31. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-02 00:27:06 krylon>
+// Time-stamp: <2021-06-02 10:49:15 krylon>
 
 // Package prefetch processes items received via RSS/Atom feeds
 // and checks if they contain image links.
@@ -212,6 +212,10 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 		return "", err
 	}
 
+	p.log.Printf("[TRACE] Sanitize Item %d (%s)\n",
+		i.ID,
+		i.Title)
+
 	rdr = strings.NewReader(i.Description)
 
 	if doc, err = html.Parse(rdr); err != nil {
@@ -256,8 +260,6 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 	}
 
 	return buf.String(), nil
-
-	// return "", krylib.ErrNotImplemented
 } // func (p *Prefetcher) sanitize(i *feed.Item) (string, error)
 
 // Chances are pretty low, I suppose, but we could make a little effort to avoid
