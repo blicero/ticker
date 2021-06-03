@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-02 14:12:32 krylon>
+// Time-stamp: <2021-06-03 01:08:48 krylon>
 
 package prefetch
 
@@ -27,6 +27,10 @@ func TestMain(m *testing.M) {
 	} else if err = common.SetBaseDir(baseDir); err != nil {
 		fmt.Printf("Cannot set base directory to %s: %s\n",
 			baseDir,
+			err.Error())
+		os.Exit(1)
+	} else if err = prepareItems(); err != nil {
+		fmt.Printf("Cannot prepare database: %s\n",
 			err.Error())
 		os.Exit(1)
 	} else if result = m.Run(); result == 0 {
