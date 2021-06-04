@@ -39,33 +39,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// if common.Debug {
-	// 	var profh *os.File
-	// 	var profPath = filepath.Join(common.BaseDir, "cpu.pprof")
-
-	// 	fmt.Printf("Writing profiling data to %s\n", profPath)
-
-	// 	if profh, err = os.Create(profPath); err != nil {
-	// 		fmt.Fprintf(os.Stderr, "Error opening profiling output %s: %s\n",
-	// 			profPath, err.Error())
-	// 		os.Exit(1)
-	// 	}
-	// 	defer func() {
-	// 		if e := profh.Close(); e != nil {
-	// 			fmt.Fprintf(os.Stderr, "ERROR closing %s: %s\n",
-	// 				profPath,
-	// 				e.Error())
-	// 		}
-	// 	}()
-
-	// 	runtime.SetCPUProfileRate(250)
-	// 	if err = pprof.StartCPUProfile(profh); err != nil {
-	// 		fmt.Fprintf(os.Stderr, "Error starting profiler: %s\n", err.Error())
-	// 		os.Exit(1)
-	// 	}
-	// 	defer pprof.StopCPUProfile()
-	// }
-
 	if rdr, err = reader.New(msgq); err != nil {
 		fmt.Fprintf(
 			os.Stderr,
