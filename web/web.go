@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-23 17:25:35 krylon>
+// Time-stamp: <2021-06-04 20:45:38 krylon>
 
 package web
 
@@ -149,6 +149,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/favicon.ico", srv.handleFavIco)
 	srv.router.HandleFunc("/static/{file}", srv.handleStaticFile)
 	srv.router.HandleFunc("/{page:(?i)(?:index|main)?$}", srv.handleIndex)
+	srv.router.HandleFunc("/cache/{img:(?:.*)$}", srv.handleCachedImg)
 
 	srv.router.HandleFunc("/feed/all", srv.handleFeedAll)
 	srv.router.HandleFunc("/feed/form", srv.handleFeedForm)
@@ -1273,6 +1274,59 @@ func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request)
 /////////////////////////////////////////
 ////////////// Other ////////////////////
 /////////////////////////////////////////
+
+func (srv *Server) handleCachedImg(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	var (
+		err                     error
+		basename, fullPath, msg string
+		fh                      *os.File
+		match                   []string
+	)
+
+	vars := mux.Vars(r)
+	basename = vars["img"]
+	fullPath = filepath.Join(common.CacheDir, basename)
+
+	if match = common.SuffixPattern.FindStringSubmatch(basename); match == nil {
+		msg = fmt.Sprintf("Could not determine file type for %s", basename)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	var imgType = "image/" + match[1]
+
+	srv.log.Printf("[DEBUG] MIME type for %s is %s\n",
+		fullPath,
+		imgType)
+
+	if fh, err = os.Open(fullPath); err != nil {
+		msg = fmt.Sprintf("Error opening %s: %s",
+			fullPath,
+			err.Error())
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	defer fh.Close() // nolint: errcheck
+
+	if common.Debug {
+		w.Header().Set("Cache-Control", "no-store, max-age=0")
+	} else {
+		w.Header().Set("Cache-Control", "max-age=7200")
+	}
+	w.Header().Set("Content-Type", imgType)
+	w.WriteHeader(200)
+
+	if _, err = io.Copy(w, fh); err != nil {
+		srv.log.Printf("[ERROR] Error sending file %s to %s: %s\n",
+			fullPath,
+			r.RemoteAddr,
+			err.Error())
+	}
+} // func (srv *Server) handleCachedImg(w http.ResponseWriter, request *http.Request)
 
 func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
