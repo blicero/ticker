@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-22 15:31:22 krylon>
+// Time-stamp: <2021-06-03 14:14:14 krylon>
 
 package main
 
@@ -10,8 +10,10 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"ticker/common"
+	"ticker/prefetch"
 	"ticker/reader"
 	"ticker/web"
 )
@@ -26,6 +28,7 @@ func main() {
 		err  error
 		rdr  *reader.Reader
 		srv  *web.Server
+		pre  *prefetch.Prefetcher
 		msgq = make(chan string, 5)
 	)
 
@@ -51,10 +54,23 @@ func main() {
 			"Cannnot create web server: %s\n",
 			err.Error())
 		os.Exit(1)
+	} else if pre, err = prefetch.Create(runtime.NumCPU()); err != nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"Cannot create Prefetcher: %s\n",
+			err.Error())
+		os.Exit(1)
 	}
 
 	go forwardMsg(msgq, srv)
 
+	if err = pre.Start(); err != nil {
+		fmt.Fprintf(
+			os.Stderr,
+			"Failed to start Prefetcher: %s\n",
+			err.Error())
+		os.Exit(1)
+	}
 	go rdr.Loop()
 	go srv.ListenAndServe()
 
@@ -67,6 +83,7 @@ func main() {
 
 	rdr.StopQ <- 1
 	srv.Close()
+	pre.Stop()
 
 	os.Exit(0)
 } // func main()

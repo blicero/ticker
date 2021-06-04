@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 31. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-02 10:49:15 krylon>
+// Time-stamp: <2021-06-04 13:55:54 krylon>
 
 // Package prefetch processes items received via RSS/Atom feeds
 // and checks if they contain image links.
@@ -87,6 +87,13 @@ func (p *Prefetcher) IsRunning() bool {
 	p.lock.RUnlock()
 	return b
 } // func (p *Prefetcher) IsRunning() bool
+
+// Stop tells the Prefetcher to stop. Duh.
+func (p *Prefetcher) Stop() {
+	p.lock.Lock()
+	p.running = false
+	p.lock.Unlock()
+} // func (p *Prefetcher) Stop()
 
 // Start sets the Prefetcher on its path.
 func (p *Prefetcher) Start() error {
@@ -235,7 +242,11 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 				err.Error())
 			continue
 		} else if !uri.IsAbs() {
+			var oldUri = uri
 			uri = lnk.ResolveReference(uri)
+			p.log.Printf("[TRACE] Resolve relative URI %s to %s\n",
+				oldUri,
+				uri)
 		}
 
 		if localpath, err = p.fetchImage(uri.String()); err != nil {
