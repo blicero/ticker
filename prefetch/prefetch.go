@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 31. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-04 13:55:54 krylon>
+// Time-stamp: <2021-06-04 20:49:39 krylon>
 
 // Package prefetch processes items received via RSS/Atom feeds
 // and checks if they contain image links.
@@ -37,7 +37,7 @@ import (
 
 const (
 	delay     = time.Second * 10
-	batchSize = 5
+	batchSize = 10
 )
 
 type processedItem struct {
@@ -242,10 +242,10 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 				err.Error())
 			continue
 		} else if !uri.IsAbs() {
-			var oldUri = uri
+			var oldURI = uri
 			uri = lnk.ResolveReference(uri)
 			p.log.Printf("[TRACE] Resolve relative URI %s to %s\n",
-				oldUri,
+				oldURI,
 				uri)
 		}
 
@@ -260,7 +260,14 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 
 		href = "/cache/" + basename
 
+		// While we're at it, we could resize the image, or at least
+		// tell the HTML to display it smaller.
+
 		dom.SetAttribute(node, "src", href)
+	}
+
+	for _, node := range dom.GetElementsByTagName(doc, "script") {
+		node.Parent.RemoveChild(node)
 	}
 
 	var buf bytes.Buffer

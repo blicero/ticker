@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-03 01:53:44 krylon>
+// Time-stamp: <2021-06-04 15:04:06 krylon>
 
 package prefetch
 
@@ -17,11 +17,18 @@ import (
 )
 
 const (
-	itemCnt  = 100
-	period   = 5400 // 5400 seconds = 90 minutes
-	itemTmpl = `
+	itemCnt     = 100
+	period      = 5400 // 5400 seconds = 90 minutes
+	itemTmplImg = `
 Bla Bla Bla
 <img src="/images/img%03d.jpg" />
+Bla Bla Bla
+`
+	itemTmplScript = `
+Bla Bla Bla<br />
+Bla Bla Bla<br />
+Bla <b>Bla</b> Bla<br />
+<script src="http://www.example.com/fartscroll.js"></script>
 Bla Bla Bla
 `
 )
@@ -82,8 +89,12 @@ func prepareItems() error {
 			FeedID:      myFeed.ID,
 			URL:         fmt.Sprintf("%s/item%04d", baseURL, idx),
 			Title:       fmt.Sprintf("Breaking News: Something happened %d times", idx+1),
-			Description: fmt.Sprintf(itemTmpl, idx),
+			Description: fmt.Sprintf(itemTmplImg, idx),
 			Timestamp:   randTime(),
+		}
+
+		if idx&1 == 1 {
+			i.Description += itemTmplScript
 		}
 
 		if err = db.ItemAdd(&i); err != nil {

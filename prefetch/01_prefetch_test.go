@@ -2,15 +2,20 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-03 12:33:31 krylon>
+// Time-stamp: <2021-06-04 16:09:58 krylon>
 
 package prefetch
 
 import (
+	"net/url"
+	"strings"
 	"testing"
 	"ticker/common"
 	"ticker/database"
 	"ticker/feed"
+
+	"github.com/go-shiori/dom"
+	"golang.org/x/net/html"
 )
 
 var (
@@ -50,5 +55,36 @@ func TestSanitize(t *testing.T) {
 		t.Logf("Sanitized body of item %d: %s",
 			i.ID,
 			body)
+
+		var (
+			doc *html.Node
+			rdr *strings.Reader
+		)
+
+		rdr = strings.NewReader(body)
+
+		if doc, err = html.Parse(rdr); err != nil {
+			t.Errorf("Cannot parse back body of item: %s\n%s",
+				err.Error(),
+				body)
+			continue
+		}
+
+		for _, node := range dom.GetElementsByTagName(doc, "img") {
+			var uri *url.URL
+			var href = dom.GetAttribute(node, "src")
+
+			if uri, err = url.Parse(href); err != nil {
+				t.Errorf("Cannot parse img source %q: %s",
+					href,
+					err.Error())
+			} else if uri.IsAbs() {
+				t.Errorf("URL should not be absolute: %q", href)
+			}
+		}
+
+		for _, node := range dom.GetElementsByTagName(doc, "script") {
+			t.Errorf("<script> should have been removed: %s", node.Data)
+		}
 	}
 } // func TestSanitize(t *testing.T)
