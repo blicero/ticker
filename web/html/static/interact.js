@@ -1,4 +1,4 @@
-// Time-stamp: <2021-05-31 09:48:25 krylon>
+// Time-stamp: <2021-06-05 15:09:48 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -757,7 +757,7 @@ function display_tag_items(tag_id) {
 
 // Found here: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio#14731922
 function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight) {
-    const = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+    const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
 
     return { width: srcWidth*ratio, height: srcHeight*ratio };
 } // function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight)
