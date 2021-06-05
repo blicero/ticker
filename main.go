@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-03 14:14:14 krylon>
+// Time-stamp: <2021-06-05 13:28:45 krylon>
 
 package main
 
@@ -54,7 +54,7 @@ func main() {
 			"Cannnot create web server: %s\n",
 			err.Error())
 		os.Exit(1)
-	} else if pre, err = prefetch.Create(runtime.NumCPU()); err != nil {
+	} else if pre, err = prefetch.Create(runtime.NumCPU() * 2); err != nil {
 		fmt.Fprintf(
 			os.Stderr,
 			"Cannot create Prefetcher: %s\n",
