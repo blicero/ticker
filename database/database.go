@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-31 16:33:44 krylon>
+// Time-stamp: <2021-06-05 10:26:32 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -2134,6 +2134,7 @@ EXEC_QUERY:
 	}
 
 	i.Description = description
+	status = true
 	return nil
 } // func (db *Database) ItemPrefetchSet(i *feed.Item, body string) error
 
