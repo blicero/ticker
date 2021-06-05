@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 31. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-04 20:49:39 krylon>
+// Time-stamp: <2021-06-05 13:39:43 krylon>
 
 // Package prefetch processes items received via RSS/Atom feeds
 // and checks if they contain image links.
@@ -36,8 +36,8 @@ import (
 )
 
 const (
-	delay     = time.Second * 10
-	batchSize = 10
+	delay     = time.Second * 5
+	batchSize = 25
 )
 
 type processedItem struct {
@@ -163,11 +163,15 @@ func (p *Prefetcher) receiver(db *database.Database) {
 			err error
 			i   processedItem
 		)
+
 		select {
 		case <-ticker.C:
 			continue
 		case i = <-p.resQ:
 			// ... do something about it:
+			p.log.Printf("[TRACE] Received processed Item %d (%s), storing to database.\n",
+				i.item.ID,
+				i.item.Title)
 			if err = db.ItemPrefetchSet(&i.item, i.body); err != nil {
 				p.log.Printf("[ERROR] Cannot update prefetched Item %d (%q): %s\n",
 					i.item.ID,
@@ -198,6 +202,9 @@ func (p *Prefetcher) worker() {
 					i.Title,
 					err.Error())
 			} else {
+				p.log.Printf("[TRACE] Sanitized item %d (%s), sending to database.\n",
+					i.ID,
+					i.Title)
 				p.resQ <- processedItem{item: i, body: body}
 			}
 		}
@@ -301,12 +308,19 @@ func (p *Prefetcher) fetchImage(href string) (string, error) {
 
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == 404 {
+		return href, nil
+	} else if resp.StatusCode != 200 {
 		err = fmt.Errorf("Failed to fetch %q: %s",
 			href,
 			resp.Status)
 		p.log.Printf("[ERROR] %s\n", err.Error())
 		return "", err
+	} else if strings.HasPrefix(resp.Header.Get("Content-Type"), "image/") {
+		p.log.Printf("[INFO] %s is not an image, but %s\n",
+			href,
+			resp.Header.Get("Content-Type"))
+		return href, nil
 	} else if cksum, err = common.GetChecksum([]byte(href)); err != nil {
 		p.log.Printf("[ERROR] Cannot compute checksum of URL %q: %s\n",
 			href,
