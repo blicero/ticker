@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 31. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-05 14:28:15 krylon>
+// Time-stamp: <2021-06-05 15:33:21 krylon>
 
 // Package prefetch processes items received via RSS/Atom feeds
 // and checks if they contain image links.
@@ -13,6 +13,7 @@ package prefetch
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -39,6 +40,8 @@ const (
 	delay     = time.Second * 5
 	batchSize = 25
 )
+
+var errNoReplace = errors.New("item does not get replaced")
 
 type processedItem struct {
 	item feed.Item
@@ -257,6 +260,9 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 		}
 
 		if localpath, err = p.fetchImage(uri.String()); err != nil {
+			if err == errNoReplace {
+				continue
+			}
 			p.log.Printf("[ERROR] Error fetching image %q: %s\n",
 				uri,
 				err.Error())
@@ -311,26 +317,26 @@ func (p *Prefetcher) fetchImage(href string) (string, error) {
 	mimetype = resp.Header.Get("Content-Type")
 
 	if resp.StatusCode == 404 {
-		return href, nil
+		return href, errNoReplace
 	} else if resp.StatusCode != 200 {
 		err = fmt.Errorf("Failed to fetch %q: %s",
 			href,
 			resp.Status)
 		p.log.Printf("[ERROR] %s\n", err.Error())
-		return "", err
+		return href, errNoReplace
 	} else if mimetype[:6] != "image/" {
 		p.log.Printf("[INFO] %s is not an image, but %q\n",
 			href,
 			mimetype)
-		return href, nil
+		return href, errNoReplace
 	} else if cksum, err = common.GetChecksum([]byte(href)); err != nil {
-		p.log.Printf("[ERROR] Cannot compute checksum of URL %q: %s\n",
+		p.log.Printf("[CANTHAPPEN] Cannot compute checksum of URL %q: %s\n",
 			href,
 			err.Error())
-		return "", err
+		return href, errNoReplace
 	} else if suffix, err = getFileSuffix(resp); err != nil {
 		p.log.Printf("[ERROR] %s\n", err.Error())
-		return "", err
+		return href, errNoReplace
 	}
 
 	localPath = filepath.Join(
