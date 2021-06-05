@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-31 15:54:29 krylon>
+// Time-stamp: <2021-06-05 13:54:50 krylon>
 
 package database
 
@@ -265,7 +265,7 @@ SELECT id,
        rating
 FROM item
 WHERE prefetch <> 1
-ORDER BY timestamp
+ORDER BY timestamp DESC
 LIMIT ?
 `,
 	query.ItemPrefetchSet: "UPDATE item SET description = ?, prefetch = 1 WHERE id = ?",
