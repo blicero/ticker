@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-04 20:45:38 krylon>
+// Time-stamp: <2021-06-05 15:50:14 krylon>
 
 package web
 
@@ -1279,6 +1279,8 @@ func (srv *Server) handleCachedImg(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
 		r.URL.EscapedPath())
 
+	const notFound = "Not found"
+
 	var (
 		err                     error
 		basename, fullPath, msg string
@@ -1303,10 +1305,17 @@ func (srv *Server) handleCachedImg(w http.ResponseWriter, r *http.Request) {
 		imgType)
 
 	if fh, err = os.Open(fullPath); err != nil {
-		msg = fmt.Sprintf("Error opening %s: %s",
-			fullPath,
-			err.Error())
-		srv.sendErrorMessage(w, msg)
+		if errors.Is(err, fs.ErrNotExist) {
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(notFound)) // nolint: errcheck
+		} else {
+			msg = fmt.Sprintf("Error opening %s: %s",
+				fullPath,
+				err.Error())
+			srv.sendErrorMessage(w, msg)
+		}
+
 		return
 	}
 
