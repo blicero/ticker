@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-05 13:54:50 krylon>
+// Time-stamp: <2021-06-06 15:32:26 krylon>
 
 package database
 
@@ -268,6 +268,7 @@ WHERE prefetch <> 1
 ORDER BY timestamp DESC
 LIMIT ?
 `,
+	query.ItemGetTotalCnt: "SELECT COUNT(id) FROM item",
 	query.ItemPrefetchSet: "UPDATE item SET description = ?, prefetch = 1 WHERE id = ?",
 	query.ItemRatingSet:   "UPDATE item SET rating = ? WHERE id = ?",
 	query.ItemRatingClear: "UPDATE item SET rating = NULL WHERE id = ?",

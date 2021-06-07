@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-05 10:26:32 krylon>
+// Time-stamp: <2021-06-06 15:41:45 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -1998,6 +1998,52 @@ EXEC_QUERY:
 
 	return items, nil
 } // func (db *Database) ItemGetByTagRecursive(t *tag.Tag) ([]feed.Item, error)
+
+// ItemGetTotalCnt returns the total number of items in the database.
+func (db *Database) ItemGetTotalCnt() (int64, error) {
+	const qid query.ID = query.ItemGetTotalCnt
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return 0, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return 0, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	if rows.Next() {
+		var cnt int64
+		if err = rows.Scan(&cnt); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n", err.Error())
+			return 0, err
+		}
+
+		return cnt, nil
+	}
+
+	db.log.Printf("[CANTHAPPEN] Query %s returned 0 rows\n",
+		qid)
+	return 0, nil
+} // func (db *Database) ItemGetTotalCnt() (int64, error)
 
 // ItemGetPrefetch fetches a number of Items that have not been processed
 // for prefetching, yet.
