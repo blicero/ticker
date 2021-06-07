@@ -1,6 +1,6 @@
 {{ define "all_items" }}
 {{/* Created on 18. 02. 2021 */}}
-{{/* Time-stamp: <2021-06-07 15:58:24 krylon> */}}
+{{/* Time-stamp: <2021-06-07 20:14:11 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -10,38 +10,45 @@
 
     <h2>Latest Headlines</h2>
 
-    {{ if ne .Prev "" }}
-    <a href="/items/{{ .Prev }}">&lt;&lt; Previous</a>
-    {{ end }}
-    &nbsp;&nbsp;&nbsp;
-    {{ if gt .PageCnt 0 }}
-    <select id="choose_page" class="btn btn-primary">
-      {{ range $i := intRange .PageCnt }}
-      <option id="item_page_{{ $i }}" value="{{ $i }}">
-        {{ inc $i }}
-      </option>
+    <div style="text-align: center;" id="nav">
+      {{ if ne .Prev "" }}
+      <a href="/items/{{ .Prev }}">&lt;&lt; Previous</a>
       {{ end }}
-    </select>
-    <input
-    type="button"
-    class="btn btn-primary"
-    value="Go"
-    onclick="items_go_page();" />
-    &nbsp;&nbsp;&nbsp;
-    {{ end }}
-    {{ if ne .Next "" }}
-    <a href="/items/{{ .Next }}">Next &gt;&gt;</a>
-    {{ end }}
+      &nbsp;&nbsp;&nbsp;
+      {{ if gt .PageCnt 0 }}
+      <select id="choose_page" class="btn btn-primary">
+        {{ range $i := intRange .PageCnt }}
+        <option id="item_page_{{ $i }}" value="{{ $i }}">
+          {{ inc $i }}
+        </option>
+        {{ end }}
+      </select>
+      <input
+      type="button"
+      class="btn btn-primary"
+      value="Go"
+      onclick="items_go_page();" />
+      &nbsp;&nbsp;&nbsp;
+      {{ end }}
+      {{ if ne .Next "" }}
+      <a href="/items/{{ .Next }}">Next &gt;&gt;</a>
+      {{ end }}
+    </div>
 
     {{ template "items" . }}
 
-    {{ if ne .Prev "" }}
-    <a href="/items/{{ .Prev }}">&lt;&lt; Previous</a>
-    {{ end }}
-    &nbsp;&nbsp;&nbsp;
-    {{ if ne .Next "" }}
-    <a href="/items/{{ .Next }}">Next &gt;&gt;</a>
-    {{ end }}
+
+    <div style="text-align: center;">
+      {{ if ne .Prev "" }}
+      <a href="/items/{{ .Prev }}">&lt;&lt; Previous</a>
+      {{ end }}
+      &nbsp;&nbsp;&nbsp;
+      <a href="#nav">Top</a>
+      &nbsp;&nbsp;&nbsp;
+      {{ if ne .Next "" }}
+      <a href="/items/{{ .Next }}">Next &gt;&gt;</a>
+      {{ end }}
+    </div>
 
     {{ template "footer" }}
   </body>
