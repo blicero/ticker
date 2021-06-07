@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-05 15:50:14 krylon>
+// Time-stamp: <2021-06-07 12:40:23 krylon>
 
 package web
 
@@ -552,12 +552,12 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	)
 
 	var (
-		err                 error
-		msg, pageSpec       string
-		pageNo, cnt, offset int64
-		db                  *database.Database
-		tmpl                *template.Template
-		data                = tmplDataItems{
+		err                                       error
+		msg, pageSpec                             string
+		pageNo, cnt, offset, totalCnt, totalPages int64
+		db                                        *database.Database
+		tmpl                                      *template.Template
+		data                                      = tmplDataItems{
 			tmplDataBase: tmplDataBase{
 				Debug: common.Debug,
 				URL:   r.URL.String(),
@@ -595,7 +595,14 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if data.Items, err = db.ItemGetAll(cnt, offset); err != nil {
+	if totalCnt, err = db.ItemGetTotalCnt(); err != nil {
+		msg = fmt.Sprintf("Cannot get total number of items from database: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, "/index", http.StatusFound)
+		return
+	} else if data.Items, err = db.ItemGetAll(cnt, offset); err != nil {
 		msg = fmt.Sprintf("Cannot load Items (%d / offset %d) from database: %s",
 			itemCnt,
 			offset,
@@ -635,6 +642,11 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
+	}
+
+	if cnt > 0 {
+		totalPages = totalCnt / cnt
+		data.PageCnt = totalPages
 	}
 
 	srv.clsLock.RLock()

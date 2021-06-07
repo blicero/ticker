@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-03-12 18:04:42 krylon>
+// Time-stamp: <2021-06-07 12:39:40 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -76,6 +76,7 @@ type tmplDataItems struct {
 	FeedMap map[int64]feed.Feed
 	Next    string
 	Prev    string
+	PageCnt int64
 }
 
 // TagLinkData returns data for use in the tag_link_form template.

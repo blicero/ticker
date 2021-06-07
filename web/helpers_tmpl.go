@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2021-03-11 18:37:16 krylon>
+// Time-stamp: <2021-06-07 15:58:20 krylon>
 
 package web
 
@@ -51,6 +51,8 @@ var funcmap = template.FuncMap{
 	"concat":           concat,
 	"i64str":           i64str,
 	"truncate":         truncateHTML,
+	"intRange":         intRange,
+	"inc":              inc,
 }
 
 type generator struct {
@@ -285,3 +287,20 @@ func truncateHTML(s string, maxlen int) string {
 
 	return string(output)
 } // func truncateHTML(s string, maxlen int) string
+
+func intRange(n int64) []int64 {
+	var (
+		i    int64
+		list = make([]int64, n)
+	)
+
+	for i = 0; i < n; i++ {
+		list[i] = i
+	}
+
+	return list
+} // func intRange(n int64) []int64
+
+func inc(n int64) int64 {
+	return n + 1
+} // func inc(n int64) int64
