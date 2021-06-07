@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 31. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-06 11:10:16 krylon>
+// Time-stamp: <2021-06-07 22:52:43 krylon>
 
 // Package prefetch processes items received via RSS/Atom feeds
 // and checks if they contain image links.
@@ -23,6 +23,7 @@ import (
 	"path"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"sync"
 	"ticker/common"
@@ -31,17 +32,23 @@ import (
 	"ticker/logdomain"
 	"time"
 
+	"github.com/blicero/krylib"
+
 	"github.com/go-shiori/dom"
 
 	"golang.org/x/net/html"
 )
 
 const (
-	delay     = time.Second * 5
-	batchSize = 25
+	delay      = time.Second * 5
+	batchSize  = 25
+	maxImgSize = 524288 // 512 KiB
 )
 
-var errNoReplace = errors.New("item does not get replaced")
+var (
+	errTooBig    = errors.New("file is too big")
+	errNoReplace = errors.New("item does not get replaced")
+)
 
 type processedItem struct {
 	item feed.Item
@@ -262,6 +269,9 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 		if localpath, err = p.fetchImage(uri.String()); err != nil {
 			if err == errNoReplace {
 				continue
+			} else if err == errTooBig {
+				node.Parent.RemoveChild(node)
+				continue
 			}
 			p.log.Printf("[ERROR] Error fetching image %q: %s\n",
 				uri,
@@ -309,7 +319,9 @@ func (p *Prefetcher) fetchImage(href string) (string, error) {
 		fh                                 *os.File
 	)
 
-	if resp, err = http.Get(href); err != nil {
+	if _, err = p.getImageSize(href); err != nil {
+		return "", err
+	} else if resp, err = http.Get(href); err != nil {
 		p.log.Printf("[ERROR] Failed to fetch %q: %s\n",
 			href,
 			err.Error())
@@ -372,6 +384,42 @@ func (p *Prefetcher) fetchImage(href string) (string, error) {
 
 	return localPath, nil
 } // func (p *Prefetcher) fetchImage(href string) (string, error)
+
+func (p *Prefetcher) getImageSize(href string) (int64, error) {
+	var (
+		err    error
+		res    *http.Response
+		lenStr string
+		cnt    int64
+	)
+
+	if res, err = http.Head(href); err != nil {
+		p.log.Printf("[ERROR] Cannot get HTTP headers for %q: %s\n",
+			href,
+			err.Error())
+		return 0, err
+	}
+
+	lenStr = res.Header.Get("Content-Length")
+
+	if lenStr == "" {
+		return -1, nil
+	}
+
+	if cnt, err = strconv.ParseInt(lenStr, 10, 64); err != nil {
+		p.log.Printf("[ERROR] Cannot parse Content-Length (%s): %s\n",
+			lenStr,
+			err.Error())
+		return 0, err
+	} else if cnt > maxImgSize {
+		p.log.Printf("[INFO] Image %q is too big: %s\n",
+			href,
+			krylib.FmtBytes(cnt))
+		return cnt, errTooBig
+	}
+
+	return cnt, nil
+} // func (p *prefetcher) getImageSize(href string) (int64, error)
 
 var suffixPattern = regexp.MustCompile("(?i)^image/([a-z]+)$")
 
