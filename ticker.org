@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-07 16:04:39 krylon>
+# Time-stamp: <2021-06-07 19:04:57 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-07 Mo 16:04]
+   #+CAPTION: Clock summary at [2021-06-07 Mo 19:04]
    | Headline                               | Time       |          |         |          |          |      |
    |----------------------------------------+------------+----------+---------+----------+----------+------|
-   | *Total time*                           | *12d 3:42* |          |         |          |          |      |
+   | *Total time*                           | *12d 4:05* |          |         |          |          |      |
    |----------------------------------------+------------+----------+---------+----------+----------+------|
-   | Ticker                                 | 12d 3:42   |          |         |          |          |      |
+   | Ticker                                 | 12d 4:05   |          |         |          |          |      |
    | \_  Main                               |            |     0:56 |         |          |          |      |
    | \_    Shutdown                         |            |          |    0:56 |          |          |      |
-   | \_  Components [29/33]                 |            | 11d 9:09 |         |          |          |      |
+   | \_  Components [29/33]                 |            | 11d 9:32 |         |          |          |      |
    | \_    Feed [6/6]                       |            |          | 1d 8:39 |          |          |      |
    | \_      Homepage                       |            |          |         |     0:12 |          |      |
    | \_      Rating [3/3]                   |            |          |         |  1d 5:11 |          |      |
@@ -32,17 +32,17 @@
    | \_    Reader [2/2]                     |            |          |   18:06 |          |          |      |
    | \_      Timestamps                     |            |          |         |     0:15 |          |      |
    | \_      Pseudo-duplicates              |            |          |         |     2:01 |          |      |
-   | \_    Web interface [12/15]            |            |          | 4d 7:32 |          |          |      |
+   | \_    Web interface [12/15]            |            |          | 4d 7:55 |          |          |      |
    | \_      Handling Images [2/2]          |            |          |         | 1d 17:11 |          |      |
    | \_        Prefetch images and such     |            |          |         |          | 1d 17:11 |      |
    | \_      Various small-ish improvements |            |          |         |     8:57 |          |      |
    | \_        Shutdown                     |            |          |         |          |     6:15 |      |
    | \_      Embed                          |            |          |         |     3:00 |          |      |
-   | \_      Snazzy [5/7]                   |            |          |         |    12:46 |          |      |
+   | \_      Snazzy [5/7]                   |            |          |         |    13:09 |          |      |
    | \_        Paging [1/2]                 |            |          |         |          |     4:21 |      |
    | \_          Menu                       |            |          |         |          |          | 4:21 |
    | \_        Voting Buttons               |            |          |         |          |     3:33 |      |
-   | \_        Selection form for tags      |            |          |         |          |     0:48 |      |
+   | \_        Selection form for tags      |            |          |         |          |     1:11 |      |
    | \_        Ooopsie [1/1]                |            |          |         |          |     0:51 |      |
    | \_          Read later form            |            |          |         |          |          | 0:51 |
    | \_        Subscribe                    |            |          |         |          |     2:35 |      |
@@ -303,7 +303,7 @@
        CLOCK: [2021-06-07 Mo 11:57]--[2021-06-07 Mo 16:04] =>  4:07
        CLOCK: [2021-06-06 So 15:31]--[2021-06-06 So 15:45] =>  0:14
        :END:
-****** TODO Number of items per page
+****** TODO [#E] Number of items per page
 ***** DONE Voting Buttons
       CLOSED: [2021-05-28 Fr 20:58]
       :LOGBOOK:
@@ -312,11 +312,12 @@
       
 ***** TODO Selection form for tags
       :LOGBOOK:
+      CLOCK: [2021-06-07 Mo 18:41]--[2021-06-07 Mo 19:04] =>  0:23
       CLOCK: [2021-05-28 Fr 16:36]--[2021-05-28 Fr 17:24] =>  0:48
       :END:
       - [X] Smaller font
       - [ ] Display most likely candidate first
-      - [ ] Select first item when appliying tag
+      - [X] Select first item when applying tag
 ***** Ooopsie [1/1]
       I appear to have broken some things when trying to make them less ugly
 ****** DONE Read later form
