@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-07 19:04:57 krylon>
+# Time-stamp: <2021-06-07 21:59:45 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,56 +13,56 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-07 Mo 19:04]
-   | Headline                               | Time       |          |         |          |          |      |
-   |----------------------------------------+------------+----------+---------+----------+----------+------|
-   | *Total time*                           | *12d 4:05* |          |         |          |          |      |
-   |----------------------------------------+------------+----------+---------+----------+----------+------|
-   | Ticker                                 | 12d 4:05   |          |         |          |          |      |
-   | \_  Main                               |            |     0:56 |         |          |          |      |
-   | \_    Shutdown                         |            |          |    0:56 |          |          |      |
-   | \_  Components [29/33]                 |            | 11d 9:32 |         |          |          |      |
-   | \_    Feed [6/6]                       |            |          | 1d 8:39 |          |          |      |
-   | \_      Homepage                       |            |          |         |     0:12 |          |      |
-   | \_      Rating [3/3]                   |            |          |         |  1d 5:11 |          |      |
-   | \_        Web Frontend                 |            |          |         |          |    12:09 |      |
-   | \_        Classifier                   |            |          |         |          |    16:25 |      |
-   | \_    Database [1/1]                   |            |          |   21:55 |          |          |      |
-   | \_      Due Feeds                      |            |          |         |     1:26 |          |      |
-   | \_    Reader [2/2]                     |            |          |   18:06 |          |          |      |
-   | \_      Timestamps                     |            |          |         |     0:15 |          |      |
-   | \_      Pseudo-duplicates              |            |          |         |     2:01 |          |      |
-   | \_    Web interface [12/15]            |            |          | 4d 7:55 |          |          |      |
-   | \_      Handling Images [2/2]          |            |          |         | 1d 17:11 |          |      |
-   | \_        Prefetch images and such     |            |          |         |          | 1d 17:11 |      |
-   | \_      Various small-ish improvements |            |          |         |     8:57 |          |      |
-   | \_        Shutdown                     |            |          |         |          |     6:15 |      |
-   | \_      Embed                          |            |          |         |     3:00 |          |      |
-   | \_      Snazzy [5/7]                   |            |          |         |    13:09 |          |      |
-   | \_        Paging [1/2]                 |            |          |         |          |     4:21 |      |
-   | \_          Menu                       |            |          |         |          |          | 4:21 |
-   | \_        Voting Buttons               |            |          |         |          |     3:33 |      |
-   | \_        Selection form for tags      |            |          |         |          |     1:11 |      |
-   | \_        Ooopsie [1/1]                |            |          |         |          |     0:51 |      |
-   | \_          Read later form            |            |          |         |          |          | 0:51 |
-   | \_        Subscribe                    |            |          |         |          |     2:35 |      |
-   | \_      Limit description length       |            |          |         |     1:32 |          |      |
-   | \_      Manage Feeds                   |            |          |         |    17:11 |          |      |
-   | \_    Tags [3/4]                       |            |          | 2d 4:46 |          |          |      |
-   | \_      Database                       |            |          |         |    10:59 |          |      |
-   | \_        Hierarchy                    |            |          |         |          |     8:58 |      |
-   | \_      Web interface                  |            |          |         |  1d 4:45 |          |      |
-   | \_      Suggestions                    |            |          |         |    11:12 |          |      |
-   | \_    Search [3/3]                     |            |          | 1d 0:23 |          |          |      |
-   | \_      Moar!                          |            |          |         |    20:53 |          |      |
-   | \_    Read Later [2/2]                 |            |          |   19:48 |          |          |      |
-   | \_      Web interface                  |            |          |         |    17:46 |          |      |
-   | \_  Tedious tasks                      |            |    14:57 |         |          |          |      |
-   | \_    Performance [2/2]                |            |          |   14:57 |          |          |      |
-   | \_      Advisor                        |            |          |         |     4:06 |          |      |
-   | \_      Profiling                      |            |          |         |     7:01 |          |      |
-   | \_  Bugs                               |            |     2:40 |         |          |          |      |
-   | \_    Panic in Language Guesser        |            |          |    2:40 |          |          |      |
+   #+CAPTION: Clock summary at [2021-06-07 Mo 21:59]
+   | Headline                               | Time       |           |         |          |          |      |
+   |----------------------------------------+------------+-----------+---------+----------+----------+------|
+   | *Total time*                           | *12d 6:06* |           |         |          |          |      |
+   |----------------------------------------+------------+-----------+---------+----------+----------+------|
+   | Ticker                                 | 12d 6:06   |           |         |          |          |      |
+   | \_  Main                               |            |      0:56 |         |          |          |      |
+   | \_    Shutdown                         |            |           |    0:56 |          |          |      |
+   | \_  Components [31/34]                 |            | 11d 11:33 |         |          |          |      |
+   | \_    Feed [6/6]                       |            |           | 1d 8:39 |          |          |      |
+   | \_      Homepage                       |            |           |         |     0:12 |          |      |
+   | \_      Rating [3/3]                   |            |           |         |  1d 5:11 |          |      |
+   | \_        Web Frontend                 |            |           |         |          |    12:09 |      |
+   | \_        Classifier                   |            |           |         |          |    16:25 |      |
+   | \_    Database [1/1]                   |            |           |   21:55 |          |          |      |
+   | \_      Due Feeds                      |            |           |         |     1:26 |          |      |
+   | \_    Reader [2/2]                     |            |           |   18:06 |          |          |      |
+   | \_      Timestamps                     |            |           |         |     0:15 |          |      |
+   | \_      Pseudo-duplicates              |            |           |         |     2:01 |          |      |
+   | \_    Web interface [14/16]            |            |           | 4d 9:56 |          |          |      |
+   | \_      Handling Images [2/2]          |            |           |         | 1d 17:11 |          |      |
+   | \_        Prefetch images and such     |            |           |         |          | 1d 17:11 |      |
+   | \_      Various small-ish improvements |            |           |         |     8:57 |          |      |
+   | \_        Shutdown                     |            |           |         |          |     6:15 |      |
+   | \_      Embed                          |            |           |         |     3:00 |          |      |
+   | \_      Snazzy [5/7]                   |            |           |         |    15:10 |          |      |
+   | \_        Paging [1/2]                 |            |           |         |          |     6:22 |      |
+   | \_          Menu                       |            |           |         |          |          | 4:21 |
+   | \_        Voting Buttons               |            |           |         |          |     3:33 |      |
+   | \_        Selection form for tags      |            |           |         |          |     1:11 |      |
+   | \_        Ooopsie [1/1]                |            |           |         |          |     0:51 |      |
+   | \_          Read later form            |            |           |         |          |          | 0:51 |
+   | \_        Subscribe                    |            |           |         |          |     2:35 |      |
+   | \_      Limit description length       |            |           |         |     1:32 |          |      |
+   | \_      Manage Feeds                   |            |           |         |    17:11 |          |      |
+   | \_    Tags [3/4]                       |            |           | 2d 4:46 |          |          |      |
+   | \_      Database                       |            |           |         |    10:59 |          |      |
+   | \_        Hierarchy                    |            |           |         |          |     8:58 |      |
+   | \_      Web interface                  |            |           |         |  1d 4:45 |          |      |
+   | \_      Suggestions                    |            |           |         |    11:12 |          |      |
+   | \_    Search [3/3]                     |            |           | 1d 0:23 |          |          |      |
+   | \_      Moar!                          |            |           |         |    20:53 |          |      |
+   | \_    Read Later [2/2]                 |            |           |   19:48 |          |          |      |
+   | \_      Web interface                  |            |           |         |    17:46 |          |      |
+   | \_  Tedious tasks                      |            |     14:57 |         |          |          |      |
+   | \_    Performance [2/2]                |            |           |   14:57 |          |          |      |
+   | \_      Advisor                        |            |           |         |     4:06 |          |      |
+   | \_      Profiling                      |            |           |         |     7:01 |          |      |
+   | \_  Bugs                               |            |      2:40 |         |          |          |      |
+   | \_    Panic in Language Guesser        |            |           |    2:40 |          |          |      |
    #+END:
 
 ** Questions
@@ -73,7 +73,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [29/33]
+** Components [31/34]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -186,7 +186,7 @@
      it works.
      Simply skipping the Item if the headline already exists, is not a good
      idea, either, I should at least take the timestamps into consideration.
-*** Web interface [12/15]
+*** Web interface [14/16]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -200,7 +200,9 @@
     CLOCK: [2021-02-12 Fr 17:21]--[2021-02-12 Fr 19:04] =>  1:43
     CLOCK: [2021-02-12 Fr 15:23]--[2021-02-12 Fr 16:34] =>  1:11
     :END:
-**** TODO Fartscroll                                                :feature:
+**** CANCELLED Fartscroll                                           :feature:
+     CLOSED: [2021-06-07 Mo 19:48]
+     That was a lot less funny than I imagined it would be. Very annoying.
 **** Handling Images [2/2]
      Sometimes, item bodies contain images, which makes loading slow, and it
      also can make the layout awkward when these images are large in size.
@@ -294,6 +296,9 @@
      of doing things, but it seems nice enough, well-documented, and a
      reasonably easy way of making the whole thing less of an eye sore.
 ***** Paging [1/2]
+      :LOGBOOK:
+      CLOCK: [2021-06-07 Mo 19:58]--[2021-06-07 Mo 21:59] =>  2:01
+      :END:
       I would like to have a selection menu for the paged list of items, so I
       can directly jump to later pages. Also, I'd like to choose how many
       items per page are displayed.
