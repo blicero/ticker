@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-07 14:28:06 krylon>
+// Time-stamp: <2021-06-07 19:03:17 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -473,8 +473,9 @@ function rebuildFTS() {
 } // function rebuildFTS()
 
 function attach_tag(form_id, item_id) {
-    var sel = $("#" + form_id)[0].value;
-    var tag_id = parseInt(sel);
+    const id = `#${form_id}`;
+    const sel = $(id)[0].value;
+    const tag_id = parseInt(sel);
 
     console.log("Attach Tag #" + sel + " to Item " + item_id + ".");
 
@@ -482,15 +483,22 @@ function attach_tag(form_id, item_id) {
                      { Tag: tag_id, Item: item_id },
                      function(reply) {
                          console.log(`Successfully attached Tag ${sel} to Item ${item_id}`);
-                         var div_id = `#tags_${item_id}`;
-                         var div = $(div_id)[0];
+                         const div_id = `#tags_${item_id}`;
+                         const div = $(div_id)[0];
 
-                         var tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" role="button" onclick="untag(${item_id}, ${tag_id});" /> &nbsp; `;
+                         const tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" role="button" onclick="untag(${item_id}, ${tag_id});" /> &nbsp; `;
 
                          div.innerHTML += tag;
 
-                         var opt_id = `#${form_id}_opt_${tag_id}`;
+                         const opt_id = `#${form_id}_opt_${tag_id}`;
                          $(opt_id).hide();
+                         let form = $(id)[0];
+                         for (const [idx, val] of Object.entries(form.options)) {
+                             if (val.style.display != "none") {
+                                 form.value = val.value;
+                                 break;
+                             }
+                         }
                      },
                      "json");
 
@@ -500,29 +508,30 @@ function attach_tag(form_id, item_id) {
 } // function attach_tag(form_id, item_id)
 
 function untag(item_id, tag_id) {
-    var tag = `#item_${item_id}_tag_${tag_id}`;
-    var msg = `Remove tag ${tag_id} from Item ${item_id}`;
+    const tag = `#item_${item_id}_tag_${tag_id}`;
+    const msg = `Remove tag ${tag_id} from Item ${item_id}`;
     console.log(msg);
-    // alert(msg);
     
     var req = $.post("/ajax/tag_link_delete",
                      { Tag: tag_id, Item: item_id },
                      function(reply) {
                          console.log(`Successfully detached Tag ${tag_id} from Item ${item_id}`);
 
-                         var label_id = `.item_${item_id}_tag_${tag_id}`;
-                         var labels = $(label_id);
+                         const label_id = `.item_${item_id}_tag_${tag_id}`;
+                         const labels = $(label_id);
 
                          labels.each(function() { $(this).remove(); });
 
-                         var sel_id = `tag_menu_item_${item_id}`;
-                         var opt_id = `#${sel_id}_opt_${tag_id}`;
+                         const sel_id = `tag_menu_item_${item_id}`;
+                         const opt_id = `#${sel_id}_opt_${tag_id}`;
                          $(opt_id).show();
                      },
                      "json");
 
     req.fail(function(reply, status_text, xhr) {
-        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
+        const errmsg = `Error attaching Tag to Item: ${status_text} // ${reply}`;
+        console.log(errmsg);
+        alert(errmsg);
     });
 } // function untag(item_id, tag_id)
 
