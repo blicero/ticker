@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-07 12:40:23 krylon>
+// Time-stamp: <2021-06-07 18:01:01 krylon>
 
 package web
 
@@ -1310,7 +1310,7 @@ func (srv *Server) handleCachedImg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var imgType = "image/" + match[1]
+	var imgType = "image/" + match[1][1:]
 
 	srv.log.Printf("[DEBUG] MIME type for %s is %s\n",
 		fullPath,
