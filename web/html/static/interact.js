@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-07 19:03:17 krylon>
+// Time-stamp: <2021-06-08 21:53:21 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -746,7 +746,7 @@ function toggle_feed_active(feed_id) {
 function display_tag_items(tag_id) {
     const url = `/ajax/items_by_tag/${tag_id}`;
 
-    var req = $.post(url,
+    let req1 = $.post(url,
                      {},
                      function(reply) {
                          if (reply.Status) {
@@ -759,9 +759,31 @@ function display_tag_items(tag_id) {
                      },
                      "json");
 
-    req.fail(function(reply, status_text, xhr) {
+    req1.fail(function(reply, status_text, xhr) {
         console.log(`Error getting Items: ${status_text} - ${xhr}`);
     });
+
+    let req2 = $.get(`/ajax/tag_details/${tag_id}`,
+                     {},
+                     (reply) => {
+                         if (reply.Status) {
+                             $("#tag_id")[0].value = reply.Tag.ID;
+                             $("#tag_name")[0].value = reply.Tag.Name;
+                             $("#tag_description")[0].value = reply.Tag.Description;
+                             console.log(`Server said ${reply.Message}`);
+
+                             let sel = $("#tag_parent")[0];
+                             for (const [idx, entry] of Object.entries(sel.options)) {
+                                 if (entry.value == reply.Tag.Parent) {
+                                     sel.value = entry.value;
+                                     break;
+                                 }
+                             }
+                         }
+                     },
+                     "json");
+
+    req2.fail((reply, status_text, xhr) => { console.log(`Error getting Tag: ${status_text} - ${xhr}`); });
 } // function display_tag_items(tag_id)
 
 // Found here: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio#14731922

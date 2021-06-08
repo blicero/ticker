@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-07 18:01:01 krylon>
+// Time-stamp: <2021-06-08 22:37:29 krylon>
 
 package web
 
@@ -173,6 +173,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/rate_item", srv.handleRateItem)
 	srv.router.HandleFunc("/ajax/unrate_item/{id:(?:\\d+)$}", srv.handleUnrateItem)
 	srv.router.HandleFunc("/ajax/rebuild_fts", srv.handleRebuildFTS)
+	srv.router.HandleFunc("/ajax/tag_details/{id:(?:\\d+)$}", srv.handleAjaxTagDetails)
 	srv.router.HandleFunc("/ajax/tag_link_create", srv.handleTagLinkCreate)
 	srv.router.HandleFunc("/ajax/tag_link_delete", srv.handleTagLinkDelete)
 	srv.router.HandleFunc("/ajax/read_later_mark", srv.handleReadLaterMark)
@@ -1054,11 +1055,11 @@ func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
 		r.URL.EscapedPath())
 
 	var (
-		err                   error
-		msg, name, desc, pStr string
-		t                     *tag.Tag
-		db                    *database.Database
-		parentID              int64
+		err                          error
+		msg, name, desc, pStr, idStr string
+		t                            *tag.Tag
+		db                           *database.Database
+		parentID                     int64
 	)
 
 	if err = r.ParseForm(); err != nil {
@@ -1070,6 +1071,7 @@ func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	idStr = r.FormValue("id")
 	name = r.FormValue("name")
 	desc = r.FormValue("description")
 	pStr = r.FormValue("parent")
@@ -1079,6 +1081,15 @@ func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
 			pStr,
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	if idStr != "" {
+		// Update!!!
+		msg = "Updating Tags is not implemented, yet!"
+		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
@@ -1712,6 +1723,77 @@ func (srv *Server) handleRebuildFTS(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleRebuildFTS(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleAjaxTagDetails(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	type tagResponse struct {
+		Status  bool
+		Message string
+		Tag     *tag.Tag
+	}
+
+	var (
+		err               error
+		db                *database.Database
+		id                int64
+		t                 *tag.Tag
+		idStr, msg, reply string
+		buf               []byte
+		resp              tagResponse
+	)
+
+	vars := mux.Vars(r)
+	idStr = vars["id"]
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse Tag ID %s: %s",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if t, err = db.TagGetByID(id); err != nil {
+		msg = fmt.Sprintf("Failed to get Tag %d from database: %s",
+			id,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	resp = tagResponse{
+		Status:  true,
+		Message: "Success",
+		Tag:     t,
+	}
+
+	if buf, err = json.Marshal(&resp); err != nil {
+		msg = fmt.Sprintf("Cannot serialize Response for Tag %d (%s): %s",
+			id,
+			t.Name,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(buf)), 10))
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(buf) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleAjaxTagDetails(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleTagLinkCreate(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle %s from %s\n",
