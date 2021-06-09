@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-08 22:37:29 krylon>
+// Time-stamp: <2021-06-09 18:31:41 krylon>
 
 package web
 
@@ -1086,19 +1086,41 @@ func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if idStr != "" {
-		// Update!!!
-		msg = "Updating Tags is not implemented, yet!"
-		srv.log.Printf("[ERROR] %s\n", msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	}
-
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if t, err = db.TagCreate(name, desc, parentID); err != nil {
+	if idStr != "" {
+		srv.log.Printf("[TRACE] Updating Tag %s (%s)\n",
+			idStr,
+			name)
+
+		// Update!!!
+		t = &tag.Tag{
+			Name:        name,
+			Description: desc,
+			Parent:      parentID,
+		}
+
+		if t.ID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+			msg = fmt.Sprintf("Cannot parse Tag ID %q: %s",
+				idStr,
+				err.Error())
+			srv.log.Printf("[ERROR] %s\n", msg)
+			srv.SendMessage(msg)
+			// http.Redirect(w, r, r.Referer(), http.StatusFound)
+			// return
+		} else if err = db.TagUpdate(t); err != nil {
+			msg = fmt.Sprintf("Failed to update Tag %d (%s): %s",
+				t.ID,
+				t.Name,
+				err.Error())
+			srv.log.Printf("[ERROR] %s\n", msg)
+			srv.SendMessage(msg)
+			// http.Redirect(w, r, r.Referer(), http.StatusFound)
+			// return
+		}
+
+	} else if t, err = db.TagCreate(name, desc, parentID); err != nil {
 		msg = fmt.Sprintf("Cannot create Tag %q: %s",
 			name,
 			err.Error())
@@ -1106,13 +1128,12 @@ func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
+	} else {
+		srv.log.Printf("[DEBUG] Created Tag %s (%d)\n",
+			t.Name,
+			t.ID)
 	}
 
-	srv.log.Printf("[DEBUG] Created Tag %s (%d)\n",
-		t.Name,
-		t.ID)
-
-	// var addr = fmt.Sprintf("/tag/%d", t.ID)
 	http.Redirect(w, r, r.Referer(), http.StatusFound)
 } // func (srv *Server) handleTagCreate(w http.ResponseWriter, r *http.Request)
 
