@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-06 15:41:45 krylon>
+// Time-stamp: <2021-06-09 18:50:32 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -2671,9 +2671,10 @@ EXEC_QUERY:
 		var (
 			t      tag.Tag
 			parent *int64
+			desc   *string
 		)
 
-		if err = rows.Scan(&t.ID, &t.Name, &t.Description, &parent); err != nil {
+		if err = rows.Scan(&t.ID, &t.Name, &desc, &parent); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
@@ -2681,6 +2682,9 @@ EXEC_QUERY:
 
 		if parent != nil {
 			t.Parent = *parent
+		}
+		if desc != nil {
+			t.Description = *desc
 		}
 
 		tags = append(tags, t)
@@ -2728,9 +2732,12 @@ EXEC_QUERY:
 	var tags = make([]tag.Tag, 0, 16)
 
 	for rows.Next() {
-		var t tag.Tag
+		var (
+			t    tag.Tag
+			desc *string
+		)
 
-		if err = rows.Scan(&t.ID, &t.Name, &t.Description); err != nil {
+		if err = rows.Scan(&t.ID, &t.Name, &desc); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
@@ -2740,6 +2747,10 @@ EXEC_QUERY:
 				t.ID,
 				err.Error())
 			return nil, err
+		}
+
+		if desc != nil {
+			t.Description = *desc
 		}
 
 		tags = append(tags, t)
@@ -2838,15 +2849,21 @@ EXEC_QUERY:
 	var tags = make([]tag.Tag, 0, 16)
 
 	for rows.Next() {
-		var t tag.Tag
+		var (
+			desc *string
+			t    tag.Tag
+		)
 
-		if err = rows.Scan(&t.ID, &t.Name, &t.Description); err != nil {
+		if err = rows.Scan(&t.ID, &t.Name, &desc); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
 		}
 
 		t.Parent = id
+		if desc != nil {
+			t.Description = *desc
+		}
 
 		if t.Children, err = db.TagGetChildrenImmediate(t.ID); err != nil {
 			db.log.Printf("[ERROR] Cannot get immediate children of Tag %s (%d): %s\n",
@@ -3015,10 +3032,11 @@ EXEC_QUERY:
 	for rows.Next() {
 		var (
 			t      tag.Tag
+			desc   *string
 			parent *int64
 		)
 
-		if err = rows.Scan(&t.ID, &t.Name, &t.Description, &parent); err != nil {
+		if err = rows.Scan(&t.ID, &t.Name, &desc, &parent); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
@@ -3026,6 +3044,9 @@ EXEC_QUERY:
 
 		if parent != nil {
 			t.Parent = *parent
+		}
+		if desc != nil {
+			t.Description = *desc
 		}
 
 		tags = append(tags, t)
@@ -3312,6 +3333,87 @@ EXEC_QUERY:
 	t.Parent = 0
 	return nil
 } // func (db *Database) TagParentClear(t *tag.Tag) error
+
+// TagUpdate updates a Tag.
+func (db *Database) TagUpdate(t *tag.Tag) error {
+	const qid query.ID = query.TagUpdate
+	var (
+		err    error
+		msg    string
+		stmt   *sql.Stmt
+		tx     *sql.Tx
+		status bool
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid.String(),
+			err.Error())
+		return err
+	} else if db.tx != nil {
+		tx = db.tx
+	} else {
+	BEGIN_AD_HOC:
+		if tx, err = db.db.Begin(); err != nil {
+			if worthARetry(err) {
+				waitForRetry()
+				goto BEGIN_AD_HOC
+			} else {
+				msg = fmt.Sprintf("Error starting transaction: %s\n",
+					err.Error())
+				db.log.Printf("[ERROR] %s\n", msg)
+				return errors.New(msg)
+			}
+
+		} else {
+			defer func() {
+				var err2 error
+				if status {
+					if err2 = tx.Commit(); err2 != nil {
+						db.log.Printf("[ERROR] Failed to commit ad-hoc transaction: %s\n",
+							err2.Error())
+					}
+				} else if err2 = tx.Rollback(); err2 != nil {
+					db.log.Printf("[ERROR] Rollback of ad-hoc transaction failed: %s\n",
+						err2.Error())
+				}
+			}()
+		}
+	}
+
+	stmt = tx.Stmt(stmt)
+
+	var (
+		parent      *int64
+		description *string
+	)
+
+	if t.Parent != 0 {
+		parent = &t.Parent
+	}
+
+	if t.Description != "" {
+		description = &t.Description
+	}
+
+EXEC_QUERY:
+	if _, err = stmt.Exec(t.Name, parent, description, t.ID); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		} else {
+			err = fmt.Errorf("cannot update Tag %s (%d): %s",
+				t.Name,
+				t.ID,
+				err.Error())
+			db.log.Printf("[ERROR] %s\n", err.Error())
+			return err
+		}
+	}
+
+	status = true
+	return nil
+} // func (db *Database) TagUpdate(t *tag.Tag) error
 
 // TagLinkCreate attaches the given Tag to the given Item.
 func (db *Database) TagLinkCreate(itemID, tagID int64) error {

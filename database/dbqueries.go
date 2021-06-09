@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-06 15:32:26 krylon>
+// Time-stamp: <2021-06-09 18:36:20 krylon>
 
 package database
 
@@ -344,6 +344,7 @@ ORDER BY name
 	query.TagDescriptionUpdate: "UPDATE tag SET description = ? WHERE id = ?",
 	query.TagParentSet:         "UPDATE tag SET parent = ? WHERE id = ?",
 	query.TagParentClear:       "UPDATE tag SET parent = NULL WHERE id = ?",
+	query.TagUpdate:            "UPDATE tag SET name = ?, parent = ?, description = ? WHERE id = ?",
 	query.TagLinkCreate:        "INSERT INTO tag_link (tag_id, item_id) VALUES (?, ?)",
 	query.TagLinkDelete:        "DELETE FROM tag_link WHERE tag_id = ? AND item_id = ?",
 	query.TagLinkGetByItem:     "SELECT tag_id FROM tag_link WHERE item_id = ?",
