@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-09 18:56:48 krylon>
+# Time-stamp: <2021-06-09 22:14:24 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,7 +13,7 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-09 Mi 18:56]
+   #+CAPTION: Clock summary at [2021-06-09 Mi 22:14]
    | Headline                               | Time        |           |          |          |          |      |
    |----------------------------------------+-------------+-----------+----------+----------+----------+------|
    | *Total time*                           | *12d 16:58* |           |          |          |          |      |
@@ -21,7 +21,7 @@
    | Ticker                                 | 12d 16:58   |           |          |          |          |      |
    | \_  Main                               |             |      0:56 |          |          |          |      |
    | \_    Shutdown                         |             |           |     0:56 |          |          |      |
-   | \_  Components [32/39]                 |             | 11d 22:25 |          |          |          |      |
+   | \_  Components [35/39]                 |             | 11d 22:25 |          |          |          |      |
    | \_    Feed [6/6]                       |             |           |  1d 8:39 |          |          |      |
    | \_      Homepage                       |             |           |          |     0:12 |          |      |
    | \_      Rating [3/3]                   |             |           |          |  1d 5:11 |          |      |
@@ -32,8 +32,8 @@
    | \_    Reader [2/2]                     |             |           |    18:06 |          |          |      |
    | \_      Timestamps                     |             |           |          |     0:15 |          |      |
    | \_      Pseudo-duplicates              |             |           |          |     2:01 |          |      |
-   | \_    Web interface [14/19]            |             |           | 4d 12:41 |          |          |      |
-   | \_      Handling Images [2/5]          |             |           |          | 1d 19:56 |          |      |
+   | \_    Web interface [17/19]            |             |           | 4d 12:41 |          |          |      |
+   | \_      Handling Images [5/5]          |             |           |          | 1d 19:56 |          |      |
    | \_        Size matters                 |             |           |          |          |     2:45 |      |
    | \_          Scale                      |             |           |          |          |          | 0:56 |
    | \_          Check first                |             |           |          |          |          | 1:49 |
@@ -77,7 +77,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [32/39]
+** Components [35/39]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -190,7 +190,7 @@
      it works.
      Simply skipping the Item if the headline already exists, is not a good
      idea, either, I should at least take the timestamps into consideration.
-*** Web interface [14/19]
+*** Web interface [17/19]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -207,10 +207,11 @@
 **** CANCELLED Fartscroll                                           :feature:
      CLOSED: [2021-06-07 Mo 19:48]
      That was a lot less funny than I imagined it would be. Very annoying.
-**** Handling Images [2/5]
+**** Handling Images [5/5]
      Sometimes, item bodies contain images, which makes loading slow, and it
      also can make the layout awkward when these images are large in size.
-***** TODO Size matters                                            :optimize:
+***** DONE Size matters                                            :optimize:
+      CLOSED: [2021-06-09 Mi 22:14]
       Turns out some of the images are pretty big, and already they amount to
       more than a Gigabyte in the local cache. I need to do /something/ about
       that. 
@@ -223,7 +224,8 @@
        The downside is I waste a lot of bandwidth.
        On the other hand, I *do* have a lot of large images already, maybe I
        should write a one-time script to scale them down a bit?
-****** TEST Check first
+****** DONE Check first
+       CLOSED: [2021-06-09 Mi 22:13]
        :LOGBOOK:
        CLOCK: [2021-06-07 Mo 22:17]--[2021-06-08 Di 00:06] =>  1:49
        :END:
@@ -234,7 +236,8 @@
        wait a while to see if it has a noticable effect.
 ****** Erase
        I could just remove image tags the way I already remove script tags.
-****** MEDITATE Clean up
+****** SUSPENDED Clean up
+       CLOSED: [2021-06-09 Mi 22:14]
        I /could/ also consider removing images on old items?
 ***** DONE [#B] Prefetch images and such                            :feature:
       CLOSED: [2021-06-06 So 14:56]
