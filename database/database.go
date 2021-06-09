@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-09 18:50:32 krylon>
+// Time-stamp: <2021-06-09 20:12:44 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -2796,9 +2796,10 @@ EXEC_QUERY:
 		var (
 			t      tag.Tag
 			parent *int64
+			desc   *string
 		)
 
-		if err = rows.Scan(&t.ID, &t.Name, &t.Description, &parent); err != nil {
+		if err = rows.Scan(&t.ID, &t.Name, &desc, &parent); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
@@ -2806,6 +2807,9 @@ EXEC_QUERY:
 
 		if parent != nil {
 			t.Parent = *parent
+		}
+		if desc != nil {
+			t.Description = *desc
 		}
 
 		tags = append(tags, t)
@@ -2918,9 +2922,10 @@ EXEC_QUERY:
 		var (
 			t      = &tag.Tag{ID: id}
 			parent *int64
+			desc   *string
 		)
 
-		if err = rows.Scan(&t.Name, &t.Description, &parent); err != nil {
+		if err = rows.Scan(&t.Name, &desc, &parent); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
@@ -2928,6 +2933,9 @@ EXEC_QUERY:
 
 		if parent != nil {
 			t.Parent = *parent
+		}
+		if desc != nil {
+			t.Description = *desc
 		}
 
 		return t, nil
@@ -2975,9 +2983,10 @@ EXEC_QUERY:
 		var (
 			t      = &tag.Tag{Name: name}
 			parent *int64
+			desc   *string
 		)
 
-		if err = rows.Scan(&t.ID, &t.Description, &parent); err != nil {
+		if err = rows.Scan(&t.ID, &desc, &parent); err != nil {
 			db.log.Printf("[ERROR] Cannot scan row: %s\n",
 				err.Error())
 			return nil, err
@@ -2985,6 +2994,9 @@ EXEC_QUERY:
 
 		if parent != nil {
 			t.Parent = *parent
+		}
+		if desc != nil {
+			t.Description = *desc
 		}
 
 		return t, nil
