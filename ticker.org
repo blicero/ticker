@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-08 22:50:18 krylon>
+# Time-stamp: <2021-06-09 18:56:48 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-08 Di 22:50]
+   #+CAPTION: Clock summary at [2021-06-09 Mi 18:56]
    | Headline                               | Time        |           |          |          |          |      |
    |----------------------------------------+-------------+-----------+----------+----------+----------+------|
-   | *Total time*                           | *12d 13:21* |           |          |          |          |      |
+   | *Total time*                           | *12d 16:58* |           |          |          |          |      |
    |----------------------------------------+-------------+-----------+----------+----------+----------+------|
-   | Ticker                                 | 12d 13:21   |           |          |          |          |      |
+   | Ticker                                 | 12d 16:58   |           |          |          |          |      |
    | \_  Main                               |             |      0:56 |          |          |          |      |
    | \_    Shutdown                         |             |           |     0:56 |          |          |      |
-   | \_  Components [31/38]                 |             | 11d 18:48 |          |          |          |      |
+   | \_  Components [32/39]                 |             | 11d 22:25 |          |          |          |      |
    | \_    Feed [6/6]                       |             |           |  1d 8:39 |          |          |      |
    | \_      Homepage                       |             |           |          |     0:12 |          |      |
    | \_      Rating [3/3]                   |             |           |          |  1d 5:11 |          |      |
@@ -51,8 +51,8 @@
    | \_        Subscribe                    |             |           |          |          |     2:35 |      |
    | \_      Limit description length       |             |           |          |     1:32 |          |      |
    | \_      Manage Feeds                   |             |           |          |    17:11 |          |      |
-   | \_    Tags [3/5]                       |             |           |  2d 9:16 |          |          |      |
-   | \_      Edit Tags                      |             |           |          |     4:30 |          |      |
+   | \_    Tags [4/6]                       |             |           | 2d 12:53 |          |          |      |
+   | \_      Edit Tags                      |             |           |          |     8:07 |          |      |
    | \_      Database                       |             |           |          |    10:59 |          |      |
    | \_        Hierarchy                    |             |           |          |          |     8:58 |      |
    | \_      Web interface                  |             |           |          |  1d 4:45 |          |      |
@@ -77,7 +77,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [31/38]
+** Components [32/39]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -411,18 +411,22 @@
      :END:
      I want to un-subscribe feeds and possibly change their data (name,
      homepage, etc.).
-*** Tags [3/5]
+*** Tags [4/6]
     :LOGBOOK:
     CLOCK: [2021-03-02 Di 18:54]--[2021-03-02 Di 20:44] =>  1:50
     :END:
     I would like to create tags and assign them to items.
     Furthermore, I would like to use the Bayesian classifier to suggest tags
     for Items and maybe assign them automatically eventually.
-**** TODO Edit Tags                                                 :feature:
+**** DONE Edit Tags                                                 :feature:
+     CLOSED: [2021-06-09 Mi 18:56]
      :LOGBOOK:
+     CLOCK: [2021-06-09 Mi 15:19]--[2021-06-09 Mi 18:56] =>  3:37
      CLOCK: [2021-06-08 Di 18:19]--[2021-06-08 Di 22:49] =>  4:30
      :END:
      It would be nice to edit Tags via the web interface. Maybe even delete them???
+**** TODO Delete tags
+     Should deleting a tag also delete all of its children?
 **** DONE Database
      CLOSED: [2021-03-03 Mi 00:39]
      :LOGBOOK:
