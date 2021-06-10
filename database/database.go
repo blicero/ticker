@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-09 20:12:44 krylon>
+// Time-stamp: <2021-06-10 18:27:38 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -2758,6 +2758,65 @@ EXEC_QUERY:
 
 	return tags, nil
 } // func (db *Database) TagGetHierarchy() ([]tag.Tag, error)
+
+// TagGetAllByHierarchy returns all Tags ordered by hierarchy.
+func (db *Database) TagGetAllByHierarchy() ([]tag.Tag, error) {
+	const qid query.ID = query.TagGetAllByHierarchy
+	var (
+		err  error
+		stmt *sql.Stmt
+	)
+
+	if stmt, err = db.getQuery(qid); err != nil {
+		db.log.Printf("[ERROR] Cannot prepare query %s: %s\n",
+			qid,
+			err.Error())
+		return nil, err
+	} else if db.tx != nil {
+		stmt = db.tx.Stmt(stmt)
+	}
+
+	var rows *sql.Rows
+
+EXEC_QUERY:
+	if rows, err = stmt.Query(); err != nil {
+		if worthARetry(err) {
+			waitForRetry()
+			goto EXEC_QUERY
+		}
+
+		return nil, err
+	}
+
+	defer rows.Close() // nolint: errcheck,gosec
+
+	var tags = make([]tag.Tag, 0, 16)
+
+	for rows.Next() {
+		var (
+			t      tag.Tag
+			parent *int64
+			desc   *string
+		)
+
+		if err = rows.Scan(&t.ID, &t.Name, &desc, &parent, &t.Level, &t.Path); err != nil {
+			db.log.Printf("[ERROR] Cannot scan row: %s\n",
+				err.Error())
+			return nil, err
+		}
+
+		if parent != nil {
+			t.Parent = *parent
+		}
+		if desc != nil {
+			t.Description = *desc
+		}
+
+		tags = append(tags, t)
+	}
+
+	return tags, nil
+} // func (db *Database) TagGetAllByHierarchy() ([]tag.Tag, error)
 
 // TagGetChildren fetches all the children - recursively - of the given Tag.
 func (db *Database) TagGetChildren(id int64) ([]tag.Tag, error) {

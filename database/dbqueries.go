@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-09 18:36:20 krylon>
+// Time-stamp: <2021-06-10 17:12:12 krylon>
 
 package database
 
@@ -321,6 +321,40 @@ SELECT
 FROM children
 WHERE id <> ?
 ORDER BY name
+`,
+	query.TagGetAllByHierarchy: `
+WITH RECURSIVE children(id, name, description, lvl, root, parent, full_name) AS (
+    SELECT
+        id,
+        name,
+        description,
+        0 AS lvl,
+        id AS root,
+        COALESCE(parent, 0) AS parent,
+        name AS full_name
+    FROM tag WHERE parent IS NULL
+    UNION ALL
+    SELECT
+        tag.id,
+        tag.name,
+        tag.description,
+        lvl + 1 AS lvl,
+        children.root,
+        tag.parent,
+        full_name || '/' || tag.name AS full_name
+    FROM tag, children
+    WHERE tag.parent = children.id
+)
+
+SELECT
+        id,
+        name,
+        description,
+        parent,
+        lvl,
+        full_name
+FROM children
+ORDER BY full_name;
 `,
 	query.TagGetChildrenImmediate: `
 SELECT
