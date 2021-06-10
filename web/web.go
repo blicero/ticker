@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-09 18:31:41 krylon>
+// Time-stamp: <2021-06-10 18:48:58 krylon>
 
 package web
 
@@ -321,7 +321,7 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
@@ -406,7 +406,7 @@ func (srv *Server) handleFeedAll(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
@@ -618,7 +618,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
@@ -787,7 +787,7 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, "/index", http.StatusFound)
 		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
@@ -957,7 +957,7 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
@@ -1016,7 +1016,7 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		srv.log.Println("[ERROR] " + msg)
@@ -1257,7 +1257,7 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if data.AllTags, err = db.TagGetAll(); err != nil {
+	if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Tags: %s", err.Error())
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
@@ -2310,7 +2310,7 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		goto SEND_ERROR_MESSAGE
@@ -2456,7 +2456,7 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
-	} else if data.AllTags, err = db.TagGetAll(); err != nil {
+	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
 		msg = fmt.Sprintf("Cannot load all Tags: %s",
 			err.Error())
 		goto SEND_ERROR_MESSAGE

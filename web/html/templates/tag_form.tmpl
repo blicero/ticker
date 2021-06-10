@@ -1,6 +1,6 @@
 {{ define "tag_form" }}
 {{/* Created on 24. 02. 2021 */}}
-{{/* Time-stamp: <2021-06-08 19:35:26 krylon> */}}
+{{/* Time-stamp: <2021-06-10 19:04:30 krylon> */}}
 <form action="/tag/create" method="post">
   <input type="hidden" name="id" id="tag_id" />
   <h2>Define Tag</h2>
@@ -32,7 +32,7 @@
         <select name="parent" id="tag_parent">
           <option value="0">None</option>
           {{ range .AllTags }}
-          <option value="{{ .ID }}">{{ .Name }}</option>
+          <option value="{{ .ID }}">{{ nbsp .Level }}{{ nbsp .Level }}{{ .Name }}</option>
           {{ end }}
         </select>
       </td>
