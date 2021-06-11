@@ -2,11 +2,12 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-05 13:28:45 krylon>
+// Time-stamp: <2021-06-11 22:38:56 krylon>
 
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
@@ -25,12 +26,27 @@ func main() {
 		common.BuildStamp)
 
 	var (
-		err  error
-		rdr  *reader.Reader
-		srv  *web.Server
-		pre  *prefetch.Prefetcher
-		msgq = make(chan string, 5)
+		err     error
+		baseDir string
+		rdr     *reader.Reader
+		srv     *web.Server
+		pre     *prefetch.Prefetcher
+		msgq    = make(chan string, 5)
 	)
+
+	flag.StringVar(
+		&baseDir,
+		"basedir",
+		common.BaseDir,
+		"The directory to store application-specific data in.",
+	)
+
+	flag.Parse()
+
+	if baseDir != common.BaseDir {
+		fmt.Printf("Set BaseDir to %q\n", baseDir)
+		common.BaseDir = baseDir
+	}
 
 	if err = common.InitApp(); err != nil {
 		fmt.Fprintf(

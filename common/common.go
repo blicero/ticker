@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-11 22:19:32 krylon>
+// Time-stamp: <2021-06-11 22:43:01 krylon>
 
 // Package common contain definitions used throughout the application
 package common
@@ -126,6 +126,8 @@ var CacheDir = filepath.Join(BaseDir, "cache")
 func InitApp() error {
 	var err error
 
+	CacheDir = filepath.Join(BaseDir, "cache")
+
 	if err = os.Mkdir(BaseDir, 0700); err != nil {
 		if !os.IsExist(err) {
 			return fmt.Errorf("Error creating BaseDir %s: %s", BaseDir, err.Error())
@@ -137,6 +139,9 @@ func InitApp() error {
 				err.Error())
 		}
 	}
+
+	LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppName)))
+	DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
 
 	return nil
 } // func InitApp() error
