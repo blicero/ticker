@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-11 22:19:14 krylon>
+# Time-stamp: <2021-06-11 22:24:48 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -76,11 +76,14 @@
    Main is, of course, the package / function that binds the whole thing
    together.
 *** TODO Config                                                     :feature:
+    I would like to at least define where the BaseDir resides. On wintermute,
+    the default path resides on a µSD card, I would like to use the zfs pool
+    for that.
 *** Shutdown
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [37/41]
+** Components [37/43]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -158,6 +161,10 @@
     :END:
     Is there any reason /not/ to use good old SQLite?
     I don't think so.
+**** TODO Backup / Restore                                          :feature:
+**** TODO Indices                                                  :optimize:
+     It's not a big issue right now, but as a matter of principle, I would
+     like to add some indices to the database.
 **** DONE Due Feeds
      CLOSED: [2021-02-16 Di 00:45]
      :LOGBOOK:
