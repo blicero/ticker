@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-08 21:53:21 krylon>
+// Time-stamp: <2021-06-11 22:17:55 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -9,23 +9,18 @@
 "use strict";
 
 function defined(x) {
-    return undefined != x && null != x;
+    return undefined !== x && null !== x;
 }
 
 function fmtDateNumber(n) {
-    if (n < 10) {
-        return "0" + n.toString();
-    } else {
-        return n.toString();
-    }
+    return (n < 10 ? "0" : "") + n.toString();
 } // function fmtDateNumber(n)
 
 function timeStampString(t) {
-    if (typeof(t) == "string") {
+    if ((typeof t) === "string") {
         return t;
     }
 
-    // (1900 + d.getYear()) + "-" + d.getMonth() + "-" + d.getDate() + " " + d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds()
     const year = t.getYear() + 1900;
     const month = fmtDateNumber(t.getMonth() + 1);
     const day = fmtDateNumber(t.getDate());
@@ -377,6 +372,12 @@ function rate_item(item_id, new_rating) {
     var req = $.post("/ajax/rate_item",
                      { ID: item_id, Rating: new_rating },
                      function(reply) {
+                         if (!reply.Status) {
+                             const msg = `Error rating Item #${item_id}: ${reply.Message}`;
+                             console.log(msg);
+                             alert(msg);
+                             return;
+                         }
                          var content = "";
                          var row_id = `#item_${item_id}`;
                          var row = $(row_id);
@@ -416,15 +417,66 @@ function rate_item(item_id, new_rating) {
 
 function unvote_item(item_id) {
     const addr = "/ajax/unrate_item/" + item_id;
-    var req = $.get(
+    let req = $.get(
         addr,
         {},
         function(reply) {
-            // Display zee buttons!
-            var row_id = `#item_${item_id}`;
+            if (!reply.Status) {
+                const msg = `Error retracting vote for item ${item_id}: ${reply.Message}`;
+                console.log(msg);
+                alert(msg);
+                return;
+            }
+
+            // It would be nice if I could display the suggested Rating, too!
+            const row_id = `#item_${item_id}`;
+            const cell_id = `#item_rating_${item_id}`;
+
+            const content = `<input
+        class="btn btn-secondary"
+        type="button"
+        value="Interesting"
+        onclick="rate_item(${item_id}, 1);" />
+        <br />&nbsp;<br />
+        <input
+        type="button"
+        class="btn btn-secondary"
+        value="Booooring"
+        onclick="rate_item(${item_id}, 0);" />
+        <br />
+`;
+
+            let cell = $(cell_id)[0];
+            cell.innerHTML = content;
+
             $(row_id).removeClass("boring");
             console.log("Rating on Item " + item_id + " has been cleared.");
-        });
+
+            let r = $.get(
+                `/ajax/suggest_rating/${item_id}`,
+                {},
+                (reply) => {
+                    if (!reply.Status) {
+                        const msg = `Error requesting Rating for Item ${item_id}: ${reply.Message}`;
+                        console.log(msg);
+                        alert(msg);
+                        return;
+                    }
+
+                    const filename = reply.Rating < 0 ? "emo_boring.png" : "emo_interesting.png";
+                    const img = `<small>${reply.Rating}<small><br /><img src="/static/${filename}" />`;
+
+                    cell.innerHTML += img;
+                },
+                "json");
+
+            r.fail(function(rep, stat, x) {
+                let msg = "Error unrating Item at " + addr + ": "  + status_text;
+                console.log(msg);
+                alert(msg);
+            });
+        },
+        "json");
 
     req.fail(function(reply, status_text, xhr) {
         let msg = "Error unrating Item at " + addr + ": "  + status_text;
@@ -435,7 +487,7 @@ function unvote_item(item_id) {
 
 function hide_boring_items() {
     console.log("Hiding boring items.");
-    $.each($("tr.boring"), function() { $(this).hide(); } );
+    $.each($("tr.boring"), () => { $(this).hide(); } );
 } // function hide_boring_items()
 
 function show_boring_items() {
@@ -813,7 +865,7 @@ function load_feed_items(feed_id) {
     const div_id = "#item_div";
     const url = `/ajax/items_by_feed/${feed_id}`;
 
-    var req = $.get(url,
+    let req = $.get(url,
                      {},
                      function(reply) {
                          if (reply.Status) {
@@ -838,7 +890,7 @@ function shutdown_server() {
         return false;
     }
 
-    var req = $.get(url,
+    let req = $.get(url,
                     { AreYouSure: true, AreYouReallySure: true },
                     function(reply) {
                         if (!reply.Status) {
@@ -859,6 +911,6 @@ function shutdown_server() {
 function items_go_page() {
     const idx = $("#choose_page")[0].value;
     const addr = `/items/${idx}`;
-    //alert(`Go to page #${idx}`);
+
     window.location = addr;
 } // function items_go_page()

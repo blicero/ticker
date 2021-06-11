@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-10 18:48:58 krylon>
+// Time-stamp: <2021-06-11 20:38:41 krylon>
 
 package web
 
@@ -172,6 +172,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
 	srv.router.HandleFunc("/ajax/rate_item", srv.handleRateItem)
 	srv.router.HandleFunc("/ajax/unrate_item/{id:(?:\\d+)$}", srv.handleUnrateItem)
+	srv.router.HandleFunc("/ajax/suggest_rating/{id:(?:\\d+)$}", srv.handleSuggestRating)
 	srv.router.HandleFunc("/ajax/rebuild_fts", srv.handleRebuildFTS)
 	srv.router.HandleFunc("/ajax/tag_details/{id:(?:\\d+)$}", srv.handleAjaxTagDetails)
 	srv.router.HandleFunc("/ajax/tag_link_create", srv.handleTagLinkCreate)
@@ -1712,6 +1713,93 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleUnrateItem(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleSuggestRating(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle %s from %s\n",
+		r.URL,
+		r.RemoteAddr)
+
+	type replyMsg struct {
+		Status  bool
+		Message string
+		Rating  float64
+	}
+
+	var (
+		err                     error
+		db                      *database.Database
+		msg, reply, idStr, sugg string
+		id                      int64
+		item                    *feed.Item
+		answer                  replyMsg
+		buf                     []byte
+	)
+
+	vars := mux.Vars(r)
+	idStr = vars["id"]
+
+	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Cannot parse ID %q: %s",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if item, err = db.ItemGetByID(id); err != nil {
+		msg = fmt.Sprintf("Failed to get Item %d: %s",
+			id,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if item == nil {
+		msg = fmt.Sprintf("Item %d was not found in database", id)
+		goto SEND_ERROR_MESSAGE
+	}
+
+	srv.clsLock.RLock()
+	defer srv.clsLock.RUnlock()
+
+	if sugg, err = srv.clsItem.Classify(item); err != nil {
+		msg = fmt.Sprintf("Error trying to classify Item %d (%s): %s",
+			id,
+			item.Title,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	answer.Status = true
+	answer.Message = "Success"
+
+	switch sugg {
+	case classifier.Good:
+		answer.Rating = 100
+	case classifier.Bad:
+		answer.Rating = -100
+	}
+
+	if buf, err = json.Marshal(&answer); err != nil {
+		msg = fmt.Sprintf("Error serializing answer: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write(buf) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "ID": %d, "Message": "%s" }`,
+		id,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleSuggestRating(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleRebuildFTS(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle %s from %s\n",
