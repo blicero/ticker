@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-11 22:24:48 krylon>
+# Time-stamp: <2021-06-12 00:30:26 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -75,7 +75,8 @@
 ** Main
    Main is, of course, the package / function that binds the whole thing
    together.
-*** TODO Config                                                     :feature:
+*** DONE Config                                                     :feature:
+    CLOSED: [2021-06-12 Sa 00:30]
     I would like to at least define where the BaseDir resides. On wintermute,
     the default path resides on a µSD card, I would like to use the zfs pool
     for that.
