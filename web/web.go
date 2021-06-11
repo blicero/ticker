@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-11 20:38:41 krylon>
+// Time-stamp: <2021-06-11 22:39:21 krylon>
 
 package web
 
@@ -1345,9 +1345,9 @@ func (srv *Server) handleCachedImg(w http.ResponseWriter, r *http.Request) {
 
 	var imgType = "image/" + match[1][1:]
 
-	srv.log.Printf("[DEBUG] MIME type for %s is %s\n",
-		fullPath,
-		imgType)
+	// srv.log.Printf("[DEBUG] MIME type for %s is %s\n",
+	// 	fullPath,
+	// 	imgType)
 
 	if fh, err = os.Open(fullPath); err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
