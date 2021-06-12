@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-27 14:20:07 krylon>
+// Time-stamp: <2021-06-12 18:04:52 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -137,11 +137,11 @@ func (adv *Advisor) Suggest(item *feed.Item) map[string]SuggestedTag {
 	sugg = make(map[string]SuggestedTag, len(res))
 
 	for c, r := range res {
-		adv.log.Printf("[TRACE] SUGGEST Item %q (%d): Tag %q -> %.2f\n",
-			item.Title,
-			item.ID,
-			c,
-			r)
+		// adv.log.Printf("[TRACE] SUGGEST Item %q (%d): Tag %q -> %.2f\n",
+		// 	item.Title,
+		// 	item.ID,
+		// 	c,
+		// 	r)
 
 		var t = adv.tags[string(c)]
 
