@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-12 00:30:26 krylon>
+# Time-stamp: <2021-06-13 18:50:17 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,7 +13,7 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-11 Fr 22:19]
+   #+CAPTION: Clock summary at [2021-06-13 So 18:50]
    | Headline                               | Time       |           |          |          |          |      |
    |----------------------------------------+------------+-----------+----------+----------+----------+------|
    | *Total time*                           | *13d 5:53* |           |          |          |          |      |
@@ -21,7 +21,7 @@
    | Ticker                                 | 13d 5:53   |           |          |          |          |      |
    | \_  Main                               |            |      0:56 |          |          |          |      |
    | \_    Shutdown                         |            |           |     0:56 |          |          |      |
-   | \_  Components [37/41]                 |            | 12d 11:20 |          |          |          |      |
+   | \_  Components [37/43]                 |            | 12d 11:20 |          |          |          |      |
    | \_    Feed [7/7]                       |            |           | 1d 14:32 |          |          |      |
    | \_      Homepage                       |            |           |          |     0:12 |          |      |
    | \_      Rating [4/4]                   |            |           |          | 1d 11:04 |          |      |
@@ -507,6 +507,10 @@
      into the UI. Currently, I just display the tags and the scores the
      Bayesian classifier came up with. It's not very helpful, takes up a lot
      space, and it is not very pleasing to the eye.
+
+     [2021-06-13 So 15:53]
+     I think I'd like to reduce the display to just the three most likely
+     suggestions that the Item is not already tagged with.
 *** Search [3/3]
     :LOGBOOK:
     CLOCK: [2021-02-23 Di 20:00]--[2021-02-23 Di 23:30] =>  3:30
