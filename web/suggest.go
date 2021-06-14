@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-23 17:26:21 krylon>
+// Time-stamp: <2021-06-14 13:34:14 krylon>
 
 package web
 
@@ -10,6 +10,8 @@ import (
 	"ticker/advisor"
 	"ticker/feed"
 )
+
+const maxSuggestions = 5
 
 func (srv *Server) suggestTags(items []feed.Item) (map[int64]map[string]advisor.SuggestedTag, error) {
 	// var (
@@ -30,7 +32,7 @@ func (srv *Server) suggestTags(items []feed.Item) (map[int64]map[string]advisor.
 	var sugg = make(map[int64]map[string]advisor.SuggestedTag, len(items))
 
 	for _, item := range items {
-		sugg[item.ID] = srv.clsTags.Suggest(&item)
+		sugg[item.ID] = srv.clsTags.Suggest(&item, maxSuggestions)
 	}
 
 	return sugg, nil

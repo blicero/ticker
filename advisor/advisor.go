@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-12 18:04:52 krylon>
+// Time-stamp: <2021-06-14 13:49:55 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -12,6 +12,7 @@ import (
 	"log"
 	"regexp"
 	"runtime"
+	"sort"
 	"ticker/common"
 	"ticker/database"
 	"ticker/feed"
@@ -125,8 +126,14 @@ func (adv *Advisor) Train() error {
 	return nil
 } // func (adv *Advisor) Train() error
 
+type suggList []SuggestedTag
+
+func (s suggList) Len() int           { return len(s) }
+func (s suggList) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s suggList) Less(i, j int) bool { return s[j].Score < s[i].Score }
+
 // Suggest returns a map Tags and how likely they apply to the given Item.
-func (adv *Advisor) Suggest(item *feed.Item) map[string]SuggestedTag {
+func (adv *Advisor) Suggest(item *feed.Item, n int) map[string]SuggestedTag {
 	var (
 		sugg map[string]SuggestedTag
 		res  map[bayesian.Class]float64
@@ -134,21 +141,19 @@ func (adv *Advisor) Suggest(item *feed.Item) map[string]SuggestedTag {
 
 	res, _, _ = adv.cls.Classify(adv.tokenize(item)...)
 
-	sugg = make(map[string]SuggestedTag, len(res))
+	var list = make(suggList, 0, len(res))
 
 	for c, r := range res {
-		// adv.log.Printf("[TRACE] SUGGEST Item %q (%d): Tag %q -> %.2f\n",
-		// 	item.Title,
-		// 	item.ID,
-		// 	c,
-		// 	r)
-
 		var t = adv.tags[string(c)]
+		var s = SuggestedTag{Tag: t, Score: r}
+		list = append(list, s)
+	}
 
-		sugg[t.Name] = SuggestedTag{
-			Tag:   t,
-			Score: r,
-		}
+	sort.Sort(list)
+	sugg = make(map[string]SuggestedTag, n)
+
+	for _, s := range list[:n] {
+		sugg[s.Tag.Name] = s
 	}
 
 	return sugg
