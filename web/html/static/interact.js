@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-14 15:28:28 krylon>
+// Time-stamp: <2021-06-14 15:37:54 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -8,431 +8,424 @@
 
 'use strict'
 
-function defined(x) {
-    return undefined !== x && null !== x;
+function defined (x) {
+    return undefined !== x && x !== null
 }
 
-function fmtDateNumber(n) {
-    return (n < 10 ? "0" : "") + n.toString();
+function fmtDateNumber (n) {
+    return (n < 10 ? '0' : '') + n.toString()
 } // function fmtDateNumber(n)
 
-function timeStampString(t) {
-    if ((typeof t) === "string") {
-        return t;
+function timeStampString (t) {
+    if ((typeof t) === 'string') {
+        return t
     }
 
-    const year = t.getYear() + 1900;
-    const month = fmtDateNumber(t.getMonth() + 1);
-    const day = fmtDateNumber(t.getDate());
-    const hour = fmtDateNumber(t.getHours());
-    const minute = fmtDateNumber(t.getMinutes());
-    const second = fmtDateNumber(t.getSeconds());
+    const year = t.getYear() + 1900
+    const month = fmtDateNumber(t.getMonth() + 1)
+    const day = fmtDateNumber(t.getDate())
+    const hour = fmtDateNumber(t.getHours())
+    const minute = fmtDateNumber(t.getMinutes())
+    const second = fmtDateNumber(t.getSeconds())
 
     const s =
-        year + "-" + month + "-" + day +
-        " " + hour + ":" + minute + ":" + second;
-    return s;
+          year + '-' + month + '-' + day +
+          ' ' + hour + ':' + minute + ':' + second
+    return s
 } // function timeStampString(t)
 
-function fmtDuration(seconds) {
-    let minutes = 0;
-    let hours = 0;
+function fmtDuration (seconds) {
+    let minutes = 0
+    let hours = 0
 
     while (seconds > 3599) {
-        hours++;
-        seconds -= 3600;
+        hours++
+        seconds -= 3600
     }
 
     while (seconds > 59) {
-        minutes++;
-        seconds -= 60;
+        minutes++
+        seconds -= 60
     }
 
     if (hours > 0) {
-        return `${hours}h${minutes}m${seconds}s`;
+        return `${hours}h${minutes}m${seconds}s`
     } else if (minutes > 0) {
-        return `${minutes}m${seconds}s`;
+        return `${minutes}m${seconds}s`
     } else {
-        return `${seconds}s`;
+        return `${seconds}s`
     }
 } // function fmtDuration(seconds)
 
-function beaconLoop() {
+function beaconLoop () {
     try {
         if (settings.beacon.active) {
-            var req = $.get("/ajax/beacon",
-                            {},
-                            function(response) {
-                                var status = "";
+            const req = $.get('/ajax/beacon',
+                              {},
+                              function (response) {
+                                  let status = ''
 
-                                if (response.Status) {
-                                    status =
-                                        response.Message +
-                                        " running on " +
-                                        response.Hostname + 
-                                        " is alive at " +
-                                        response.Timestamp;
-                                } else {
-                                    status = "Server is not responding";
-                                }
+                                  if (response.Status) {
+                                      status = 
+                                          response.Message +
+                                          ' running on ' +
+                                          response.Hostname +
+                                          ' is alive at ' +
+                                          response.Timestamp
+                                  } else {
+                                      status = 'Server is not responding'
+                                  }
 
-                                var beaconDiv = $("#beacon")[0];
+                                  const beaconDiv = $('#beacon')[0]
 
-                                if (defined(beaconDiv)) {
-                                    beaconDiv.innerHTML = status;
-                                    beaconDiv.classList.remove("error");
-                                } else {
-                                    console.log("Beacon field was not found");
-                                }
-                            },
-                            "json"
-                           ).fail(function() {
-                               var beaconDiv = $("#beacon")[0];
-                               beaconDiv.innerHTML = "Server is not responding";
-                               beaconDiv.classList.add("error");
-                               //logMsg("ERROR", "Server is not responding");
-                           });
+                                  if (defined(beaconDiv)) {
+                                      beaconDiv.innerHTML = status
+                                      beaconDiv.classList.remove('error')
+                                  } else {
+                                      console.log('Beacon field was not found')
+                                  }
+                              },
+                              'json'
+                             ).fail(function () {
+                                 const beaconDiv = $('#beacon')[0]
+                                 beaconDiv.innerHTML = 'Server is not responding'
+                                 beaconDiv.classList.add('error')
+                                 // logMsg("ERROR", "Server is not responding");
+                             })
         }
-    }
-    finally {
-        window.setTimeout(beaconLoop, settings.beacon.interval);
+    } finally {
+        window.setTimeout(beaconLoop, settings.beacon.interval)
     }
 } // function beaconLoop()
 
-function beaconToggle() {
-    settings.beacon.active = !settings.beacon.active;
-    saveSetting("beacon", "active", settings.beacon.active);
+function beaconToggle () {
+    settings.beacon.active = !settings.beacon.active
+    saveSetting('beacon', 'active', settings.beacon.active)
 
     if (!settings.beacon.active) {
-        var beaconDiv = $("#beacon")[0];
-        beaconDiv.innerHTML = "Beacon is suspended";
-        beaconDiv.classList.remove("error");
+        const beaconDiv = $('#beacon')[0]
+        beaconDiv.innerHTML = 'Beacon is suspended'
+        beaconDiv.classList.remove('error')
     }
-
 } // function beaconToggle()
 
-
 /*
-The ‘content’ attribute of Window objects is deprecated.  Please use ‘window.top’ instead. interact.js:125:8
-Ignoring get or set of property that has [LenientThis] because the “this” object is incorrect. interact.js:125:8
+  The ‘content’ attribute of Window objects is deprecated.  Please use ‘window.top’ instead. interact.js:125:8
+  Ignoring get or set of property that has [LenientThis] because the “this” object is incorrect. interact.js:125:8
 
 */
 
-function db_maintenance() {
-    const maintURL = "/ajax/db_maint";
+function db_maintenance () {
+    const maintURL = '/ajax/db_maint'
 
-    var req = $.get(
+    const req = $.get(
         maintURL,
         {},
-        function(res) {
+        function (res) {
             if (!res.Status) {
-                console.log(res.Message);
-                postMessage(new Date(), "ERROR", res.Message);
+                console.log(res.Message)
+                postMessage(new Date(), 'ERROR', res.Message)
             } else {
-                const msg = "Database Maintenance performed without errors";
-                console.log(msg);
-                postMessage(new Date(), "INFO", msg);
+                const msg = 'Database Maintenance performed without errors'
+                console.log(msg)
+                postMessage(new Date(), 'INFO', msg)
             }
         },
-        "json"
-    ).fail(function() {
-        var msg = "Error performing DB maintenance";
-        console.log(msg);
-        postMessage(new Date(), "ERROR", msg);
-    });
+        'json'
+    ).fail(function () {
+        const msg = 'Error performing DB maintenance'
+        console.log(msg)
+        postMessage(new Date(), 'ERROR', msg)
+    })
 } // function db_maintenance()
 
-function msgCheckSum(timestamp, level, msg) {
-    var line = [ timeStampString(timestamp), level, msg ].join("##");
+function msgCheckSum (timestamp, level, msg) {
+    const line = [timeStampString(timestamp), level, msg].join('##')
 
-    var cksum = sha512(line);
-    return cksum;
+    const cksum = sha512(line)
+    return cksum
 }
 
-var curMessageCnt = 0;
+let curMessageCnt = 0
 
-function post_test_msg() {
-    var user = $("#msgTestText")[0];
-    var msg = user.value;
-    var now = new Date();
+function post_test_msg () {
+    const user = $('#msgTestText')[0]
+    const msg = user.value
+    const now = new Date()
 
-    postMessage(now, "DEBUG", msg);
+    postMessage(now, 'DEBUG', msg)
 } // function post_tst_msg()
 
-function postMessage(timestamp, level, msg) {
-    var row = '<tr id="msg_' +
-        msgCheckSum(timestamp, level, msg) +
-        '"><td>' +
-        timeStampString(timestamp) +
-        '</td><td>' +
-        level +
-        '</td><td>' +
-        msg +
-        '</td></tr>\n';
+function postMessage (timestamp, level, msg) {
+    const row = '<tr id="msg_' +
+          msgCheckSum(timestamp, level, msg) +
+          '"><td>' +
+          timeStampString(timestamp) +
+          '</td><td>' +
+          level +
+          '</td><td>' +
+          msg +
+          '</td></tr>\n'
 
-    msgRowAdd(row);
+    msgRowAdd(row)
 } // function postMessage(timestamp, level, msg)
 
-function adjustMsgMaxCnt() {
-    var cntField = $("#max_msg_cnt")[0];
-    var newMax = cntField.valueAsNumber;
+function adjustMsgMaxCnt () {
+    const cntField = $('#max_msg_cnt')[0]
+    const newMax = cntField.valueAsNumber
 
     if (newMax < curMessageCnt) {
-        var rows = $("#msg_body")[0].children;
+        const rows = $('#msg_body')[0].children
 
         while (rows.length > newMax) {
-            rows[rows.length - 1].remove();
-            curMessageCnt--;
+            rows[rows.length - 1].remove()
+            curMessageCnt--
         }
-
     }
-    
-    saveSetting("messages", "maxShow", newMax);
+
+    saveSetting('messages', 'maxShow', newMax)
 } // function adjustMaxMsgCnt()
 
-function adjustMsgCheckInterval() {
-    var intervalField = $("#msg_check_interval")[0];
+function adjustMsgCheckInterval () {
+    const intervalField = $('#msg_check_interval')[0]
     if (intervalField.checkValidity()) {
-        var interval = intervalField.valueAsNumber;
+        const interval = intervalField.valueAsNumber
         // intervalField.setInterval(interval); // ???
-        saveSetting("messages", "interval", interval);
+        saveSetting('messages', 'interval', interval)
     }
 } // function adjustMsgCheckInterval()
 
-function toggleCheckMessages() {
-    var box = $("#msg_check_switch")[0];
-    var newVal = box.checked;
+function toggleCheckMessages () {
+    const box = $('#msg_check_switch')[0]
+    const newVal = box.checked
 
-    saveSetting("messages", "queryEnabled", newVal);
+    saveSetting('messages', 'queryEnabled', newVal)
 } // function toggleCheckMessages()
 
-function getNewMessages() {
-    const msgURL = "/ajax/get_messages";
+function getNewMessages () {
+    const msgURL = '/ajax/get_messages'
 
     try {
         if (!settings.messages.queryEnabled) {
-            return;
+            return
         }
-        
-        var req = $.get(
+
+        const req = $.get(
             msgURL,
             {},
-            function(res) {
+            function (res) {
                 if (!res.Status) {
-                    var msg = msgURL +
-                        " failed: " +
-                        res.Message;
+                    const msg = msgURL +
+                          ' failed: ' +
+                          res.Message
 
                     console.log(msg)
-                    alert(msg);
+                    alert(msg)
                 } else {
-                    let i = 0;
+                    let i = 0
                     for (i = 0; i < res.Messages.length; i++) {
-                        const item = res.Messages[i];
+                        const item = res.Messages[i]
                         const rowid =
-                            "msg_" +
-                            msgCheckSum(item.Time, item.Level, item.Message);
+                              'msg_' +
+                              msgCheckSum(item.Time, item.Level, item.Message)
                         const row = '<tr id="' +
-                            rowid +
-                            '"><td>' +
-                            item.Time +
-                            '</td><td>' +
-                            item.Level +
-                            '</td><td>' +
-                            item.Message +
-                            '</td><td>' +
-                            '<input type="button" value="Delete" onclick="msgRowDelete(\'' +
-                            rowid +
-                            '\');" />' +
-                            '</td></tr>\n';
+                              rowid +
+                              '"><td>' +
+                              item.Time +
+                              '</td><td>' +
+                              item.Level +
+                              '</td><td>' +
+                              item.Message +
+                              '</td><td>' +
+                              '<input type="button" value="Delete" onclick="msgRowDelete(\'' +
+                              rowid +
+                              '\');" />' +
+                              '</td></tr>\n'
 
-                        msgRowAdd(row);
+                        msgRowAdd(row)
                     }
                 }
             },
-            "json"
-        );
+            'json'
+        )
+    } finally {
+        window.setTimeout(getNewMessages, settings.messages.interval)
     }
-    finally {
-        window.setTimeout(getNewMessages, settings.messages.interval);
-    }
-
 } // function getNewMessages()
 
-function logMsg(level, msg) {
-    var timestamp = timeStampString(new Date());
-    var rowID = "msg_" + sha512(msgCheckSum(timestamp, level, msg));
-    var row = '<tr id="' +
-        rowID +
-        '"><td>' +
-        timestamp +
-        '</td><td>' +
-        level +
-        '</td><td>' +
-        msg +
-        '</td><td>' +
-        '<input type="button" value="Delete" onclick="msgRowDelete(\'' +
-        rowID +
-        '\');" />' +
-        '</td></tr>\n';
+function logMsg (level, msg) {
+    const timestamp = timeStampString(new Date())
+    const rowID = 'msg_' + sha512(msgCheckSum(timestamp, level, msg))
+    const row = '<tr id="' +
+          rowID +
+          '"><td>' +
+          timestamp +
+          '</td><td>' +
+          level +
+          '</td><td>' +
+          msg +
+          '</td><td>' +
+          '<input type="button" value="Delete" onclick="msgRowDelete(\'' +
+          rowID +
+          '\');" />' +
+          '</td></tr>\n'
 
-    $("#msg_display_tbl")[0].innerHTML += row;
+    $('#msg_display_tbl')[0].innerHTML += row
 } // function logMsg(level, msg)
 
-function msgRowAdd(row) {
-    var msgBody = $("#msg_body")[0];
+function msgRowAdd (row) {
+    const msgBody = $('#msg_body')[0]
 
-    msgBody.innerHTML = row + msgBody.innerHTML;
+    msgBody.innerHTML = row + msgBody.innerHTML
 
     if (++curMessageCnt > settings.messages.maxShow) {
-        msgBody.children[msgBody.children.length - 1].remove();
+        msgBody.children[msgBody.children.length - 1].remove()
     }
 
-    var tbl = $("#msg_tbl")[0];
+    const tbl = $('#msg_tbl')[0]
     if (tbl.hidden) {
-        tbl.hidden = false;
+        tbl.hidden = false
     }
 } // function msgRowAdd(row)
 
-function msgRowDelete(rowID) {
-    var row = $("#" + rowID)[0];
+function msgRowDelete (rowID) {
+    const row = $('#' + rowID)[0]
 
     if (row != undefined) {
-        row.remove();
+        row.remove()
         if (--curMessageCnt == 0) {
-            var tbl = $("#msg_tbl")[0];
-            tbl.hidden = true;
+            const tbl = $('#msg_tbl')[0]
+            tbl.hidden = true
         }
     }
 } // function msgRowDelete(rowID)
 
-function msgRowDeleteAll() {
-    var msgBody = $("#msg_body")[0];
-    msgBody.innerHTML = '';
-    curMessageCnt = 0;
+function msgRowDeleteAll () {
+    const msgBody = $('#msg_body')[0]
+    msgBody.innerHTML = ''
+    curMessageCnt = 0
 
-    var tbl = $("#msg_tbl")[0];
-    tbl.hidden = true;
+    const tbl = $('#msg_tbl')[0]
+    tbl.hidden = true
 } // function msgRowDeleteAll()
 
-function requestTestMessages() {
-    const urlRoot = "/ajax/rnd_message/";
+function requestTestMessages () {
+    const urlRoot = '/ajax/rnd_message/'
 
-    const cnt = $("#msg_cnt")[0].valueAsNumber;
-    const rounds = $("#msg_round_cnt")[0].valueAsNumber;
-    const delay = $("#msg_round_delay")[0].valueAsNumber;
+    const cnt = $('#msg_cnt')[0].valueAsNumber
+    const rounds = $('#msg_round_cnt')[0].valueAsNumber
+    const delay = $('#msg_round_delay')[0].valueAsNumber
 
     if (cnt == 0) {
-        console.log("Generate *0* messages? Alrighty then...");
-        return;
+        console.log('Generate *0* messages? Alrighty then...')
+        return
     }
 
-    var reqURL = urlRoot + cnt;
+    const reqURL = urlRoot + cnt
 
     $.get(
         reqURL,
         {
-            "Rounds": rounds,
-            "Delay": delay,
+            Rounds: rounds,
+            Delay: delay
         },
         (res) => {
             if (!res.Status) {
-                console.log(res.Message);
-                alert(res.Message);
+                console.log(res.Message)
+                alert(res.Message)
             }
         },
-        "json"
-    ).fail(function() {
-            const msg = "Requesting test messages failed.";
-            console.log(msg);
-            //alert(msg);
-            logMsg("ERROR", msg);
-        });
+        'json'
+    ).fail(function () {
+        const msg = 'Requesting test messages failed.'
+        console.log(msg)
+        // alert(msg);
+        logMsg('ERROR', msg)
+    })
 } // function requestTestMessages()
 
-function toggleMsgTestDisplayVisible() {
-    var tbl = $("#test_msg_cfg")[0];
+function toggleMsgTestDisplayVisible () {
+    const tbl = $('#test_msg_cfg')[0]
 
     if (tbl.hidden) {
-        tbl.hidden = false;
+        tbl.hidden = false
 
-        var checkbox = $("#msg_check_switch")[0];
-        settings.messages.queryEnabled = checkbox.checked;
+        const checkbox = $('#msg_check_switch')[0]
+        settings.messages.queryEnabled = checkbox.checked
     } else {
-        settings.messages.queryEnabled = false;
-        tbl.hidden = true;
+        settings.messages.queryEnabled = false
+        tbl.hidden = true
     }
 } // function toggleMsgTmpDisplayVisible()
 
-function toggleMsgDisplayVisible() {
-    var display = $("#msg_display_div")[0];
+function toggleMsgDisplayVisible () {
+    const display = $('#msg_display_div')[0]
 
-    display.hidden = !display.hidden;
+    display.hidden = !display.hidden
 } // function toggleMsgDisplayVisible()
 
-function rate_item(item_id, new_rating) {
-    var req = $.post("/ajax/rate_item",
-                     { ID: item_id, Rating: new_rating },
-                     function(reply) {
-                         if (!reply.Status) {
-                             const msg = `Error rating Item #${item_id}: ${reply.Message}`;
-                             console.log(msg);
-                             alert(msg);
-                             return;
-                         }
-                         var content = "";
-                         var row_id = `#item_${item_id}`;
-                         var row = $(row_id);
-                         if (new_rating <= 0.0) {
-                             content = '<img src="/static/emo_boring.png" />';
-                             row.addClass("boring");
-                         } else {
-                             content = '<img src="/static/emo_interesting.png" />';
-                             row.removeClass("boring");
-                         }
+function rate_item (item_id, new_rating) {
+    const req = $.post('/ajax/rate_item',
+                       { ID: item_id, Rating: new_rating },
+                       function (reply) {
+                           if (!reply.Status) {
+                               const msg = `Error rating Item #${item_id}: ${reply.Message}`
+                               console.log(msg)
+                               alert(msg)
+                               return
+                           }
+                           let content = ''
+                           const row_id = `#item_${item_id}`
+                           const row = $(row_id)
+                           if (new_rating <= 0.0) {
+                               content = '<img src="/static/emo_boring.png" />'
+                               row.addClass('boring')
+                           } else {
+                               content = '<img src="/static/emo_interesting.png" />'
+                               row.removeClass('boring')
+                           }
 
-                         content += `<br /><input
+                           content += `<br /><input
         type="button"
         class="btn btn-secondary"
         value="Unvote"
-        onclick="unvote_item(${item_id});" />`;
+        onclick="unvote_item(${item_id});" />`
 
-                         $("#item_rating_" + item_id)[0].innerHTML = content;
-                     },
-                     "json");
+                           $('#item_rating_' + item_id)[0].innerHTML = content
+                       },
+                       'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        console.log("Our Ajax request failed: " + status_text);
-        var data = reply; // $.parseJSON(reply.responseText);
+    req.fail(function (reply, status_text, xhr) {
+        console.log('Our Ajax request failed: ' + status_text)
+        const data = reply // $.parseJSON(reply.responseText);
         if (data.Status) {
-            var msg = "Error rating item - but Status is true?!?!?!";
-            alert(msg);
-            console.log(msg);
+            var msg = 'Error rating item - but Status is true?!?!?!'
+            alert(msg)
+            console.log(msg)
+        } else {
+            var msg = 'Error rating item - ' + data.Message
+            alert(msg)
+            console.log(msg)
         }
-        else {
-            var msg = "Error rating item - " + data.Message;
-            alert(msg);
-            console.log(msg);
-        }
-    });
+    })
 } // function rate_item(item_id, new_rating)
 
-function unvote_item(item_id) {
-    const addr = "/ajax/unrate_item/" + item_id;
-    let req = $.get(
+function unvote_item (item_id) {
+    const addr = '/ajax/unrate_item/' + item_id
+    const req = $.get(
         addr,
         {},
-        function(reply) {
+        function (reply) {
             if (!reply.Status) {
-                const msg = `Error retracting vote for item ${item_id}: ${reply.Message}`;
-                console.log(msg);
-                alert(msg);
-                return;
+                const msg = `Error retracting vote for item ${item_id}: ${reply.Message}`
+                console.log(msg)
+                alert(msg)
+                return
             }
 
             // It would be nice if I could display the suggested Rating, too!
-            const row_id = `#item_${item_id}`;
-            const cell_id = `#item_rating_${item_id}`;
+            const row_id = `#item_${item_id}`
+            const cell_id = `#item_rating_${item_id}`
 
             const content = `<input
         class="btn btn-secondary"
@@ -446,473 +439,474 @@ function unvote_item(item_id) {
         value="Booooring"
         onclick="rate_item(${item_id}, 0);" />
         <br />
-`;
+`
 
-            let cell = $(cell_id)[0];
-            cell.innerHTML = content;
+            const cell = $(cell_id)[0]
+            cell.innerHTML = content
 
-            $(row_id).removeClass("boring");
-            console.log("Rating on Item " + item_id + " has been cleared.");
+            $(row_id).removeClass('boring')
+            console.log('Rating on Item ' + item_id + ' has been cleared.')
 
-            let r = $.get(
+            const r = $.get(
                 `/ajax/suggest_rating/${item_id}`,
                 {},
                 (reply) => {
                     if (!reply.Status) {
-                        const msg = `Error requesting Rating for Item ${item_id}: ${reply.Message}`;
-                        console.log(msg);
-                        alert(msg);
-                        return;
+                        const msg = `Error requesting Rating for Item ${item_id}: ${reply.Message}`
+                        console.log(msg)
+                        alert(msg)
+                        return
                     }
 
-                    const filename = reply.Rating < 0 ? "emo_boring.png" : "emo_interesting.png";
-                    const img = `<small>${reply.Rating}<small><br /><img src="/static/${filename}" />`;
+                    const filename = reply.Rating < 0 ? 'emo_boring.png' : 'emo_interesting.png'
+                    const img = `<small>${reply.Rating}<small><br /><img src="/static/${filename}" />`
 
-                    cell.innerHTML += img;
+                    cell.innerHTML += img
                 },
-                "json");
+                'json')
 
-            r.fail(function(rep, stat, x) {
-                let msg = "Error unrating Item at " + addr + ": "  + status_text;
-                console.log(msg);
-                alert(msg);
-            });
+            r.fail(function (rep, stat, x) {
+                const msg = 'Error unrating Item at ' + addr + ': ' + status_text
+                console.log(msg)
+                alert(msg)
+            })
         },
-        "json");
+        'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        let msg = "Error unrating Item at " + addr + ": "  + status_text;
-        console.log(msg);
-        alert(msg);
-    });
+    req.fail(function (reply, status_text, xhr) {
+        const msg = 'Error unrating Item at ' + addr + ': ' + status_text
+        console.log(msg)
+        alert(msg)
+    })
 } // function unvote_item(item_id)
 
-function hide_boring_items() {
-    console.log("Hiding boring items.");
-    $.each($("tr.boring"), () => { $(this).hide(); } );
+function hide_boring_items () {
+    console.log('Hiding boring items.')
+    $.each($('tr.boring'), () => { $(this).hide() })
 } // function hide_boring_items()
 
-function show_boring_items() {
-    console.log("Displaying boring items.");
-    $.each($("tr.boring"), function() { $(this).show(); } );
+function show_boring_items () {
+    console.log('Displaying boring items.')
+    $.each($('tr.boring'), function () { $(this).show() })
 } // function show_boring_items()
 
-function toggle_hide_boring() {
-    console.log("toggle_hide_boring()");
+function toggle_hide_boring () {
+    console.log('toggle_hide_boring()')
 
-    settings.items.hideboring = !settings.items.hideboring;
-    saveSetting("items", "hideboring", settings.items.hideboring);
+    settings.items.hideboring = !settings.items.hideboring
+    saveSetting('items', 'hideboring', settings.items.hideboring)
 
     if (settings.items.hideboring) {
-        hide_boring_items();
+        hide_boring_items()
     } else {
-        show_boring_items();
+        show_boring_items()
     }
 
-    return true;
+    return true
 } // function toggle_hide_boring()
 
-function rebuildFTS() {
-    var req = $.get("/ajax/rebuild_fts",
-                    "",
-                    function(reply) {
-                        console.log("FTS index has been rebuilt.");
-                    });
+function rebuildFTS () {
+    const req = $.get('/ajax/rebuild_fts',
+                      '',
+                      function (reply) {
+                          console.log('FTS index has been rebuilt.')
+                      })
 
-    req.fail(function(reply, status_text, xhr) {
-        var msg = reply + " -- " + status_text;
-        console.log(msg);
-        alert(msg);
-    });
+    req.fail(function (reply, status_text, xhr) {
+        const msg = reply + ' -- ' + status_text
+        console.log(msg)
+        alert(msg)
+    })
 } // function rebuildFTS()
 
-function attach_tag(form_id, item_id) {
-    const id = `#${form_id}`;
-    const sel = $(id)[0].value;
-    const tag_id = parseInt(sel);
+function attach_tag (form_id, item_id) {
+    const id = `#${form_id}`
+    const sel = $(id)[0].value
+    const tag_id = parseInt(sel)
 
-    console.log("Attach Tag #" + sel + " to Item " + item_id + ".");
+    console.log('Attach Tag #' + sel + ' to Item ' + item_id + '.')
 
-    var req = $.post("/ajax/tag_link_create",
-                     { Tag: tag_id, Item: item_id },
-                     function(reply) {
-                         console.log(`Successfully attached Tag ${sel} to Item ${item_id}`);
-                         const div_id = `#tags_${item_id}`;
-                         const div = $(div_id)[0];
+    const req = $.post('/ajax/tag_link_create',
+                       { Tag: tag_id, Item: item_id },
+                       function (reply) {
+                           console.log(`Successfully attached Tag ${sel} to Item ${item_id}`)
+                           const div_id = `#tags_${item_id}`
+                           const div = $(div_id)[0]
 
-                         const tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" role="button" onclick="untag(${item_id}, ${tag_id});" /> &nbsp; `;
+                           const tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" role="button" onclick="untag(${item_id}, ${tag_id});" /> &nbsp; `
 
-                         div.innerHTML += tag;
+                           div.innerHTML += tag
 
-                         const opt_id = `#${form_id}_opt_${tag_id}`;
-                         $(opt_id).hide();
-                         let form = $(id)[0];
-                         for (const [idx, val] of Object.entries(form.options)) {
-                             if (val.style.display != "none") {
-                                 form.value = val.value;
-                                 break;
-                             }
-                         }
-                     },
-                     "json");
+                           const opt_id = `#${form_id}_opt_${tag_id}`
+                           $(opt_id).hide()
+                           const form = $(id)[0]
+                           for (const [idx, val] of Object.entries(form.options)) {
+                               if (val.style.display != 'none') {
+                                   form.value = val.value
+                                   break
+                               }
+                           }
+                       },
+                       'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
-    });
+    req.fail(function (reply, status_text, xhr) {
+        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`)
+    })
 } // function attach_tag(form_id, item_id)
 
-function untag(item_id, tag_id) {
-    const tag = `#item_${item_id}_tag_${tag_id}`;
-    const msg = `Remove tag ${tag_id} from Item ${item_id}`;
-    console.log(msg);
-    
-    var req = $.post("/ajax/tag_link_delete",
-                     { Tag: tag_id, Item: item_id },
-                     function(reply) {
-                         console.log(`Successfully detached Tag ${tag_id} from Item ${item_id}`);
+function untag (item_id, tag_id) {
+    const tag = `#item_${item_id}_tag_${tag_id}`
+    const msg = `Remove tag ${tag_id} from Item ${item_id}`
+    console.log(msg)
 
-                         const label_id = `.item_${item_id}_tag_${tag_id}`;
-                         const labels = $(label_id);
+    const req = $.post('/ajax/tag_link_delete',
+                       { Tag: tag_id, Item: item_id },
+                       function (reply) {
+                           console.log(`Successfully detached Tag ${tag_id} from Item ${item_id}`)
 
-                         labels.each(function() { $(this).remove(); });
+                           const label_id = `.item_${item_id}_tag_${tag_id}`
+                           const labels = $(label_id)
 
-                         const sel_id = `tag_menu_item_${item_id}`;
-                         const opt_id = `#${sel_id}_opt_${tag_id}`;
-                         $(opt_id).show();
-                     },
-                     "json");
+                           labels.each(function () { $(this).remove() })
 
-    req.fail(function(reply, status_text, xhr) {
-        const errmsg = `Error attaching Tag to Item: ${status_text} // ${reply}`;
-        console.log(errmsg);
-        alert(errmsg);
-    });
+                           const sel_id = `tag_menu_item_${item_id}`
+                           const opt_id = `#${sel_id}_opt_${tag_id}`
+                           $(opt_id).show()
+                       },
+                       'json')
+
+    req.fail(function (reply, status_text, xhr) {
+        const errmsg = `Error attaching Tag to Item: ${status_text} // ${reply}`
+        console.log(errmsg)
+        alert(errmsg)
+    })
 } // function untag(item_id, tag_id)
 
 // "/ajax/read_later_mark"
 
-function read_later_show(item_id) {
-    var button_id = `#read_later_button_${item_id}`;
-    var form_id = `#read_later_form_${item_id}`;
+function read_later_show (item_id) {
+    const button_id = `#read_later_button_${item_id}`
+    const form_id = `#read_later_form_${item_id}`
 
-    $(form_id).show();
-    $(button_id).hide();
+    $(form_id).show()
+    $(button_id).hide()
 } // function read_later_show(item_id)
 
-function read_later_reset(item_id) {
-    var button_id = `#read_later_button_${item_id}`;
-    var form_id = `#read_later_form_${item_id}`;
+function read_later_reset (item_id) {
+    const button_id = `#read_later_button_${item_id}`
+    const form_id = `#read_later_form_${item_id}`
 
-    $(form_id).hide();
-    $(button_id).show();
+    $(form_id).hide()
+    $(button_id).show()
 } // function read_later_reset(item_id)
 
-function read_later_mark(item_id) {
-    console.log(`IMPLEMENTME: Mark Item ${item_id} for later reading.`);
-    var button_id = `#read_later_button_${item_id}`;
-    var form_id = `#read_later_form_${item_id}`;
-    var num_id = `#later_deadline_num_${item_id}`;
-    var unit_sel_id = `#later_deadline_unit_${item_id}`;
-    var note_id = `#later_note_${item_id}`;
+function read_later_mark (item_id) {
+    console.log(`IMPLEMENTME: Mark Item ${item_id} for later reading.`)
+    const button_id = `#read_later_button_${item_id}`
+    const form_id = `#read_later_form_${item_id}`
+    const num_id = `#later_deadline_num_${item_id}`
+    const unit_sel_id = `#later_deadline_unit_${item_id}`
+    const note_id = `#later_note_${item_id}`
 
-    var num = $(num_id)[0].value;
-    var unit = $(unit_sel_id)[0].value;
+    const num = $(num_id)[0].value
+    const unit = $(unit_sel_id)[0].value
 
-    var deadline = num * unit;
+    const deadline = num * unit
 
-    var now = new Date();
-    var due_time = Math.floor(now.getTime() / 1000 + deadline);
+    const now = new Date()
+    const due_time = Math.floor(now.getTime() / 1000 + deadline)
 
-    var note = $(note_id)[0].value;
+    const note = $(note_id)[0].value
 
-    var req = $.post("/ajax/read_later_mark",
-                     {
-                         ItemID:        item_id,
-                         Note:          note,
-                         Deadline:      due_time,
-                     },
-                     function(reply) {
-                         if (!reply.Status) {
-                             var errmsg = `Error marking Item for later: ${reply.Message}`;
-                             console.log(errmsg);
-                             alert(errmsg);
-                         } else {
-                             $(form_id).hide();
-                             $(button_id).hide();
-                         }
-                     },
-                     "json");
+    const req = $.post('/ajax/read_later_mark',
+                       {
+                           ItemID: item_id,
+                           Note: note,
+                           Deadline: due_time
+                       },
+                       function (reply) {
+                           if (!reply.Status) {
+                               const errmsg = `Error marking Item for later: ${reply.Message}`
+                               console.log(errmsg)
+                               alert(errmsg)
+                           } else {
+                               $(form_id).hide()
+                               $(button_id).hide()
+                           }
+                       },
+                       'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`);
-    });
+    req.fail(function (reply, status_text, xhr) {
+        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`)
+    })
 
-    console.log(`Deadline is ${due_time}`);
+    console.log(`Deadline is ${due_time}`)
 
-    $(form_id).hide();
-    $(button_id).show();
+    $(form_id).hide()
+    $(button_id).show()
 } // function read_later_mark(item_id)
 
-function read_later_mark_read(item_id, item_title) {
-    const checkbox_id = `#later_mark_read_${item_id}`;
-    const state = $(checkbox_id)[0].checked;
-    const url = `/ajax/read_later_set_read/${item_id}/${state ? 1 : 0}`;
+function read_later_mark_read (item_id, item_title) {
+    const checkbox_id = `#later_mark_read_${item_id}`
+    const state = $(checkbox_id)[0].checked
+    const url = `/ajax/read_later_set_read/${item_id}/${state ? 1 : 0}`
 
-    var req = $.get(url,
-                    {},
-                    function(reply) {
-                        if (!reply.Status) {
-                            const errmsg = `Error marking Item as read: ${reply.Message}`;
-                            console.log(errmsg);
-                            alert(errmsg);
-                        } else {
-                            // Do something!
-                            const rowid = `#item_${item_id}`;
-                            if (state) {
-                                $(rowid).addClass("read");
-                                $(rowid).removeClass("urgent");
-                            } else {
-                                // Instead of just turning on the urgent class,
-                                // we should if the item's deadline has actually
-                                // passed. What would be the easiest way of
-                                // doing that?
-                                const now = new Date();
-                                const row_id = `#item_${item_id}`;
-                                const cell = $(row_id)[0].children[0];
-                                const txt = cell.textContent.trim();
-                                const deadline = new Date(txt);
+    const req = $.get(url,
+                      {},
+                      function (reply) {
+                          if (!reply.Status) {
+                              const errmsg = `Error marking Item as read: ${reply.Message}`
+                              console.log(errmsg)
+                              alert(errmsg)
+                          } else {
+                              // Do something!
+                              const rowid = `#item_${item_id}`
+                              if (state) {
+                                  $(rowid).addClass('read')
+                                  $(rowid).removeClass('urgent')
+                              } else {
+                                  // Instead of just turning on the urgent class,
+                                  // we should if the item's deadline has actually
+                                  // passed. What would be the easiest way of
+                                  // doing that?
+                                  const now = new Date()
+                                  const row_id = `#item_${item_id}`
+                                  const cell = $(row_id)[0].children[0]
+                                  const txt = cell.textContent.trim()
+                                  const deadline = new Date(txt)
 
-                                $(rowid).removeClass("read");
-                                if (deadline <= now) {
-                                    $(rowid).addClass("urgent");
-                                }
-                            }
-                        }
-                    },
-                    "json");
+                                  $(rowid).removeClass('read')
+                                  if (deadline <= now) {
+                                      $(rowid).addClass('urgent')
+                                  }
+                              }
+                          }
+                      },
+                      'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        console.log(`Error marking Item as Read: ${status_text} // ${reply}`);
-        $(checkbox_id)[0].checked = !state;
-    });
+    req.fail(function (reply, status_text, xhr) {
+        console.log(`Error marking Item as Read: ${status_text} // ${reply}`)
+        $(checkbox_id)[0].checked = !state
+    })
 } // function read_later_mark_read(item_id, item_title)
 
-function read_later_toggle_read_entries() {
-    const checkbox_id = "#hide_old";
-    const state = $(checkbox_id)[0].checked;
-    const query = "#read_later_list .read";
+function read_later_toggle_read_entries () {
+    const checkbox_id = '#hide_old'
+    const state = $(checkbox_id)[0].checked
+    const query = '#read_later_list .read'
 
     if (state) {
-        $(query).hide();
+        $(query).hide()
     } else {
-        $(query).show();
+        $(query).show()
     }
 } // function read_later_toggle_read_entries()
 
-function edit_feed(feed_id) {
-    console.log(`IMPLEMENTME: edit_feed(${feed_id})`);
-    const form_id = "#feed_form";
-    const feed = feeds[feed_id];
+function edit_feed (feed_id) {
+    console.log(`IMPLEMENTME: edit_feed(${feed_id})`)
+    const form_id = '#feed_form'
+    const feed = feeds[feed_id]
 
-    $("#form_url")[0].value = feed.url;
-    $("#form_name")[0].value = feed.name;
-    $("#form_homepage")[0].value = feed.homepage;
-    $("#form_interval")[0].value = feed.interval / 60;
+    $('#form_url')[0].value = feed.url
+    $('#form_name')[0].value = feed.name
+    $('#form_homepage')[0].value = feed.homepage
+    $('#form_interval')[0].value = feed.interval / 60
     // $("#form_active")[0].checked = feed.active;
-    $("#form_id")[0].value = feed.id;
-    $(form_id).show();
+    $('#form_id')[0].value = feed.id
+    $(form_id).show()
 } // function edit_feed(feed_id)
 
-function feed_form_submit() {
-    console.log("IMPLEMENTME: feed_form_submit()");
+function feed_form_submit () {
+    console.log('IMPLEMENTME: feed_form_submit()')
 
-    const id = $("#form_id")[0].value;
-    const name = $("#form_name")[0].value;
-    const url = $("#form_url")[0].value;
-    const homepage = $("#form_homepage")[0].value;
-    const interval = $("#form_interval")[0].value;
+    const id = $('#form_id')[0].value
+    const name = $('#form_name')[0].value
+    const url = $('#form_url')[0].value
+    const homepage = $('#form_homepage')[0].value
+    const interval = $('#form_interval')[0].value
     // const active = $("#form_active")[0].checked;
 
-    var feed = feeds[id];
+    const feed = feeds[id]
 
-    var req = $.post("/ajax/feed_update",
-                     { "ID": id,
-                       "Name": name,
-                       "URL": url,
-                       "Homepage": homepage,
-                       "Interval": interval * 60,
-                       // "Active": active,
-                     },
-                     function(reply) {
-                         if (reply.Status) {
-                             console.log(`Successfully updated Feed ${name}`);
+    const req = $.post('/ajax/feed_update',
+                       {
+                           ID: id,
+                           Name: name,
+                           URL: url,
+                           Homepage: homepage,
+                           Interval: interval * 60
+                           // "Active": active,
+                       },
+                       function (reply) {
+                           if (reply.Status) {
+                               console.log(`Successfully updated Feed ${name}`)
 
-                             var hp = $(`#homepage_${id}`)[0];
-                             hp.href = homepage;
-                             hp.innerHTML = name;
+                               const hp = $(`#homepage_${id}`)[0]
+                               hp.href = homepage
+                               hp.innerHTML = name
 
-                             var lnk = $(`#url_${id}`)[0];
-                             lnk.href = url;
-                             lnk.innerHTML = url;
+                               const lnk = $(`#url_${id}`)[0]
+                               lnk.href = url
+                               lnk.innerHTML = url
 
-                             $(`#interval_${id}`)[0].innerHTML = fmtDuration(interval * 60);
+                               $(`#interval_${id}`)[0].innerHTML = fmtDuration(interval * 60)
 
-                             $("#feed_form").hide();
-                         } else {
-                             const msg = `Error updating Feed ${name}: ${reply.Message}`;
-                             console.log(msg);
-                             alert(msg);
-                         }
-                     },
-                     "json");
+                               $('#feed_form').hide()
+                           } else {
+                               const msg = `Error updating Feed ${name}: ${reply.Message}`
+                               console.log(msg)
+                               alert(msg)
+                           }
+                       },
+                       'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        console.log(`Error updating Feed: ${status_text} // ${reply}`);
-        $(checkbox_id)[0].checked = !state;
-    });
+    req.fail(function (reply, status_text, xhr) {
+        console.log(`Error updating Feed: ${status_text} // ${reply}`)
+        $(checkbox_id)[0].checked = !state
+    })
 } // function feed_submit()
 
-function feed_form_reset() {
-    $("#feed_form")[0].reset();
-    $("#feed_form").hide();
+function feed_form_reset () {
+    $('#feed_form')[0].reset()
+    $('#feed_form').hide()
 } // function feed_form_reset()
 
-function toggle_feed_active(feed_id) {
-    const checkbox_id = `#feed_active_${feed_id}`;
-    const active = $(checkbox_id)[0].checked;
+function toggle_feed_active (feed_id) {
+    const checkbox_id = `#feed_active_${feed_id}`
+    const active = $(checkbox_id)[0].checked
 
-    var req = $.get(`/ajax/feed_set_active/${feed_id}/${active}`,
-                    {},
-                    function(reply) {
-                        if (!reply.Status) {
-                            $(checkbox_id)[0].checked = !active;
-                            alert(reply.Message);
-                        }
-                    },
-                    "json");
+    const req = $.get(`/ajax/feed_set_active/${feed_id}/${active}`,
+                      {},
+                      function (reply) {
+                          if (!reply.Status) {
+                              $(checkbox_id)[0].checked = !active
+                              alert(reply.Message)
+                          }
+                      },
+                      'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        console.log(`Error toggling Feed ${feed_id}: ${status_text} // ${reply}`);
-        $(checkbox_id)[0].checked = !active;
-    });
+    req.fail(function (reply, status_text, xhr) {
+        console.log(`Error toggling Feed ${feed_id}: ${status_text} // ${reply}`)
+        $(checkbox_id)[0].checked = !active
+    })
 } // function toggle_feed_active(feed_id)
 
-function display_tag_items(tag_id) {
-    const url = `/ajax/items_by_tag/${tag_id}`;
+function display_tag_items (tag_id) {
+    const url = `/ajax/items_by_tag/${tag_id}`
 
-    let req1 = $.post(url,
-                     {},
-                     function(reply) {
-                         if (reply.Status) {
-                             $("#item_div")[0].innerHTML = reply.Message;
-                             shrink_images();
-                         } else {
-                             console.log(reply.Message);
-                             alert(reply.Message);
-                         }
-                     },
-                     "json");
+    const req1 = $.post(url,
+                        {},
+                        function (reply) {
+                            if (reply.Status) {
+                                $('#item_div')[0].innerHTML = reply.Message
+                                shrink_images()
+                            } else {
+                                console.log(reply.Message)
+                                alert(reply.Message)
+                            }
+                        },
+                        'json')
 
-    req1.fail(function(reply, status_text, xhr) {
-        console.log(`Error getting Items: ${status_text} - ${xhr}`);
-    });
+    req1.fail(function (reply, status_text, xhr) {
+        console.log(`Error getting Items: ${status_text} - ${xhr}`)
+    })
 
-    let req2 = $.get(`/ajax/tag_details/${tag_id}`,
-                     {},
-                     (reply) => {
-                         if (reply.Status) {
-                             $("#tag_id")[0].value = reply.Tag.ID;
-                             $("#tag_name")[0].value = reply.Tag.Name;
-                             $("#tag_description")[0].value = reply.Tag.Description;
-                             console.log(`Server said ${reply.Message}`);
+    const req2 = $.get(`/ajax/tag_details/${tag_id}`,
+                       {},
+                       (reply) => {
+                           if (reply.Status) {
+                               $('#tag_id')[0].value = reply.Tag.ID
+                               $('#tag_name')[0].value = reply.Tag.Name
+                               $('#tag_description')[0].value = reply.Tag.Description
+                               console.log(`Server said ${reply.Message}`)
 
-                             let sel = $("#tag_parent")[0];
-                             for (const [idx, entry] of Object.entries(sel.options)) {
-                                 if (entry.value == reply.Tag.Parent) {
-                                     sel.value = entry.value;
-                                     break;
-                                 }
-                             }
-                         }
-                     },
-                     "json");
+                               const sel = $('#tag_parent')[0]
+                               for (const [idx, entry] of Object.entries(sel.options)) {
+                                   if (entry.value == reply.Tag.Parent) {
+                                       sel.value = entry.value
+                                       break
+                                   }
+                               }
+                           }
+                       },
+                       'json')
 
-    req2.fail((reply, status_text, xhr) => { console.log(`Error getting Tag: ${status_text} - ${xhr}`); });
+    req2.fail((reply, status_text, xhr) => { console.log(`Error getting Tag: ${status_text} - ${xhr}`) })
 } // function display_tag_items(tag_id)
 
 // Found here: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio#14731922
-function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight) {
-    const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+function shrink_img (srcWidth, srcHeight, maxWidth, maxHeight) {
+    const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight)
 
-    return { width: srcWidth*ratio, height: srcHeight*ratio };
+    return { width: srcWidth * ratio, height: srcHeight * ratio }
 } // function shrink_img(srcWidth, srcHeight, maxWidth, maxHeight)
 
-function shrink_images() {
-    const selector = "table.items img";
-    const maxHeight = 300;
-    const maxWidth = 300;
+function shrink_images () {
+    const selector = 'table.items img'
+    const maxHeight = 300
+    const maxWidth = 300
 
-    $(selector).each(function() {
-        let img = $(this)[0];
+    $(selector).each(function () {
+        const img = $(this)[0]
         if (img.width > maxWidth || img.height > maxHeight) {
-            const size = shrink_img(img.width, img.height, maxWidth, maxHeight);
+            const size = shrink_img(img.width, img.height, maxWidth, maxHeight)
 
-            img.width = size.width;
-            img.height = size.height;
+            img.width = size.width
+            img.height = size.height
         }
-    });
+    })
 } // function shrink_images()
 
-function load_feed_items(feed_id) {
-    const div_id = "#item_div";
-    const url = `/ajax/items_by_feed/${feed_id}`;
+function load_feed_items (feed_id) {
+    const div_id = '#item_div'
+    const url = `/ajax/items_by_feed/${feed_id}`
 
-    let req = $.get(url,
-                     {},
-                     function(reply) {
-                         if (reply.Status) {
-                             $("#item_div")[0].innerHTML = reply.Message;
-                             shrink_images();
-                         } else {
-                             console.log(reply.Message);
-                             alert(reply.Message);
-                         }
-                     },
-                     "json");
+    const req = $.get(url,
+                      {},
+                      function (reply) {
+                          if (reply.Status) {
+                              $('#item_div')[0].innerHTML = reply.Message
+                              shrink_images()
+                          } else {
+                              console.log(reply.Message)
+                              alert(reply.Message)
+                          }
+                      },
+                      'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        console.log(`Error getting Items: ${status_text} - ${xhr}`);
-    });
+    req.fail(function (reply, status_text, xhr) {
+        console.log(`Error getting Items: ${status_text} - ${xhr}`)
+    })
 } // function load_feed_items(feed_id)
 
-function shutdown_server() {
-    const url = "/ajax/shutdown";
+function shutdown_server () {
+    const url = '/ajax/shutdown'
 
-    if (!confirm("Shut down server?")) {
-        return false;
+    if (!confirm('Shut down server?')) {
+        return false
     }
 
-    let req = $.get(url,
-                    { AreYouSure: true, AreYouReallySure: true },
-                    function(reply) {
-                        if (!reply.Status) {
-                            const msg = `Error shutting down Server: ${reply.Message}`;
-                            console.log(msg)
-                            alert(msg);
-                        }
-                    },
-                    "json");
+    const req = $.get(url,
+                      { AreYouSure: true, AreYouReallySure: true },
+                      function (reply) {
+                          if (!reply.Status) {
+                              const msg = `Error shutting down Server: ${reply.Message}`
+                              console.log(msg)
+                              alert(msg)
+                          }
+                      },
+                      'json')
 
-    req.fail(function(reply, status_text, xhr) {
-        const  msg = `Error getting Items: ${status_text} - ${xhr}`;
-        console.log(msg);
-        alert(msg);
-    });
+    req.fail(function (reply, status_text, xhr) {
+        const msg = `Error getting Items: ${status_text} - ${xhr}`
+        console.log(msg)
+        alert(msg)
+    })
 } // function shutdown_server()
 
-function items_go_page() {
-    const idx = $("#choose_page")[0].value;
-    const addr = `/items/${idx}`;
+function items_go_page () {
+    const idx = $('#choose_page')[0].value
+    const addr = `/items/${idx}`
 
-    window.location = addr;
+    window.location = addr
 } // function items_go_page()
