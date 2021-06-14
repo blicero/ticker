@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-13 18:50:17 krylon>
+# Time-stamp: <2021-06-14 13:59:07 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,15 +13,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-13 So 18:50]
+   #+CAPTION: Clock summary at [2021-06-14 Mo 13:59]
    | Headline                               | Time       |           |          |          |          |      |
    |----------------------------------------+------------+-----------+----------+----------+----------+------|
-   | *Total time*                           | *13d 5:53* |           |          |          |          |      |
+   | *Total time*                           | *13d 7:24* |           |          |          |          |      |
    |----------------------------------------+------------+-----------+----------+----------+----------+------|
-   | Ticker                                 | 13d 5:53   |           |          |          |          |      |
+   | Ticker                                 | 13d 7:24   |           |          |          |          |      |
    | \_  Main                               |            |      0:56 |          |          |          |      |
    | \_    Shutdown                         |            |           |     0:56 |          |          |      |
-   | \_  Components [37/43]                 |            | 12d 11:20 |          |          |          |      |
+   | \_  Components [39/43]                 |            | 12d 12:51 |          |          |          |      |
    | \_    Feed [7/7]                       |            |           | 1d 14:32 |          |          |      |
    | \_      Homepage                       |            |           |          |     0:12 |          |      |
    | \_      Rating [4/4]                   |            |           |          | 1d 11:04 |          |      |
@@ -42,7 +42,7 @@
    | \_      Various small-ish improvements |            |           |          |     8:57 |          |      |
    | \_        Shutdown                     |            |           |          |          |     6:15 |      |
    | \_      Embed                          |            |           |          |     3:00 |          |      |
-   | \_      Snazzy [5/7]                   |            |           |          |    15:10 |          |      |
+   | \_      Snazzy [6/7]                   |            |           |          |    15:10 |          |      |
    | \_        Paging [1/2]                 |            |           |          |          |     6:22 |      |
    | \_          Menu                       |            |           |          |          |          | 4:21 |
    | \_        Voting Buttons               |            |           |          |          |     3:33 |      |
@@ -52,13 +52,13 @@
    | \_        Subscribe                    |            |           |          |          |     2:35 |      |
    | \_      Limit description length       |            |           |          |     1:32 |          |      |
    | \_      Manage Feeds                   |            |           |          |    17:11 |          |      |
-   | \_    Tags [5/7]                       |            |           | 2d 19:55 |          |          |      |
+   | \_    Tags [6/7]                       |            |           | 2d 21:26 |          |          |      |
    | \_      Sort tags by hierarchy         |            |           |          |     7:02 |          |      |
    | \_      Edit Tags                      |            |           |          |     8:07 |          |      |
    | \_      Database                       |            |           |          |    10:59 |          |      |
    | \_        Hierarchy                    |            |           |          |          |     8:58 |      |
    | \_      Web interface                  |            |           |          |  1d 4:45 |          |      |
-   | \_      Suggestions                    |            |           |          |    11:12 |          |      |
+   | \_      Suggestions                    |            |           |          |    12:43 |          |      |
    | \_    Search [3/3]                     |            |           |  1d 0:23 |          |          |      |
    | \_      Moar!                          |            |           |          |    20:53 |          |      |
    | \_    Read Later [2/2]                 |            |           |    19:48 |          |          |      |
@@ -84,7 +84,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [37/43]
+** Components [39/43]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -326,7 +326,7 @@
      [2021-03-05 Fr 23:03]
      Seems to work. Now I have to build Go 1.16 from source on OpenBSD,
      because go:embed is still new.
-**** Snazzy [5/7]
+**** Snazzy [6/7]
      :PROPERTIES:
      :COOKIE_DATA: todo recursive
      :VISIBILITY: children
@@ -366,7 +366,8 @@
       CLOCK: [2021-05-28 Fr 17:25]--[2021-05-28 Fr 20:58] =>  3:33
       :END:
       
-***** TODO Selection form for tags
+***** DONE Selection form for tags
+      CLOSED: [2021-06-14 Mo 13:58]
       :LOGBOOK:
       CLOCK: [2021-06-07 Mo 18:41]--[2021-06-07 Mo 19:04] =>  0:23
       CLOCK: [2021-05-28 Fr 16:36]--[2021-05-28 Fr 17:24] =>  0:48
@@ -432,7 +433,7 @@
      :END:
      I want to un-subscribe feeds and possibly change their data (name,
      homepage, etc.).
-*** Tags [5/7]
+*** Tags [6/7]
     :LOGBOOK:
     CLOCK: [2021-03-02 Di 18:54]--[2021-03-02 Di 20:44] =>  1:50
     :END:
@@ -489,8 +490,10 @@
      CLOCK: [2021-02-25 Do 00:45]--[2021-02-25 Do 03:22] =>  2:37
      CLOCK: [2021-02-24 Mi 21:47]--[2021-02-25 Do 00:16] =>  2:29
      :END:
-**** TODO Suggestions
+**** DONE Suggestions
+     CLOSED: [2021-06-14 Mo 13:58]
      :LOGBOOK:
+     CLOCK: [2021-06-14 Mo 12:26]--[2021-06-14 Mo 13:57] =>  1:31
      CLOCK: [2021-03-20 Sa 23:40]--[2021-03-21 So 00:51] =>  1:11
      CLOCK: [2021-03-11 Do 21:37]--[2021-03-12 Fr 00:50] =>  3:13
      CLOCK: [2021-03-11 Do 18:19]--[2021-03-11 Do 19:45] =>  1:26
