@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-11 22:17:55 krylon>
+// Time-stamp: <2021-06-14 15:28:28 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -6,7 +6,7 @@
 // It is not a /big/ problem right now, but in the long run, I will have to
 // break this thing up into several smaller files.
 
-"use strict";
+'use strict'
 
 function defined(x) {
     return undefined !== x && null !== x;
@@ -35,7 +35,8 @@ function timeStampString(t) {
 } // function timeStampString(t)
 
 function fmtDuration(seconds) {
-    let minutes = 0, hours = 0;
+    let minutes = 0;
+    let hours = 0;
 
     while (seconds > 3599) {
         hours++;
@@ -225,12 +226,13 @@ function getNewMessages() {
                     console.log(msg)
                     alert(msg);
                 } else {
-                    for (var i = 0; i < res.Messages.length; i++) {
-                        var item = res.Messages[i];
-                        var rowid =
+                    let i = 0;
+                    for (i = 0; i < res.Messages.length; i++) {
+                        const item = res.Messages[i];
+                        const rowid =
                             "msg_" +
                             msgCheckSum(item.Time, item.Level, item.Message);
-                        var row = '<tr id="' +
+                        const row = '<tr id="' +
                             rowid +
                             '"><td>' +
                             item.Time +
@@ -316,9 +318,9 @@ function msgRowDeleteAll() {
 function requestTestMessages() {
     const urlRoot = "/ajax/rnd_message/";
 
-    var cnt = $("#msg_cnt")[0].valueAsNumber;
-    var rounds = $("#msg_round_cnt")[0].valueAsNumber;
-    var delay = $("#msg_round_delay")[0].valueAsNumber;
+    const cnt = $("#msg_cnt")[0].valueAsNumber;
+    const rounds = $("#msg_round_cnt")[0].valueAsNumber;
+    const delay = $("#msg_round_delay")[0].valueAsNumber;
 
     if (cnt == 0) {
         console.log("Generate *0* messages? Alrighty then...");
@@ -333,7 +335,7 @@ function requestTestMessages() {
             "Rounds": rounds,
             "Delay": delay,
         },
-        function(res) {
+        (res) => {
             if (!res.Status) {
                 console.log(res.Message);
                 alert(res.Message);
