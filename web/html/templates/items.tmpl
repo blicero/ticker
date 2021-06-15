@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-06-15 16:58:08 krylon> */}}
+{{/* Time-stamp: <2021-06-15 18:48:33 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -73,6 +73,7 @@
       <td>
         <div id="tags_{{ .ID }}">
           {{ $item_id := .ID }}
+          {{ $item := . }}
           {{ range .Tags }}
           <a class="item_{{ $item_id }}_tag_{{ .ID }}" href="/tag/{{ .ID }}">{{ .Name }}</a>
           <img
@@ -92,7 +93,9 @@
           <input type="button"
                  id="{{ $button_id }}"
                  class="btn btn-link"
+                 {{ if not ($item.HasTag .ID) }}
                  onclick="quick_tag({{ $item_id }}, {{ .ID }}, '#{{ $button_id }}');"
+                 {{ end }}
                  value="{{ .Name }}" />
           ({{ fmt_float .Score }})&nbsp;
           {{ end }}
