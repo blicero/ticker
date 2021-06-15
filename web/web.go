@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-11 22:39:21 krylon>
+// Time-stamp: <2021-06-15 10:27:49 krylon>
 
 package web
 
@@ -58,6 +58,7 @@ type Server struct {
 	pool      *database.Pool
 	clsItem   *classifier.Classifier
 	clsTags   *advisor.Advisor
+	clsStamp  time.Time
 	clsLock   sync.RWMutex
 }
 
@@ -103,6 +104,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 			err.Error())
 		return nil, err
 	}
+
+	srv.clsStamp = time.Now()
 
 	const tmplFolder = "html/templates"
 	var templates []fs.DirEntry
@@ -241,9 +244,7 @@ func (srv *Server) Close() error {
 } // func (srv *Server) Close() error
 
 func (srv *Server) retrain() error {
-	var (
-		err error
-	)
+	var err error
 
 	srv.clsLock.Lock()
 	defer srv.clsLock.Unlock()
@@ -254,6 +255,8 @@ func (srv *Server) retrain() error {
 	} else if err = srv.clsTags.Train(); err != nil {
 		srv.log.Printf("[ERROR] Cannot train Tag Classifier: %s\n",
 			err.Error())
+	} else {
+		srv.clsStamp = time.Now()
 	}
 
 	return err
@@ -299,9 +302,10 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		tmpl *template.Template
 		data = tmplDataIndex{
 			tmplDataBase: tmplDataBase{
-				Title: "Main",
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Title:      "Main",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -384,9 +388,10 @@ func (srv *Server) handleFeedAll(w http.ResponseWriter, r *http.Request) {
 		tmpl *template.Template
 		data = tmplDataIndex{
 			tmplDataBase: tmplDataBase{
-				Title: "Main",
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Title:      "Main",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -451,9 +456,10 @@ func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
 		msg  string
 		data = tmplDataIndex{
 			tmplDataBase: tmplDataBase{
-				Title: "Subscribe to Feed",
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Title:      "Subscribe to Feed",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -561,8 +567,9 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		tmpl                                      *template.Template
 		data                                      = tmplDataItems{
 			tmplDataBase: tmplDataBase{
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -726,9 +733,10 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		tmpl      *template.Template
 		data      = tmplDataItems{
 			tmplDataBase: tmplDataBase{
-				Title: "Main",
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Title:      "Main",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -829,9 +837,10 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 		feeds []feed.Feed
 		data  = tmplDataIndex{
 			tmplDataBase: tmplDataBase{
-				Title: "Search",
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Title:      "Search",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -1000,9 +1009,10 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 		db   *database.Database
 		data = tmplDataTags{
 			tmplDataBase: tmplDataBase{
-				Title: "All Tags",
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Title:      "All Tags",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -1155,8 +1165,9 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 		db         *database.Database
 		data       = tmplDataTagDetails{
 			tmplDataBase: tmplDataBase{
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -1248,9 +1259,10 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 		db   *database.Database
 		data = tmplDataReadLater{
 			tmplDataBase: tmplDataBase{
-				Debug: common.Debug,
-				URL:   r.URL.String(),
-				Title: "Read Later",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				Title:      "Read Later",
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -2353,9 +2365,10 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 		raw               []byte
 		data              = tmplDataItems{
 			tmplDataBase: tmplDataBase{
-				Title: "Items",
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Title:      "Items",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)
@@ -2508,9 +2521,10 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 		raw               []byte
 		data              = tmplDataItems{
 			tmplDataBase: tmplDataBase{
-				Title: "Items",
-				Debug: common.Debug,
-				URL:   r.URL.String(),
+				Title:      "Items",
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				TrainStamp: srv.clsStamp,
 			},
 		}
 	)

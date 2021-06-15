@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-06-07 12:39:40 krylon>
+// Time-stamp: <2021-06-15 10:25:40 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -50,6 +50,7 @@ type tmplDataBase struct {
 	Debug          bool
 	TestMsgGen     bool
 	URL            string
+	TrainStamp     time.Time
 	AllTags        []tag.Tag
 	TagHierarchy   []tag.Tag
 	TagSuggestions map[int64]map[string]advisor.SuggestedTag
