@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-05-28 20:12:00 krylon> */}}
+{{/* Time-stamp: <2021-06-15 16:58:08 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -88,7 +88,13 @@
           {{ if gt (len $sugg) 0 }}
           <br />
           {{ range $sugg }}
-          {{ .Name }} ({{ fmt_float .Score }})&nbsp;
+          {{ $button_id := uuid }}
+          <input type="button"
+                 id="{{ $button_id }}"
+                 class="btn btn-link"
+                 onclick="quick_tag({{ $item_id }}, {{ .ID }}, '#{{ $button_id }}');"
+                 value="{{ .Name }}" />
+          ({{ fmt_float .Score }})&nbsp;
           {{ end }}
           {{ end }}
         </div>

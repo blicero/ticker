@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-14 15:37:54 krylon>
+// Time-stamp: <2021-06-15 17:00:22 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -553,6 +553,38 @@ function attach_tag (form_id, item_id) {
         console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`)
     })
 } // function attach_tag(form_id, item_id)
+
+function quick_tag (item_id, tag_id, button_id) {
+    const req = $.post('/ajax/tag_link_create',
+                       { Tag: tag_id, Item: item_id },
+                       (reply) => {
+                           if (!reply.Status) {
+                               const msg = `Error tagging Item ${item_id}: ${reply.Message}`
+                               console.log(msg)
+                               alert(msg)
+                               return
+                           }
+
+                           console.log(`Successfully attached Tag ${tag_id} to Item ${item_id}`)
+                           const div_id = `#tags_${item_id}`
+                           const div = $(div_id)[0]
+                           const form_id = `tag_menu_item_${item_id}`
+
+                           const tag = `<a class="item_${item_id}_tag_${tag_id}" href="/tag/${tag_id}">${reply.Name}</a>&nbsp;<img class="item_${item_id}_tag_${tag_id}" src="/static/delete.png" role="button" onclick="untag(${item_id}, ${tag_id});" /> &nbsp; `
+
+                           div.innerHTML += tag
+
+                           const opt_id = `#${form_id}_opt_${tag_id}`
+                           $(opt_id).hide()
+
+                           $(button_id)[0].onclick = null;
+                       },
+                       'json')
+
+    req.fail(function (reply, status_text, xhr) {
+        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`)
+    })
+} // function quick_tag (item_id, tag_id)
 
 function untag (item_id, tag_id) {
     const tag = `#item_${item_id}_tag_${tag_id}`
