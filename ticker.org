@@ -1,7 +1,8 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-15 18:51:16 krylon>
+# Time-stamp: <2021-06-16 11:37:00 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
+#+TAGS: web(w) database(d) javascript(j)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
 #+TODO: MEDITATE(m) PLANNING(p) REFINE(n) | FAILED(f) CANCELLED(c) SUSPENDED(s)
 #+PRIORITIES: A G D
