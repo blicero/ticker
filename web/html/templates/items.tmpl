@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-06-15 18:48:33 krylon> */}}
+{{/* Time-stamp: <2021-06-16 19:24:43 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -24,23 +24,34 @@
     {{ range .Items }}
     <tr class="{{ $class.Next }}{{ if .IsBoring }} boring{{ end }}" id="item_{{ .ID }}">
       <td>
-        {{ fmt_time .Timestamp }}<br />
-        <input
-        type="button"
-        value="Read Later"
-        id="read_later_button_{{ .ID }}"
-        onclick="read_later_show({{ .ID }});" />
-        <br />
-        {{ template "later_form" . }}
+        <div class="container-fluid>
+          <div class="row">
+            {{ fmt_time .Timestamp }}
+          </div>
+          <div class="row">
+            <input
+            type="button"
+            value="Read Later"
+            id="read_later_button_{{ .ID }}"
+            onclick="read_later_show({{ .ID }});" />
+            {{ template "later_form" . }}
+          </div>
+          <div class="row">
+            {{ template "cluster" ($dot.ClusterFormData .ID) }}
+          </div>
+        </div>
       </td>
-            <td><a href="/feed/{{ .FeedID }}">
-        {{ (index $feeds .FeedID).Name }}
-      </a></td>
+
+      <td>
+        <a href="/feed/{{ .FeedID }}">{{ (index $feeds .FeedID).Name }}</a>
+      </td>
+      
       <td>
         <a href="{{ .URL }}" target="_blank">
           {{ .Title }}
         </a>
       </td>
+      
       <td id="item_rating_{{ .ID }}">
         <small>{{ .RatingString }}</small><br />
         {{ if not .IsRated }}
@@ -70,6 +81,7 @@
         <img src="/static/emo_interesting.png" />
         {{ end }}
       </td>
+      
       <td>
         <div id="tags_{{ .ID }}">
           {{ $item_id := .ID }}
@@ -105,6 +117,7 @@
         {{ $arg := $dot.TagLinkData . }}
         {{ template "tag_link_form" $arg }}
       </td>
+      
       <td>
         {{ if gt (len .Description) 500 }}
         <button class="btn btn-primary"
@@ -121,6 +134,7 @@
         {{ .Description }}
         {{ end }}
       </td>
+      
     </tr>
     {{ end }}
   </tbody>

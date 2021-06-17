@@ -1,5 +1,5 @@
 {{ define "head" }}
-{{/* Time-stamp: <2021-03-06 19:46:46 krylon> */}}
+{{/* Time-stamp: <2021-06-16 22:42:46 krylon> */}}
 <head>
   <title>{{ app_string }}@{{ hostname  }} - {{ .Title }}</title>
   
@@ -44,6 +44,17 @@
        hide_boring_items();
      }
    });
+
+   const clusterList = {
+     {{ range .AllClusters }}
+     "{{ js .Name }}": {
+       ID:                      {{ .ID }},
+       Name:                    "{{ js .Name }}",
+       Description:             "{{ js .Description }}",
+       Timestamp:               "Date.parse({{ fmt_time .Timestamp }}) / 1000",
+     },
+     {{ end }}
+   };
   </script>
 
   <link rel="stylesheet" type="text/css" href="/static/style.css" />

@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-15 17:00:22 krylon>
+// Time-stamp: <2021-06-17 23:56:46 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -942,3 +942,79 @@ function items_go_page () {
 
     window.location = addr
 } // function items_go_page()
+
+function item_add_cluster(item_id, clu) {
+    const addr = '/ajax/cluster_link_add'
+
+    let req = $.post(
+        addr,
+        { ItemID: item_id, ClusterID: clu.ID },
+        (reply) => {
+            console.log(reply)
+            if (reply.Status) {
+                const div_id = `#cluster_list_${item_id}`
+                $(div_id)[0].innerHTML += `${clu.Name}&nbsp;(${clu.ID})&nbsp;`
+            } else {
+                const msg = `Error adding Item ${item_id} to Cluster ${clu.ID}: ${reply.Message}`
+                console.log(msg)
+                alert(msg)
+            }
+        },
+        'json'
+    )
+
+    req.fail = function(rep, stat, xhr) {
+        const msg = `Error linking Item ${item_id} to Cluster ${cluster_id}: ${rep} / ${stat} / ${xhr}`;
+        console.log(msg);
+        alert(msg);
+    };
+} // function item_add_cluster(div_id, clu)
+
+function make_cluster_key_handler(id) {
+    return (e) => {
+        const itemID = id;
+        const inputID = `#cluster_input_${id}`;
+        let status = false;
+        if (e.code == 'Enter') {
+            const name = $(inputID)[0].value;
+            let clu = clusterList[name];
+            console.log(`Add Item ${id} to Cluster ${clu ? clu.Name + "!" : name}`);
+            if (clu == undefined) {
+                // create Cluster!!!
+                const desc = '' // prompt(`Description for ${name}?`);
+
+                const req = $.post(
+                    "/ajax/cluster_create",
+                    { Name: name, Description: desc },
+                    (reply) => {
+                        if (reply.Status) {
+                            clusterList[name] = reply.Cluster
+                            status = true
+                            clu = reply.Cluster
+                            item_add_cluster(itemID, clu)
+                        } else {
+                            const msg = `Error creating cluster "${name}": ${reply.Message}`;
+                            console.log(msg);
+                            alert(msg);
+                        }
+                    },
+                    "json"
+                )
+
+                req.fail = (rep, stat, xhr) => {
+                    console.log(`Error creating Cluster ${name}: ${rep}: ${stat} | ${xhr}`);
+                }
+            } else {
+                console.assert(clu != undefined && clu != null)
+                item_add_cluster(itemID, clu)
+            }
+        }
+    }
+} // function make_cluster_key_handler(itemID)
+
+function install_cluster_key_handler(id) {
+    const inpID = `#cluster_input_${id}`;
+    const elt = $(inpID)[0];
+
+    elt.onkeydown = make_cluster_key_handler(id);
+} // function install_cluster_key_handler(id)

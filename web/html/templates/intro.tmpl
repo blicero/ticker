@@ -1,7 +1,14 @@
 {{ define "intro" }}
-{{/* Time-stamp: <2021-06-15 10:29:32 krylon> */}}
+{{/* Time-stamp: <2021-06-16 20:16:54 krylon> */}}
 <h1 id="page_title">{{ .Title }}</h1>
 <hr />
+
+<!-- Stuff -->
+<datalist id="cluster_list">
+  {{ range .AllClusters }}
+  <option value="{{ .Name }}">
+    {{ end }}
+</datalist>
 
 {{ if .Debug }}
 <script>
