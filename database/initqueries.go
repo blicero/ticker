@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-31 15:41:31 krylon>
+// Time-stamp: <2021-06-16 12:07:25 krylon>
 
 package database
 
@@ -98,5 +98,49 @@ CREATE TABLE read_later (
         ON DELETE CASCADE
 	ON UPDATE RESTRICT
 )
+`,
+
+	`
+CREATE TABLE cluster (
+    id			INTEGER PRIMARY KEY,
+    name		TEXT UNIQUE NOT NULL,
+    description		TEXT NOT NULL DEFAULT '',
+    timestamp		INTEGER NOT NULL
+)
+`,
+
+	`
+CREATE TABLE cluster_link (
+    id INTEGER PRIMARY KEY,
+    cluster_id INTEGER NOT NULL,
+    item_id INTEGER NOT NULL,
+    CONSTRAINT cluster_item_link_uniq UNIQUE (cluster_id, item_id),
+    FOREIGN KEY (cluster_id) REFERENCES cluster (id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT,
+    FOREIGN KEY (item_id) REFERENCES item (id)
+        ON DELETE CASCADE
+        ON UPDATE RESTRICT
+)
+`,
+
+	`
+CREATE TRIGGER tr_clu_lnk_add
+AFTER INSERT ON cluster_link
+BEGIN
+    UPDATE cluster 
+    SET timestamp = CAST(strftime('%s', 'now') AS INTEGER)
+    WHERE id = new.cluster_id;
+END;
+`,
+
+	`
+CREATE TRIGGER tr_clu_lnk_del
+AFTER DELETE ON cluster_link
+BEGIN
+    UPDATE cluster 
+    SET timestamp = CAST(strftime('%s', 'now') AS INTEGER)
+    WHERE id = old.cluster_id;
+END;
 `,
 }

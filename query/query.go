@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-10 17:12:16 krylon>
+// Time-stamp: <2021-06-16 15:59:52 krylon>
 
 //go:generate stringer -type=ID
 
@@ -68,4 +68,17 @@ const (
 	ReadLaterDeleteRead
 	ReadLaterSetDeadine
 	ReadLaterSetNote
+	ClusterCreate
+	ClusterDelete
+	ClusterNameUpdate
+	ClusterDescriptionUpdate
+	ClusterGetByID
+	ClusterGetByName
+	ClusterGetByItem
+	ClusterGetItems
+	ClusterGetAll
+	ClusterLinkAdd
+	ClusterLinkDel
+	ClusterLinkGetByItem
+	ClusterLinkGetByCluster
 )
