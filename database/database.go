@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-17 22:33:47 krylon>
+// Time-stamp: <2021-06-18 11:52:15 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -4559,7 +4559,7 @@ EXEC_QUERY:
 } // func (db *Database) ClusterGetByID(id int64) (*cluster.Cluster, error)
 
 // ClusterGetByItem retrieves all Clusters the given Item belongs to.
-func (db *Database) ClusterGetByItem(id int64) ([]cluster.Cluster, error) {
+func (db *Database) ClusterGetByItem(itemID int64) ([]cluster.Cluster, error) {
 	const qid query.ID = query.ClusterGetByItem
 	var (
 		err  error
@@ -4578,14 +4578,14 @@ func (db *Database) ClusterGetByItem(id int64) ([]cluster.Cluster, error) {
 	var rows *sql.Rows
 
 EXEC_QUERY:
-	if rows, err = stmt.Query(id); err != nil {
+	if rows, err = stmt.Query(itemID); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
 		}
 
-		db.log.Printf("[ERROR] Cannot load Cluster #%d: %s\n",
-			id,
+		db.log.Printf("[ERROR] Cannot load Clusters for Item #%d: %s\n",
+			itemID,
 			err.Error())
 		return nil, err
 	}
@@ -4604,6 +4604,11 @@ EXEC_QUERY:
 				err.Error())
 			return nil, err
 		}
+
+		db.log.Printf("[TRACE] Read Cluster %q (%d) for Item %d\n",
+			c.Name,
+			c.ID,
+			itemID)
 
 		c.Timestamp = time.Unix(stamp, 0)
 		results = append(results, c)
