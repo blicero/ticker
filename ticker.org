@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-17 23:57:22 krylon>
+# Time-stamp: <2021-06-18 12:07:26 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -14,15 +14,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-17 Do 23:57]
+   #+CAPTION: Clock summary at [2021-06-18 Fr 12:07]
    | Headline                                          | Time       |           |          |          |          |      |
    |---------------------------------------------------+------------+-----------+----------+----------+----------+------|
-   | *Total time*                                      | *14d 4:34* |           |          |          |          |      |
+   | *Total time*                                      | *14d 6:37* |           |          |          |          |      |
    |---------------------------------------------------+------------+-----------+----------+----------+----------+------|
-   | Ticker                                            | 14d 4:34   |           |          |          |          |      |
+   | Ticker                                            | 14d 6:37   |           |          |          |          |      |
    | \_  Main                                          |            |      0:56 |          |          |          |      |
    | \_    Shutdown                                    |            |           |     0:56 |          |          |      |
-   | \_  Components [40/46]                            |            | 13d 10:01 |          |          |          |      |
+   | \_  Components [40/46]                            |            | 13d 12:04 |          |          |          |      |
    | \_    Feed [7/7]                                  |            |           | 1d 14:32 |          |          |      |
    | \_      Homepage                                  |            |           |          |     0:12 |          |      |
    | \_      Rating [4/4]                              |            |           |          | 1d 11:04 |          |      |
@@ -62,9 +62,9 @@
    | \_        Hierarchy                               |            |           |          |          |     8:58 |      |
    | \_      Web interface                             |            |           |          |  1d 4:45 |          |      |
    | \_      Suggestions                               |            |           |          |    12:43 |          |      |
-   | \_    Clusters [0/2]                              |            |           |    17:59 |          |          |      |
+   | \_    Clusters [0/2]                              |            |           |    20:02 |          |          |      |
    | \_      Backend                                   |            |           |          |     4:30 |          |      |
-   | \_      Frontend                                  |            |           |          |    13:29 |          |      |
+   | \_      Frontend                                  |            |           |          |    15:32 |          |      |
    | \_    Search [3/3]                                |            |           |  1d 0:23 |          |          |      |
    | \_      Moar!                                     |            |           |          |    20:53 |          |      |
    | \_    Read Later [2/2]                            |            |           |    19:48 |          |          |      |
@@ -544,6 +544,7 @@
      we?
 **** TODO Frontend
      :LOGBOOK:
+     CLOCK: [2021-06-18 Fr 10:04]--[2021-06-18 Fr 12:07] =>  2:03
      CLOCK: [2021-06-17 Do 17:41]--[2021-06-17 Do 23:55] =>  6:14
      CLOCK: [2021-06-16 Mi 16:28]--[2021-06-16 Mi 23:41] =>  7:13
      CLOCK: [2021-06-16 Mi 15:57]--[2021-06-16 Mi 15:59] =>  0:02
