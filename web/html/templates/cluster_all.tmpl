@@ -1,6 +1,6 @@
 {{ define "cluster_all" }}
 {{/* Created on 18. 06. 2021 */}}
-{{/* Time-stamp: <2021-06-18 13:06:59 krylon> */}}
+{{/* Time-stamp: <2021-06-18 18:39:01 krylon> */}}
 <!DOCTYPE html>
 <html>
   {{ template "head" . }}
@@ -10,6 +10,31 @@
 
     <h2>Clusters</h2>
 
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-auto align-self-start">
+          <ul>
+            {{ range .Clusters }}
+            <li id="cluster_{{ .ID }}">
+              <input type="button"
+                     class="btn btn-link"
+                     value="{{ .Name }}"
+                     onclick="cluster_display_items({{ .ID }});"
+                     />
+              <img src="/static/delete.png"
+                   role="button"
+                   onclick="cluster_delete({{ .ID }});" />
+            </li>
+            {{ end }}
+          </ul>
+        </div>
+
+        <div id="cluster_item_div" class="col">
+        </div>
+      </div>
+    </div>
+
+    {{/*
     <table class="table">
       <thead>
         <tr>
@@ -31,6 +56,7 @@
         {{ end }}
       </tbody>
     </table>
+    */}}
 
     {{ template "footer" }}
   </body>
