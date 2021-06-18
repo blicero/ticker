@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-17 23:56:46 krylon>
+// Time-stamp: <2021-06-18 12:06:36 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -953,7 +953,9 @@ function item_add_cluster(item_id, clu) {
             console.log(reply)
             if (reply.Status) {
                 const div_id = `#cluster_list_${item_id}`
+                const input_id = `#cluster_input_${item_id}`
                 $(div_id)[0].innerHTML += `${clu.Name}&nbsp;(${clu.ID})&nbsp;`
+                $(input_id)[0].value = ''
             } else {
                 const msg = `Error adding Item ${item_id} to Cluster ${clu.ID}: ${reply.Message}`
                 console.log(msg)
@@ -992,6 +994,9 @@ function make_cluster_key_handler(id) {
                             status = true
                             clu = reply.Cluster
                             item_add_cluster(itemID, clu)
+                            const list_item = `<option value="${name}"></option>`
+                            const list = $('#cluster_list')[0]
+                            list.innerHTML += list_item
                         } else {
                             const msg = `Error creating cluster "${name}": ${reply.Message}`;
                             console.log(msg);

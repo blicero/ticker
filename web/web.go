@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-17 23:05:27 krylon>
+// Time-stamp: <2021-06-18 11:51:43 krylon>
 
 package web
 
@@ -711,7 +711,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			continue
+			// continue
 		} else if class, err = srv.clsItem.Classify(&item); err != nil {
 			srv.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
 				item.Title,
@@ -728,7 +728,8 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 				err.Error())
 		}
 
-		if data.Clusters[item.ID], err = db.ClusterGetByItem(item.ID); err != nil {
+		var clu []cluster.Cluster
+		if clu, err = db.ClusterGetByItem(item.ID); err != nil {
 			msg = fmt.Sprintf("Cannot fetch Clusters for Item %q (%d): %s",
 				item.Title,
 				item.ID,
@@ -736,7 +737,14 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 			srv.log.Println("[CRITICAL] " + msg)
 			srv.sendErrorMessage(w, msg)
 			return
+		} else if len(clu) > 0 {
+			// srv.log.Printf("[TRACE] Found %d Clusters for Item %q (%d)\n",
+			// 	len(clu),
+			// 	item.Title,
+			// 	item.ID)
+			data.Clusters[item.ID] = clu
 		}
+
 	}
 
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
@@ -1423,8 +1431,8 @@ func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request)
 /////////////////////////////////////////
 
 func (srv *Server) handleCachedImg(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
+	// srv.log.Printf("[TRACE] Handle request for %s\n",
+	// 	r.URL.EscapedPath())
 
 	const notFound = "Not found"
 
