@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-06-16 19:50:08 krylon>
+// Time-stamp: <2021-06-18 13:16:58 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -68,9 +68,10 @@ func (t *tmplDataBase) TagLinkData(i feed.Item) *tmplDataTagLinkData {
 
 type tmplDataIndex struct {
 	tmplDataBase
-	FeedMap map[int64]feed.Feed
-	Feeds   []feed.Feed
-	Items   []feed.Item
+	FeedMap  map[int64]feed.Feed
+	Feeds    []feed.Feed
+	Items    []feed.Item
+	Clusters map[int64][]cluster.Cluster
 }
 
 type tmplDataItems struct {
@@ -138,6 +139,11 @@ type tmplDataReadLater struct {
 	tmplDataBase
 	Items   []feed.ReadLater
 	FeedMap map[int64]feed.Feed
+}
+
+type tmplDataClusterList struct {
+	tmplDataBase
+	Clusters []cluster.Cluster
 }
 
 // Local Variables:  //

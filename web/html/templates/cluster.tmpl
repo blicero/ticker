@@ -1,22 +1,32 @@
 {{ define "cluster" }}
 {{/* Created on 16. 06. 2021 */}}
-{{/* Time-stamp: <2021-06-17 20:42:28 krylon> */}}
+{{/* Time-stamp: <2021-06-18 16:07:44 krylon> */}}
 <div id="cluster_div_{{ .Item.ID }}" class="container-fluid">
-    <div class="row" id="cluster_list_{{ .Item.ID }}">
-      {{ range .Clusters }}
-      {{ .Name }} ({{ .ID }})<br />
-      {{ end }}
-    </div>
+  <div class="row" id="cluster_list_{{ .Item.ID }}">
+    {{ $item := .Item }}
+    {{ range .Clusters }}
+    <span id="cluster_link_{{ $item.ID }}_{{ .ID }}">
+      {{ .Name }}
+      ({{ .ID }})
+      <img
+      id="item_{{ $item.ID }}_cluster_{{ .ID }}"
+      src="/static/delete.png"
+      role="button"
+      onclick="item_rm_cluster({{ $item.ID }}, {{ .ID }});"
+      </span>
+      <br />
+    {{ end }}
+  </div>
 
-    <div class="row" {{/* id="cluster_form_{{ .Item.ID }}" */}} >
-      <input type="text"
-             id="cluster_input_{{ .Item.ID }}"
-             list="cluster_list"
-             placeholder="Cluster"
-             />
-      <script>
-       install_cluster_key_handler({{ .Item.ID }});
-      </script>
-    </div>
+  <div class="row" {{/* id="cluster_form_{{ .Item.ID }}" */}} >
+    <input type="text"
+           id="cluster_input_{{ .Item.ID }}"
+           list="cluster_list"
+           placeholder="Cluster"
+           />
+    <script>
+     install_cluster_key_handler({{ .Item.ID }});
+    </script>
+  </div>
 </div>
 {{ end }}

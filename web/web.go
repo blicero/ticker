@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-18 11:51:43 krylon>
+// Time-stamp: <2021-06-18 16:17:34 krylon>
 
 package web
 
@@ -170,6 +170,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 
 	srv.router.HandleFunc("/later/all", srv.handleReadLaterAll)
 
+	srv.router.HandleFunc("/cluster/all", srv.handleClusterAll)
+
 	srv.router.HandleFunc("/classifier/train", srv.handleClassifierTrain)
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
@@ -189,6 +191,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/items_by_feed/{id:(?:\\d+)$}", srv.handleItemsByFeed)
 	srv.router.HandleFunc("/ajax/cluster_create", srv.handleClusterCreate)
 	srv.router.HandleFunc("/ajax/cluster_link_add", srv.handleClusterLinkAdd)
+	srv.router.HandleFunc("/ajax/cluster_link_del", srv.handleClusterLinkDel)
 
 	srv.router.HandleFunc("/ajax/shutdown", srv.handleShutdown)
 
@@ -266,6 +269,13 @@ func (srv *Server) retrain() error {
 	return err
 } // func (srv *Server) retrain() error
 
+func (srv *Server) trainStamp() time.Time {
+	srv.clsLock.RLock()
+	var t = srv.clsStamp
+	srv.clsLock.RUnlock()
+	return t
+} // func (srv *Server) trainStamp() time.Time
+
 // nolint: unused
 func (srv *Server) getMessages() []message {
 	var m1 = srv.msgBuf.GetAllMessages()
@@ -309,7 +319,7 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 				Title:      "Main",
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -402,7 +412,7 @@ func (srv *Server) handleFeedAll(w http.ResponseWriter, r *http.Request) {
 				Title:      "Main",
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -477,7 +487,7 @@ func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
 				Title:      "Subscribe to Feed",
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -594,7 +604,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 			tmplDataBase: tmplDataBase{
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 			Clusters: make(map[int64][]cluster.Cluster, 4),
 		}
@@ -785,7 +795,7 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 				Title:      "Main",
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -910,7 +920,7 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 				Title:      "Search",
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -1021,6 +1031,21 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, r.Referer(), http.StatusFound)
 			return
 		}
+
+		data.Clusters = make(map[int64][]cluster.Cluster)
+
+		for _, item := range data.Items {
+			if data.Clusters[item.ID], err = db.ClusterGetByItem(item.ID); err != nil {
+				msg = fmt.Sprintf("Error looking up Clusters for Item %q (%d): %s",
+					item.Title,
+					item.ID,
+					err.Error())
+				srv.log.Println("[ERROR] " + msg)
+				srv.SendMessage(msg)
+				http.Redirect(w, r, r.Referer(), http.StatusFound)
+				return
+			}
+		}
 	}
 
 	if feeds, err = db.FeedGetAll(); err != nil {
@@ -1089,7 +1114,7 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 				Title:      "All Tags",
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -1251,7 +1276,7 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 			tmplDataBase: tmplDataBase{
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -1353,7 +1378,7 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
 				Title:      "Read Later",
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -1404,6 +1429,7 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -1412,6 +1438,60 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleClusterAll(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const tmplName = "cluster_all"
+
+	var (
+		err  error
+		tmpl *template.Template
+		db   *database.Database
+		msg  string
+		data = tmplDataClusterList{
+			tmplDataBase: tmplDataBase{
+				Debug:      common.Debug,
+				URL:        r.URL.String(),
+				Title:      "Read Later",
+				TrainStamp: srv.trainStamp(),
+			},
+		}
+	)
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Cannot find template %s", tmplName)
+		srv.log.Printf("[CANTHAPPEN] %s\n", msg)
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Clusters, err = db.ClusterGetAll(true); err != nil {
+		msg = fmt.Sprintf("Cannot load all Clusters: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
+	data.AllClusters = data.Clusters
+	data.Messages = srv.getMessages()
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleClusterAll(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
@@ -1525,8 +1605,8 @@ func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request) {
 } // func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request)
 
 func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		request.URL.EscapedPath())
+	// srv.log.Printf("[TRACE] Handle request for %s\n",
+	// 	request.URL.EscapedPath())
 
 	// Since we controll what static files the server has available, we
 	// can easily map MIME type to slice. Soon.
@@ -2466,7 +2546,7 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 				Title:      "Items",
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -2643,7 +2723,7 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 				Title:      "Items",
 				Debug:      common.Debug,
 				URL:        r.URL.String(),
-				TrainStamp: srv.clsStamp,
+				TrainStamp: srv.trainStamp(),
 			},
 		}
 	)
@@ -2916,6 +2996,71 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleClusterLinkAdd(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleClusterLinkDel(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	var (
+		err               error
+		db                *database.Database
+		msg, reply, idStr string
+		itemID, clusterID int64
+	)
+
+	if err = r.ParseForm(); err != nil {
+		msg = fmt.Sprintf("Error parsing form data: %s",
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	idStr = r.FormValue("ItemID")
+	if itemID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Error parsing Item ID %q: %s",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	idStr = r.FormValue("ClusterID")
+	if clusterID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		msg = fmt.Sprintf("Error parsing Cluster ID %q: %s",
+			idStr,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	srv.log.Printf("[DEBUG] Add Item #%d to Cluster #%d\n",
+		itemID,
+		clusterID)
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if err = db.ClusterLinkDel(clusterID, itemID); err != nil {
+		msg = fmt.Sprintf("Error adding Item %d to Cluster %d: %s",
+			itemID,
+			clusterID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	}
+
+	reply = `{ "Status": true, "Message": "Success" }`
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+	return
+
+SEND_ERROR_MESSAGE:
+	srv.log.Printf("[ERROR] %s\n", msg)
+	srv.SendMessage(msg)
+	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
+		msg)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	w.Write([]byte(reply)) // nolint: errcheck
+} // func (srv *Server) handleClusterLinkDel(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleShutdown(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",

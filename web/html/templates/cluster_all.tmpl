@@ -1,0 +1,38 @@
+{{ define "cluster_all" }}
+{{/* Created on 18. 06. 2021 */}}
+{{/* Time-stamp: <2021-06-18 13:06:59 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <h2>Clusters</h2>
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Description</th>
+          <th>#Items</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {{ range .Clusters }}
+        <tr>
+          <td>{{ .ID }}</td>
+          <td>{{ .Name }}</td>
+          <td>{{ .Description }}</td>
+          <td>{{ len .Items }}</td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+
+    {{ template "footer" }}
+  </body>
+</html>
+{{ end }}

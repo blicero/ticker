@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-18 12:06:36 krylon>
+// Time-stamp: <2021-06-18 16:58:35 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -954,7 +954,18 @@ function item_add_cluster(item_id, clu) {
             if (reply.Status) {
                 const div_id = `#cluster_list_${item_id}`
                 const input_id = `#cluster_input_${item_id}`
-                $(div_id)[0].innerHTML += `${clu.Name}&nbsp;(${clu.ID})&nbsp;`
+                const elt = `<span id="cluster_link_${item_id}_${clu.ID}">
+  ${clu.Name}
+  (${clu.ID})
+  <img id="item_${item_id}_${clu.ID}"
+       src="/static/delete.png"
+       role="button"
+       onclick="item_rm_cluster(${item_id}, ${clu.ID});"
+       />
+</span>
+<br />
+`
+                $(div_id)[0].innerHTML += elt
                 $(input_id)[0].value = ''
             } else {
                 const msg = `Error adding Item ${item_id} to Cluster ${clu.ID}: ${reply.Message}`
@@ -1018,8 +1029,31 @@ function make_cluster_key_handler(id) {
 } // function make_cluster_key_handler(itemID)
 
 function install_cluster_key_handler(id) {
-    const inpID = `#cluster_input_${id}`;
-    const elt = $(inpID)[0];
+    const inpID = `#cluster_input_${id}`
+    const elt = $(inpID)[0]
 
-    elt.onkeydown = make_cluster_key_handler(id);
+    elt.onkeydown = make_cluster_key_handler(id)
 } // function install_cluster_key_handler(id)
+
+function item_rm_cluster(item_id, cluster_id) {
+    const addr = "/ajax/cluster_link_del"
+    const req = $.post(
+        addr,
+        { ItemID: item_id, ClusterID: cluster_id },
+        (reply) => {
+            if (reply.Status) {
+                const eltID = `#cluster_link_${item_id}_${cluster_id}`
+                let elt = $(eltID)[0]
+                elt.remove()
+            } else {
+                const msg = `Error unlinking Item ${item_id} from Cluster ${cluster_id}: ${reply.Message}`
+                console.error(msg)
+                alert(msg)
+            }
+        },
+        "json")
+
+    req.fail = (rep, stat, xhr) => {
+        console.error(`Error creating Cluster ${name}: ${rep}: ${stat} | ${xhr}`)
+    }
+} // function item_rm_cluster(item_id, cluster_id)
