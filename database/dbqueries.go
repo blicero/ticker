@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-16 16:06:41 krylon>
+// Time-stamp: <2021-06-18 15:10:29 krylon>
 
 package database
 
@@ -481,6 +481,7 @@ SELECT
 FROM cluster c
 INNER JOIN cluster_link l ON c.id = l.cluster_id
 INNER JOIN item i ON l.item_id = i.id
+WHERE c.id = ?
 `,
 	query.ClusterGetAll:           "SELECT id, name, description, timestamp FROM cluster",
 	query.ClusterLinkAdd:          "INSERT INTO cluster_link (cluster_id, item_id) VALUES (?, ?)",

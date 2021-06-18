@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-18 11:52:15 krylon>
+// Time-stamp: <2021-06-18 15:10:07 krylon>
 
 // Package database provides the storage/persistence layer,
 // using good old SQLite as its backend.
@@ -4618,7 +4618,7 @@ EXEC_QUERY:
 } // func (db *Database) ClusterGetByItem(id int64) ([]cluster.Cluster, error)
 
 // ClusterGetItems returns all Items associated with the given Cluster.
-func (db *Database) ClusterGetItems(id int64) ([]feed.Item, error) {
+func (db *Database) ClusterGetItems(clusterID int64) ([]feed.Item, error) {
 	const qid query.ID = query.ClusterGetItems
 	var (
 		err  error
@@ -4637,14 +4637,14 @@ func (db *Database) ClusterGetItems(id int64) ([]feed.Item, error) {
 	var rows *sql.Rows
 
 EXEC_QUERY:
-	if rows, err = stmt.Query(id); err != nil {
+	if rows, err = stmt.Query(clusterID); err != nil {
 		if worthARetry(err) {
 			waitForRetry()
 			goto EXEC_QUERY
 		}
 
-		db.log.Printf("[ERROR] Cannot load Cluster #%d: %s\n",
-			id,
+		db.log.Printf("[ERROR] Cannot load Items for Cluster #%d: %s\n",
+			clusterID,
 			err.Error())
 		return nil, err
 	}
