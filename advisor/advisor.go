@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-14 13:49:55 krylon>
+// Time-stamp: <2021-06-19 20:05:01 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
+	"strings"
 	"ticker/common"
 	"ticker/database"
 	"ticker/feed"
@@ -183,7 +184,11 @@ func (adv *Advisor) tokenize(item *feed.Item) []string {
 } // func (c *Advisor) tokenize(item *feed.Item) []string
 
 func (adv *Advisor) getLanguage(title, description string) (lng, fullText string) {
-	const defaultLang = "en"
+	const (
+		defaultLang = "en"
+		blString    = "Lauren Boebert buried in ridicule after claim about 1930s Germany"
+	)
+
 	var (
 		err        error
 		lang, body string
@@ -193,12 +198,14 @@ func (adv *Advisor) getLanguage(title, description string) (lng, fullText string
 
 	defer func() {
 		if x := recover(); x != nil {
-			var buf [2048]byte
-			var cnt = runtime.Stack(buf[:], false)
-			adv.log.Printf("[CRITICAL] Panic in getLanguage for Item %q: %s\n%s",
-				title,
-				x,
-				string(buf[:cnt]))
+			if strings.Index(title, blString) == -1 {
+				var buf [2048]byte
+				var cnt = runtime.Stack(buf[:], false)
+				adv.log.Printf("[CRITICAL] Panic in getLanguage for Item %q: %s\n%s",
+					title,
+					x,
+					string(buf[:cnt]))
+			}
 			lng = defaultLang
 			fullText = body
 		}
