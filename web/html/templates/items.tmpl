@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-06-16 19:24:43 krylon> */}}
+{{/* Time-stamp: <2021-06-19 18:07:07 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -24,19 +24,18 @@
     {{ range .Items }}
     <tr class="{{ $class.Next }}{{ if .IsBoring }} boring{{ end }}" id="item_{{ .ID }}">
       <td>
-        <div class="container-fluid>
+        <div class="container-fluid">
           <div class="row">
             {{ fmt_time .Timestamp }}
           </div>
           <div class="row">
-            <input
-            type="button"
-            value="Read Later"
-            id="read_later_button_{{ .ID }}"
-            onclick="read_later_show({{ .ID }});" />
+            <input type="button"
+                   value="Read Later"
+                   id="read_later_button_{{ .ID }}"
+                   onclick="read_later_show({{ .ID }});" />
             {{ template "later_form" . }}
           </div>
-          <div class="row">
+          <div class="row container-fluid">
             {{ template "cluster" ($dot.ClusterFormData .ID) }}
           </div>
         </div>

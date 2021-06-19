@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-18 16:58:35 krylon>
+// Time-stamp: <2021-06-19 17:20:33 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -203,54 +203,54 @@ function toggleCheckMessages () {
 } // function toggleCheckMessages()
 
 function getNewMessages () {
-    const msgURL = '/ajax/get_messages'
+    // const msgURL = '/ajax/get_messages'
 
-    try {
-        if (!settings.messages.queryEnabled) {
-            return
-        }
+    // try {
+    //     if (!settings.messages.queryEnabled) {
+    //         return
+    //     }
 
-        const req = $.get(
-            msgURL,
-            {},
-            function (res) {
-                if (!res.Status) {
-                    const msg = msgURL +
-                          ' failed: ' +
-                          res.Message
+    //     const req = $.get(
+    //         msgURL,
+    //         {},
+    //         function (res) {
+    //             if (!res.Status) {
+    //                 const msg = msgURL +
+    //                       ' failed: ' +
+    //                       res.Message
 
-                    console.log(msg)
-                    alert(msg)
-                } else {
-                    let i = 0
-                    for (i = 0; i < res.Messages.length; i++) {
-                        const item = res.Messages[i]
-                        const rowid =
-                              'msg_' +
-                              msgCheckSum(item.Time, item.Level, item.Message)
-                        const row = '<tr id="' +
-                              rowid +
-                              '"><td>' +
-                              item.Time +
-                              '</td><td>' +
-                              item.Level +
-                              '</td><td>' +
-                              item.Message +
-                              '</td><td>' +
-                              '<input type="button" value="Delete" onclick="msgRowDelete(\'' +
-                              rowid +
-                              '\');" />' +
-                              '</td></tr>\n'
+    //                 console.log(msg)
+    //                 alert(msg)
+    //             } else {
+    //                 let i = 0
+    //                 for (i = 0; i < res.Messages.length; i++) {
+    //                     const item = res.Messages[i]
+    //                     const rowid =
+    //                           'msg_' +
+    //                           msgCheckSum(item.Time, item.Level, item.Message)
+    //                     const row = '<tr id="' +
+    //                           rowid +
+    //                           '"><td>' +
+    //                           item.Time +
+    //                           '</td><td>' +
+    //                           item.Level +
+    //                           '</td><td>' +
+    //                           item.Message +
+    //                           '</td><td>' +
+    //                           '<input type="button" value="Delete" onclick="msgRowDelete(\'' +
+    //                           rowid +
+    //                           '\');" />' +
+    //                           '</td></tr>\n'
 
-                        msgRowAdd(row)
-                    }
-                }
-            },
-            'json'
-        )
-    } finally {
-        window.setTimeout(getNewMessages, settings.messages.interval)
-    }
+    //                     msgRowAdd(row)
+    //                 }
+    //             }
+    //         },
+    //         'json'
+    //     )
+    // } finally {
+    //     window.setTimeout(getNewMessages, settings.messages.interval)
+    // }
 } // function getNewMessages()
 
 function logMsg (level, msg) {
@@ -943,7 +943,7 @@ function items_go_page () {
     window.location = addr
 } // function items_go_page()
 
-function item_add_cluster(item_id, clu) {
+function item_add_cluster (item_id, clu) {
     const addr = '/ajax/cluster_link_add'
 
     let req = $.post(
@@ -981,9 +981,9 @@ function item_add_cluster(item_id, clu) {
         console.log(msg);
         alert(msg);
     };
-} // function item_add_cluster(div_id, clu)
+} // function item_add_cluster (div_id, clu)
 
-function make_cluster_key_handler(id) {
+function make_cluster_key_handler (id) {
     return (e) => {
         const itemID = id;
         const inputID = `#cluster_input_${id}`;
@@ -1026,16 +1026,16 @@ function make_cluster_key_handler(id) {
             }
         }
     }
-} // function make_cluster_key_handler(itemID)
+} // function make_cluster_key_handler (itemID)
 
-function install_cluster_key_handler(id) {
+function install_cluster_key_handler (id) {
     const inpID = `#cluster_input_${id}`
     const elt = $(inpID)[0]
 
     elt.onkeydown = make_cluster_key_handler(id)
-} // function install_cluster_key_handler(id)
+} // function install_cluster_key_handler (id)
 
-function item_rm_cluster(item_id, cluster_id) {
+function item_rm_cluster (item_id, cluster_id) {
     const addr = "/ajax/cluster_link_del"
     const req = $.post(
         addr,
@@ -1056,4 +1056,29 @@ function item_rm_cluster(item_id, cluster_id) {
     req.fail = (rep, stat, xhr) => {
         console.error(`Error creating Cluster ${name}: ${rep}: ${stat} | ${xhr}`)
     }
-} // function item_rm_cluster(item_id, cluster_id)
+} // function item_rm_cluster (item_id, cluster_id)
+
+function cluster_display_items (cluster_id) {
+    const url = '/ajax/cluster_items'
+    const div = '#cluster_item_div'
+    // alert('cluster_display_items: IMPLEMENT ME!!!')
+
+    const req = $.post(
+        url,
+        { ClusterID: cluster_id },
+        (reply) => {
+            if (reply.Status) {
+                $(div)[0].innerHTML = reply.HTML
+            } else {
+                const msg = `Failed to load Items for Cluster #${cluster_id}: ${reply.Message}`
+                console.error(msg)
+                alert(msg)
+            }
+        },
+        "json"
+    )
+
+    req.fail = (rep, stat, xhr) => {
+        console.error(`Error fetching Items for Cluster ${cluster_id}: ${rep}: ${stat} | ${xhr}`)
+    }
+} // function cluster_display_items (cluster_id)
