@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 21. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-21 22:28:48 krylon>
+// Time-stamp: <2021-06-21 23:06:06 krylon>
 
 package search
 
@@ -38,6 +38,32 @@ func TestParseQueryString(t *testing.T) {
 					"Database",
 					"Programming",
 				},
+			},
+		},
+		testCase{
+			qstr: `ipv6 only vpn for "GNU Linux" tag:Internet`,
+			res: Query{
+				Query: []string{
+					"GNU Linux",
+					"for",
+					"ipv6",
+					"only",
+					"vpn",
+				},
+				Tags: []string{
+					"Internet",
+				},
+			},
+		},
+		testCase{
+			qstr: `ibm mainframe datemin:2020-01-01 datemax:2020-12-31`,
+			res: Query{
+				Query: []string{
+					"ibm",
+					"mainframe",
+				},
+				DateBegin: mkdate(2020, 1, 1),
+				DateEnd:   mkdate(2020, 12, 31),
 			},
 		},
 	}
