@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 21. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-21 22:13:50 krylon>
+// Time-stamp: <2021-06-21 22:28:48 krylon>
 
 package search
 
@@ -24,6 +24,19 @@ func TestParseQueryString(t *testing.T) {
 					"else",
 					"something",
 					"something",
+				},
+			},
+		},
+		testCase{
+			qstr: "sqlite regex tag:Database tag:Programming",
+			res: Query{
+				Query: []string{
+					"regex",
+					"sqlite",
+				},
+				Tags: []string{
+					"Database",
+					"Programming",
 				},
 			},
 		},

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-21 22:19:54 krylon>
+// Time-stamp: <2021-06-21 22:30:01 krylon>
 
 // Package search implements the handling of search queries. Duh.
 package search
@@ -66,10 +66,10 @@ func ParseQueryStr(d *database.Database, s string) (*Query, error) {
 
 		switch strings.ToLower(match[1]) {
 		case "tag":
-			if t[0] == '"' {
+			if match[2][0] == '"' {
 				tword = match[2][1 : len(match[2])-1]
 			} else {
-				tword = t
+				tword = match[2]
 			}
 
 			q.Tags = append(q.Tags, tword)
