@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-21 23:39:08 krylon>
+// Time-stamp: <2021-06-22 00:36:40 krylon>
 
 // Package search implements the handling of search queries. Duh.
 package search
@@ -14,6 +14,7 @@ import (
 	"strings"
 	"ticker/common"
 	"ticker/database"
+	"ticker/feed"
 	"ticker/logdomain"
 	"time"
 
@@ -112,7 +113,7 @@ func ParseQueryStr(d *database.Database, s string) (*Query, error) {
 	sort.Strings(q.Tags)
 
 	return q, nil
-} // func ParseQueryStr(s string) (*SearchQuery, error)
+} // func ParseQueryStr(s string) (*Query, error)
 
 // Equal returns true if the given SearchQuery is structurally identical to
 // the receiver.
@@ -163,4 +164,52 @@ End:   %s
 	}
 
 	return true
-} // func (q *SearchQuery) Equal(other *SearchQuery) bool
+} // func (q *Query) Equal(other *SearchQuery) bool
+
+// Execute runs the query and returns the resulting Items.
+func (q *Query) Execute() ([]feed.Item, error) {
+	var (
+		err            error
+		items, results []feed.Item
+		qstr           string
+	)
+
+	qstr = strings.Join(q.Query, " ")
+
+	if items, err = q.db.ItemGetFTS(qstr); err != nil {
+		q.log.Printf("[ERROR] Fulltext search failed: %s\n",
+			err.Error())
+		return nil, err
+	}
+
+	results = make([]feed.Item, 0)
+
+	if !q.DateBegin.IsZero() {
+		for _, i := range items {
+			if i.Timestamp.After(q.DateBegin) {
+				results = append(results, i)
+			}
+		}
+
+		if len(results) > 0 {
+			items = results
+			results = make([]feed.Item, 0)
+		}
+	}
+
+	if !q.DateEnd.IsZero() {
+		for _, i := range items {
+			if i.Timestamp.Before(q.DateEnd) {
+				results = append(results, i)
+			}
+		}
+
+		// if len(results) > 0 {
+		// 	//items = results
+		// 	//results = make([]feed.Item, 0)
+		// }
+	}
+
+	return results, nil
+	//return nil, krylib.ErrNotImplemented
+} // func (q *Query) Execute() ([]feed.Item, error)
