@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-21 22:30:01 krylon>
+// Time-stamp: <2021-06-21 23:39:08 krylon>
 
 // Package search implements the handling of search queries. Duh.
 package search
@@ -21,7 +21,7 @@ import (
 )
 
 // var tagPat = regexp.MustCompile(`(?i)tag:(\w+|"[^"]+")`)
-var metaPat = regexp.MustCompile(`(?i)(\w+):(\w+|"[^"]+")`)
+var metaPat = regexp.MustCompile(`(?i)(\w+):(\S+|"[^"]+")`)
 
 // Query represents a ... you guessed it: a search query.
 // Using multiple
@@ -80,7 +80,7 @@ func ParseQueryStr(d *database.Database, s string) (*Query, error) {
 				tword = tword[1 : len(tword)-1]
 			}
 
-			if q.DateBegin, err = time.Parse(common.TimestampFormatDate, tword); err != nil {
+			if q.DateBegin, err = time.ParseInLocation(common.TimestampFormatDate, tword, time.Local); err != nil {
 				q.log.Printf("[ERROR] Cannot parse date %q: %s\n",
 					tword,
 					err.Error())
@@ -93,7 +93,7 @@ func ParseQueryStr(d *database.Database, s string) (*Query, error) {
 				tword = tword[1 : len(tword)-1]
 			}
 
-			if q.DateEnd, err = time.Parse(common.TimestampFormatDate, tword); err != nil {
+			if q.DateEnd, err = time.ParseInLocation(common.TimestampFormatDate, tword, time.Local); err != nil {
 				q.log.Printf("[ERROR] Cannot parse date %q: %s\n",
 					tword,
 					err.Error())
@@ -128,8 +128,17 @@ func (q *Query) Equal(other *Query) bool {
 			len(q.Query),
 			len(other.Query))
 		return false
-	} else if !(q.DateBegin.Equal(other.DateBegin) && q.DateEnd.Equal(other.DateBegin)) {
-		q.log.Println("[TRACE] Dates differ")
+	} else if !(q.DateBegin.Equal(other.DateBegin) && q.DateEnd.Equal(other.DateEnd)) {
+		q.log.Printf(`[TRACE] Dates differ:
+Begin: %s
+       %s
+End:   %s
+       %s
+`,
+			q.DateBegin.Format(common.TimestampFormatSubSecond),
+			other.DateBegin.Format(common.TimestampFormatSubSecond),
+			q.DateEnd.Format(common.TimestampFormatSubSecond),
+			other.DateEnd.Format(common.TimestampFormatSubSecond))
 		return false
 	}
 
