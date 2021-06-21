@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/CyrusF/go-bayesian v0.0.0-20180928040635-c6aa877814bd
 	github.com/SlyMarbo/rss v1.0.1
+	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be
 	github.com/bbalet/stopwords v1.0.0
 	github.com/blicero/krylib v0.0.0-20210224100727-002c413214d3
 	github.com/dchest/stemmer v0.0.0-20161207102402-66719a20c4b5

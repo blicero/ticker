@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-31 17:43:13 krylon>
+// Time-stamp: <2021-06-21 22:05:29 krylon>
 
 // Package logdomain provides constants to identify the different
 // "areas" of the application that perform logging.
@@ -22,6 +22,7 @@ const (
 	Feed
 	Prefetch
 	Reader
+	Search
 	Tag
 	Web
 )
@@ -36,6 +37,7 @@ func AllDomains() []ID {
 		Feed,
 		Prefetch,
 		Reader,
+		Search,
 		Tag,
 		Web,
 	}
