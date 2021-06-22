@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-26 17:34:45 krylon>
+// Time-stamp: <2021-06-22 17:29:52 krylon>
 
 package feed
 
@@ -32,6 +32,7 @@ type Item struct {
 	Rating        float64
 	ManuallyRated bool
 	Tags          []tag.Tag
+	tagMap        map[string]bool
 }
 
 func (i *Item) String() string {
@@ -92,3 +93,18 @@ func (i *Item) HasTag(tagID int64) bool {
 
 	return false
 } // func (i *Item) HasTag(tagID int64) bool
+
+// HasTagNamed returns true if the receiver carries the Tag with the given name.
+func (i *Item) HasTagNamed(name string) bool {
+	if len(i.Tags) == 0 {
+		return false
+	} else if len(i.tagMap) != len(i.Tags) {
+		i.tagMap = make(map[string]bool, len(i.Tags))
+
+		for _, t := range i.Tags {
+			i.tagMap[t.Name] = true
+		}
+	}
+
+	return i.tagMap[name]
+} // func (i *Item) HasTagNamed(name string) bool
