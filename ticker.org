@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-22 01:08:20 krylon>
+# Time-stamp: <2021-06-22 20:42:40 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -14,67 +14,67 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-22 Di 01:08]
-   | Headline                                          | Time       |          |          |          |          |      |
-   |---------------------------------------------------+------------+----------+----------+----------+----------+------|
-   | *Total time*                                      | *15d 1:48* |          |          |          |          |      |
-   |---------------------------------------------------+------------+----------+----------+----------+----------+------|
-   | Ticker                                            | 15d 1:48   |          |          |          |          |      |
-   | \_  Main                                          |            |     0:56 |          |          |          |      |
-   | \_    Shutdown                                    |            |          |     0:56 |          |          |      |
-   | \_  Components [40/46]                            |            | 14d 7:15 |          |          |          |      |
-   | \_    Feed [7/7]                                  |            |          | 1d 14:32 |          |          |      |
-   | \_      Homepage                                  |            |          |          |     0:12 |          |      |
-   | \_      Rating [4/4]                              |            |          |          | 1d 11:04 |          |      |
-   | \_        Delete Rating                           |            |          |          |          |     5:53 |      |
-   | \_        Web Frontend                            |            |          |          |          |    12:09 |      |
-   | \_        Classifier                              |            |          |          |          |    16:25 |      |
-   | \_    Database [1/1]                              |            |          |    21:55 |          |          |      |
-   | \_      Due Feeds                                 |            |          |          |     1:26 |          |      |
-   | \_    Reader [2/2]                                |            |          |    18:06 |          |          |      |
-   | \_      Timestamps                                |            |          |          |     0:15 |          |      |
-   | \_      Pseudo-duplicates                         |            |          |          |     2:01 |          |      |
-   | \_    Web interface [19/20]                       |            |          | 4d 15:52 |          |          |      |
-   | \_      Handling Images [5/5]                     |            |          |          | 1d 19:56 |          |      |
-   | \_        Size matters                            |            |          |          |          |     2:45 |      |
-   | \_          Scale                                 |            |          |          |          |          | 0:56 |
-   | \_          Check first                           |            |          |          |          |          | 1:49 |
-   | \_        Prefetch images and such                |            |          |          |          | 1d 17:11 |      |
-   | \_      Various small-ish improvements [3/3]      |            |          |          |    12:08 |          |      |
-   | \_        Display time the Classifier was last... |            |          |          |          |     1:14 |      |
-   | \_        Make Tag suggestions clickable links    |            |          |          |          |     1:57 |      |
-   | \_        Shutdown                                |            |          |          |          |     6:15 |      |
-   | \_      Embed                                     |            |          |          |     3:00 |          |      |
-   | \_      Snazzy [6/7]                              |            |          |          |    15:10 |          |      |
-   | \_        Paging [1/2]                            |            |          |          |          |     6:22 |      |
-   | \_          Menu                                  |            |          |          |          |          | 4:21 |
-   | \_        Voting Buttons                          |            |          |          |          |     3:33 |      |
-   | \_        Selection form for tags                 |            |          |          |          |     1:11 |      |
-   | \_        Ooopsie [1/1]                           |            |          |          |          |     0:51 |      |
-   | \_          Read later form                       |            |          |          |          |          | 0:51 |
-   | \_        Subscribe                               |            |          |          |          |     2:35 |      |
-   | \_      Limit description length                  |            |          |          |     1:32 |          |      |
-   | \_      Manage Feeds                              |            |          |          |    17:11 |          |      |
-   | \_    Tags [6/7]                                  |            |          | 2d 21:26 |          |          |      |
-   | \_      Sort tags by hierarchy                    |            |          |          |     7:02 |          |      |
-   | \_      Edit Tags                                 |            |          |          |     8:07 |          |      |
-   | \_      Database                                  |            |          |          |    10:59 |          |      |
-   | \_        Hierarchy                               |            |          |          |          |     8:58 |      |
-   | \_      Web interface                             |            |          |          |  1d 4:45 |          |      |
-   | \_      Suggestions                               |            |          |          |    12:43 |          |      |
-   | \_    Clusters [0/2]                              |            |          |  1d 8:19 |          |          |      |
-   | \_      Backend                                   |            |          |          |     4:30 |          |      |
-   | \_      Frontend                                  |            |          |          |  1d 3:49 |          |      |
-   | \_    Search [3/3]                                |            |          |  1d 7:17 |          |          |      |
-   | \_      Moar!                                     |            |          |          |    20:53 |          |      |
-   | \_    Read Later [2/2]                            |            |          |    19:48 |          |          |      |
-   | \_      Web interface                             |            |          |          |    17:46 |          |      |
-   | \_  Tedious tasks                                 |            |    14:57 |          |          |          |      |
-   | \_    Performance [2/2]                           |            |          |    14:57 |          |          |      |
-   | \_      Advisor                                   |            |          |          |     4:06 |          |      |
-   | \_      Profiling                                 |            |          |          |     7:01 |          |      |
-   | \_  Bugs                                          |            |     2:40 |          |          |          |      |
-   | \_    Panic in Language Guesser                   |            |          |     2:40 |          |          |      |
+   #+CAPTION: Clock summary at [2021-06-22 Di 20:42]
+   | Headline                                          | Time        |           |          |          |          |      |
+   |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
+   | *Total time*                                      | *15d 11:54* |           |          |          |          |      |
+   |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
+   | Ticker                                            | 15d 11:54   |           |          |          |          |      |
+   | \_  Main                                          |             |      0:56 |          |          |          |      |
+   | \_    Shutdown                                    |             |           |     0:56 |          |          |      |
+   | \_  Components [40/46]                            |             | 14d 17:21 |          |          |          |      |
+   | \_    Feed [7/7]                                  |             |           | 1d 14:32 |          |          |      |
+   | \_      Homepage                                  |             |           |          |     0:12 |          |      |
+   | \_      Rating [4/4]                              |             |           |          | 1d 11:04 |          |      |
+   | \_        Delete Rating                           |             |           |          |          |     5:53 |      |
+   | \_        Web Frontend                            |             |           |          |          |    12:09 |      |
+   | \_        Classifier                              |             |           |          |          |    16:25 |      |
+   | \_    Database [1/1]                              |             |           |    21:55 |          |          |      |
+   | \_      Due Feeds                                 |             |           |          |     1:26 |          |      |
+   | \_    Reader [2/2]                                |             |           |    18:06 |          |          |      |
+   | \_      Timestamps                                |             |           |          |     0:15 |          |      |
+   | \_      Pseudo-duplicates                         |             |           |          |     2:01 |          |      |
+   | \_    Web interface [19/20]                       |             |           | 4d 15:52 |          |          |      |
+   | \_      Handling Images [5/5]                     |             |           |          | 1d 19:56 |          |      |
+   | \_        Size matters                            |             |           |          |          |     2:45 |      |
+   | \_          Scale                                 |             |           |          |          |          | 0:56 |
+   | \_          Check first                           |             |           |          |          |          | 1:49 |
+   | \_        Prefetch images and such                |             |           |          |          | 1d 17:11 |      |
+   | \_      Various small-ish improvements [3/3]      |             |           |          |    12:08 |          |      |
+   | \_        Display time the Classifier was last... |             |           |          |          |     1:14 |      |
+   | \_        Make Tag suggestions clickable links    |             |           |          |          |     1:57 |      |
+   | \_        Shutdown                                |             |           |          |          |     6:15 |      |
+   | \_      Embed                                     |             |           |          |     3:00 |          |      |
+   | \_      Snazzy [6/7]                              |             |           |          |    15:10 |          |      |
+   | \_        Paging [1/2]                            |             |           |          |          |     6:22 |      |
+   | \_          Menu                                  |             |           |          |          |          | 4:21 |
+   | \_        Voting Buttons                          |             |           |          |          |     3:33 |      |
+   | \_        Selection form for tags                 |             |           |          |          |     1:11 |      |
+   | \_        Ooopsie [1/1]                           |             |           |          |          |     0:51 |      |
+   | \_          Read later form                       |             |           |          |          |          | 0:51 |
+   | \_        Subscribe                               |             |           |          |          |     2:35 |      |
+   | \_      Limit description length                  |             |           |          |     1:32 |          |      |
+   | \_      Manage Feeds                              |             |           |          |    17:11 |          |      |
+   | \_    Tags [6/7]                                  |             |           | 2d 21:26 |          |          |      |
+   | \_      Sort tags by hierarchy                    |             |           |          |     7:02 |          |      |
+   | \_      Edit Tags                                 |             |           |          |     8:07 |          |      |
+   | \_      Database                                  |             |           |          |    10:59 |          |      |
+   | \_        Hierarchy                               |             |           |          |          |     8:58 |      |
+   | \_      Web interface                             |             |           |          |  1d 4:45 |          |      |
+   | \_      Suggestions                               |             |           |          |    12:43 |          |      |
+   | \_    Clusters [0/2]                              |             |           |  1d 8:19 |          |          |      |
+   | \_      Backend                                   |             |           |          |     4:30 |          |      |
+   | \_      Frontend                                  |             |           |          |  1d 3:49 |          |      |
+   | \_    Search [3/3]                                |             |           | 1d 17:23 |          |          |      |
+   | \_      Moar!                                     |             |           |          |    20:53 |          |      |
+   | \_    Read Later [2/2]                            |             |           |    19:48 |          |          |      |
+   | \_      Web interface                             |             |           |          |    17:46 |          |      |
+   | \_  Tedious tasks                                 |             |     14:57 |          |          |          |      |
+   | \_    Performance [2/2]                           |             |           |    14:57 |          |          |      |
+   | \_      Advisor                                   |             |           |          |     4:06 |          |      |
+   | \_      Profiling                                 |             |           |          |     7:01 |          |      |
+   | \_  Bugs                                          |             |      2:40 |          |          |          |      |
+   | \_    Panic in Language Guesser                   |             |           |     2:40 |          |          |      |
    #+END:
 
 ** Questions
@@ -559,6 +559,7 @@
      crazy.
 *** Search [3/3]
     :LOGBOOK:
+    CLOCK: [2021-06-22 Di 10:36]--[2021-06-22 Di 20:42] => 10:06
     CLOCK: [2021-06-21 Mo 18:14]--[2021-06-22 Di 01:08] =>  6:54
     CLOCK: [2021-02-23 Di 20:00]--[2021-02-23 Di 23:30] =>  3:30
     :END:
