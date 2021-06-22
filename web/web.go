@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-19 18:48:32 krylon>
+// Time-stamp: <2021-06-22 21:09:42 krylon>
 
 package web
 
@@ -31,6 +31,7 @@ import (
 	"ticker/database"
 	"ticker/feed"
 	"ticker/logdomain"
+	"ticker/search"
 	"ticker/tag"
 	"time"
 
@@ -790,6 +791,7 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	var (
 		err       error
 		msg, qstr string
+		q         *search.Query
 		db        *database.Database
 		tmpl      *template.Template
 		data      = tmplDataItems{
@@ -825,6 +827,15 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
+	if q, err = search.ParseQueryStr(db, qstr); err != nil {
+		msg = fmt.Sprintf("Cannot process search query %q: %s\n",
+			qstr,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.sendErrorMessage(w, msg)
+		return
+	}
+
 	var feeds []feed.Feed
 
 	if feeds, err = db.FeedGetAll(); err != nil {
@@ -849,7 +860,7 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		data.FeedMap[f.ID] = f
 	}
 
-	if data.Items, err = db.ItemGetFTS(qstr); err != nil {
+	if data.Items, err = q.Execute(); err != nil {
 		msg = fmt.Sprintf("Cannot search database for %q: %s",
 			qstr,
 			err.Error())
