@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-06-22 20:42:40 krylon>
+# Time-stamp: <2021-06-22 23:46:20 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -14,7 +14,7 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-06-22 Di 20:42]
+   #+CAPTION: Clock summary at [2021-06-22 Di 23:23]
    | Headline                                          | Time        |           |          |          |          |      |
    |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
    | *Total time*                                      | *15d 11:54* |           |          |          |          |      |
@@ -22,7 +22,7 @@
    | Ticker                                            | 15d 11:54   |           |          |          |          |      |
    | \_  Main                                          |             |      0:56 |          |          |          |      |
    | \_    Shutdown                                    |             |           |     0:56 |          |          |      |
-   | \_  Components [40/46]                            |             | 14d 17:21 |          |          |          |      |
+   | \_  Components [40/47]                            |             | 14d 17:21 |          |          |          |      |
    | \_    Feed [7/7]                                  |             |           | 1d 14:32 |          |          |      |
    | \_      Homepage                                  |             |           |          |     0:12 |          |      |
    | \_      Rating [4/4]                              |             |           |          | 1d 11:04 |          |      |
@@ -67,7 +67,7 @@
    | \_      Frontend                                  |             |           |          |  1d 3:49 |          |      |
    | \_    Search [3/3]                                |             |           | 1d 17:23 |          |          |      |
    | \_      Moar!                                     |             |           |          |    20:53 |          |      |
-   | \_    Read Later [2/2]                            |             |           |    19:48 |          |          |      |
+   | \_    Read Later [2/3]                            |             |           |    19:48 |          |          |      |
    | \_      Web interface                             |             |           |          |    17:46 |          |      |
    | \_  Tedious tasks                                 |             |     14:57 |          |          |          |      |
    | \_    Performance [2/2]                           |             |           |    14:57 |          |          |      |
@@ -90,7 +90,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [40/46]
+** Components [40/47]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -598,7 +598,7 @@
      requires support in the web interface.
 **** DONE Web interface
      CLOSED: [2021-02-23 Di 23:30]
-*** Read Later [2/2]
+*** Read Later [2/3]
     :LOGBOOK:
     CLOCK: [2021-03-02 Di 17:19]--[2021-03-02 Di 18:22] =>  1:03
     CLOCK: [2021-03-02 Di 14:45]--[2021-03-02 Di 15:05] =>  0:20
@@ -606,6 +606,10 @@
     :END:
     It would be nice to be able to mark Items for later reading, so they do
     not get lost.
+**** TODO Save pages                                            :feature:web:
+     It would be super cool if I could download the web page linked to by an
+     Item and store it so I can view it offline or in case it is deleted or
+     something.
 **** DONE Database
      CLOSED: [2021-03-03 Mi 10:23]
 **** DONE [#F] Web interface
