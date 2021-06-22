@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-22 00:36:40 krylon>
+// Time-stamp: <2021-06-22 20:01:20 krylon>
 
 // Package search implements the handling of search queries. Duh.
 package search
@@ -22,7 +22,7 @@ import (
 )
 
 // var tagPat = regexp.MustCompile(`(?i)tag:(\w+|"[^"]+")`)
-var metaPat = regexp.MustCompile(`(?i)(\w+):(\S+|"[^"]+")`)
+var metaPat = regexp.MustCompile(`(?i)(\w+):(.*)\s*$`)
 
 // Query represents a ... you guessed it: a search query.
 // Using multiple
@@ -176,6 +176,8 @@ func (q *Query) Execute() ([]feed.Item, error) {
 
 	qstr = strings.Join(q.Query, " ")
 
+	q.log.Printf("[TRACE] Run query %q\n", qstr)
+
 	if items, err = q.db.ItemGetFTS(qstr); err != nil {
 		q.log.Printf("[ERROR] Fulltext search failed: %s\n",
 			err.Error())
@@ -204,12 +206,26 @@ func (q *Query) Execute() ([]feed.Item, error) {
 			}
 		}
 
-		// if len(results) > 0 {
-		// 	//items = results
-		// 	//results = make([]feed.Item, 0)
-		// }
+		if len(results) > 0 {
+			items = results
+			results = make([]feed.Item, 0)
+		}
 	}
 
-	return results, nil
-	//return nil, krylib.ErrNotImplemented
+	if len(q.Tags) > 0 {
+	ITEM:
+		for _, it := range items {
+			for _, tname := range q.Tags {
+				if !it.HasTagNamed(tname) {
+					continue ITEM
+				}
+			}
+
+			results = append(results, it)
+		}
+
+		items = results
+	}
+
+	return items, nil
 } // func (q *Query) Execute() ([]feed.Item, error)
