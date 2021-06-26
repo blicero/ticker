@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-21 22:05:29 krylon>
+// Time-stamp: <2021-06-23 16:19:52 krylon>
 
 // Package logdomain provides constants to identify the different
 // "areas" of the application that perform logging.
@@ -19,6 +19,7 @@ const (
 	Classifier
 	DBPool
 	Database
+	Download
 	Feed
 	Prefetch
 	Reader
@@ -34,6 +35,7 @@ func AllDomains() []ID {
 		Classifier,
 		DBPool,
 		Database,
+		Download,
 		Feed,
 		Prefetch,
 		Reader,
