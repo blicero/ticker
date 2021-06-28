@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-22 01:10:01 krylon>
+// Time-stamp: <2021-06-28 23:31:57 krylon>
 
 // +build ignore
 
@@ -64,6 +64,7 @@ var candidates = map[string][]string{
 	"test": []string{
 		"classifier",
 		"database",
+		"download",
 		"feed",
 		"prefetch",
 		"reader",
@@ -74,6 +75,7 @@ var candidates = map[string][]string{
 		"classifier",
 		"common",
 		"database",
+		"download",
 		"feed",
 		"logdomain",
 		"prefetch",
@@ -87,6 +89,7 @@ var candidates = map[string][]string{
 		"classifier",
 		"common",
 		"database",
+		"download",
 		"feed",
 		"logdomain",
 		"prefetch",
