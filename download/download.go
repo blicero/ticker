@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-26 22:28:05 krylon>
+// Time-stamp: <2021-06-29 22:46:18 krylon>
 
 // Package download downloads and archives web pages.
 package download
@@ -32,6 +32,8 @@ import (
 )
 
 const wkInterval = time.Millisecond * 2500
+
+var mimePat = regexp.MustCompile(`^([^/]+)/(\w+)`)
 
 // Agent is the nexus of download activity.
 type Agent struct {
@@ -217,6 +219,9 @@ func (ag *Agent) processPage(i *feed.Item) {
 			href                = dom.GetAttribute(node, "src")
 		)
 
+		ag.log.Printf("[DEBUG] Process image node: %s\n",
+			node.Data)
+
 		if uri, err = url.Parse(href); err != nil {
 			ag.log.Printf("[ERROR] Cannot parse Image URL %q: %s\n",
 				href,
@@ -292,6 +297,22 @@ func (ag *Agent) processPage(i *feed.Item) {
 	if err = html.Render(&buf, doc); err != nil {
 		ag.log.Printf("[ERROR] Cannot render DOM tree back to HTML: %s\n",
 			err.Error())
+		os.RemoveAll(pageDir) // nolint: errcheck
+	} else if _, err = fh.Seek(0, 0); err != nil {
+		ag.log.Printf("[ERROR] Cannot rewind filehandle %s: %s\n",
+			pageFile,
+			err.Error())
+		os.RemoveAll(pageDir) // nolint: errcheck
+	} else if err = fh.Truncate(0); err != nil {
+		ag.log.Printf("[ERROR] Cannot truncate file %s: %s\n",
+			pageFile,
+			err.Error())
+		os.RemoveAll(pageDir) // nolint: errcheck
+	} else if _, err = fh.Write(buf.Bytes()); err != nil {
+		ag.log.Printf("[ERROR] Cannot write to file %s: %s\n",
+			pageFile,
+			err.Error())
+		os.RemoveAll(pageDir) // nolint: errcheck
 	}
 } // func (ag *Agent) processPage(i *feed.Item)
 
@@ -405,8 +426,19 @@ func (ag *Agent) fetchScript(href *url.URL, folder string) (string, error) {
 		ag.log.Printf("[ERROR] %s\n",
 			err.Error())
 		return "", err
-	} else if resp.Header.Get("Content-Type") != "text/javascript" {
-		err = fmt.Errorf("Unexpected Content-Type for %q: %s",
+	}
+
+	var match = mimePat.FindStringSubmatch(resp.Header.Get("Content-Type"))
+
+	if match == nil {
+		err = fmt.Errorf("Cannot parse MIME type for %q: %q",
+			astr,
+			resp.Header.Get("Content-Type"))
+		ag.log.Printf("[ERROR] %s\n",
+			err.Error())
+		return "", err
+	} else if match[2] != "javascript" {
+		err = fmt.Errorf("Unexpected content type for %q: %q",
 			astr,
 			resp.Header.Get("Content-Type"))
 		ag.log.Printf("[ERROR] %s\n",
