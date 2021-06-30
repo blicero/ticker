@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-30 15:32:12 krylon>
+// Time-stamp: <2021-06-30 15:39:17 krylon>
 
 // Package download downloads and archives web pages.
 package download
@@ -321,10 +321,10 @@ func (ag *Agent) processPage(i *feed.Item) {
 
 func (ag *Agent) fetchImage(addr *url.URL, folder string) (string, error) {
 	var (
-		err                                     error
-		filename, aStr, mimetype, cksum, suffix string
-		resp                                    *http.Response
-		fh                                      *os.File
+		err                      error
+		filename, aStr, mimetype string
+		resp                     *http.Response
+		fh                       *os.File
 	)
 
 	aStr = addr.String()
@@ -355,21 +355,15 @@ func (ag *Agent) fetchImage(addr *url.URL, folder string) (string, error) {
 			mimetype)
 		ag.log.Printf("[ERROR] %s\n", err.Error())
 		return "", err
-	} else if cksum, err = common.GetChecksum([]byte(aStr)); err != nil {
-		ag.log.Printf("[ERROR] Cannot compute checksum of URL %q: %s\n",
-			aStr,
-			err.Error())
-		return "", err
-	} else if suffix, err = getFileSuffix(resp); err != nil {
-		ag.log.Printf("[ERROR] %s\n", err.Error())
-		return "", err
 	}
-
+	var base = path.Base(addr.EscapedPath())
 	filename = filepath.Join(
 		folder,
-		fmt.Sprintf("%s.%s",
-			cksum,
-			suffix))
+		base)
+
+	ag.log.Printf("[DEBUG] Save %q to %s\n",
+		addr,
+		filename)
 
 	if fh, err = os.Create(filename); err != nil {
 		ag.log.Printf("[ERROR] Cannot create file %s: %s\n",
@@ -457,24 +451,3 @@ func (ag *Agent) fetchScript(href *url.URL, folder string) (string, error) {
 
 	return localpath, nil
 } // func (ag *Agent) fetchScript(href, folder string) (string, error)
-
-// I copied these over from the prefetch package, but if I use this code from
-// two different packages, I should put it into the common package.
-// But I am too lazy right now.
-
-var suffixPattern = regexp.MustCompile("(?i)^image/([a-z]+)$")
-
-func getFileSuffix(resp *http.Response) (string, error) {
-	var (
-		mime  string
-		match []string
-	)
-
-	mime = resp.Header["Content-Type"][0]
-
-	if match = suffixPattern.FindStringSubmatch(mime); match == nil {
-		return "", fmt.Errorf("Could not parse MIME type %q", mime)
-	}
-
-	return match[1], nil
-} // func getFileSuffix(resp *http.response) string
