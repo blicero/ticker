@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-28 23:20:33 krylon>
+// Time-stamp: <2021-06-30 15:31:45 krylon>
 
 package download
 
@@ -35,9 +35,9 @@ func TestMain(m *testing.M) {
 		// database inside it) around, so we can manually inspect it
 		// if needed.
 		// If all tests pass, OTOH, we can safely remove the directory.
-		// fmt.Printf("Removing BaseDir %s\n",
-		// 	baseDir)
-		// _ = os.RemoveAll(baseDir)
+		fmt.Printf("Removing BaseDir %s\n",
+			baseDir)
+		_ = os.RemoveAll(baseDir)
 	} else {
 		fmt.Printf(">>> TEST DIRECTORY: %s\n", baseDir)
 	}

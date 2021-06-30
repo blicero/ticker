@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-29 22:46:18 krylon>
+// Time-stamp: <2021-06-30 15:32:12 krylon>
 
 // Package download downloads and archives web pages.
 package download
@@ -257,6 +257,9 @@ func (ag *Agent) processPage(i *feed.Item) {
 		)
 
 		src = dom.GetAttribute(node, "src")
+		ag.log.Printf("[DEBUG] Process script %q\n",
+			src)
+
 		if src == "" {
 			continue
 		} else if uri, err = url.Parse(src); err != nil {
