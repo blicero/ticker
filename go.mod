@@ -12,6 +12,7 @@ require (
 	github.com/endeveit/guesslanguage v0.0.0-20141216121003-b9ec07401dcb
 	github.com/go-shiori/dom v0.0.0-20210510042244-c74b4cff1404
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/logutils v1.0.0
 	github.com/jaytaylor/html2text v0.0.0-20200412013138-3577fbdbcff7
 	github.com/mattn/go-sqlite3 v1.14.6
