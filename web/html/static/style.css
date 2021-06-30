@@ -1,4 +1,4 @@
-/* Time-stamp: <2021-05-28 17:17:32 krylon> */
+/* Time-stamp: <2021-07-01 00:08:30 krylon> */
 
 body { 
     font-family: Arial,Helvetica,sans-serif;
@@ -158,4 +158,8 @@ div.body {
 
 *.tag_link_form {
     font-size: smaller;
+}
+
+input.cluster {
+    width: 150px;
 }

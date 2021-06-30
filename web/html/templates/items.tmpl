@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-06-19 18:07:07 krylon> */}}
+{{/* Time-stamp: <2021-07-01 00:29:21 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -26,7 +26,7 @@
       <td>
         <div class="container-fluid">
           <div class="row">
-            {{ fmt_time .Timestamp }}
+            {{ fmt_time_minute .Timestamp }}
           </div>
           <div class="row">
             <input type="button"
@@ -35,7 +35,7 @@
                    onclick="read_later_show({{ .ID }});" />
             {{ template "later_form" . }}
           </div>
-          <div class="row container-fluid">
+          <div class="row">
             {{ template "cluster" ($dot.ClusterFormData .ID) }}
           </div>
         </div>
