@@ -2,20 +2,32 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 09. 2019 by Benjamin Walkenhorst
 // (c) 2019 Benjamin Walkenhorst
-// Time-stamp: <2021-02-16 18:39:45 krylon>
+// Time-stamp: <2021-07-01 18:35:19 krylon>
 //
 // Helper functions for use by the HTTP request handlers
 
 package web
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 func errJSON(msg string) []byte {
 	var res = fmt.Sprintf(`{ "Status": false, "Message": %q }`,
-		msg)
+		jsonEscape(msg))
 
 	return []byte(res)
 } // func errJSON(msg string) []byte
+
+func jsonEscape(i string) string {
+	b, err := json.Marshal(i)
+	if err != nil {
+		panic(err)
+	}
+	// Trim the beginning and trailing " character
+	return string(b[1 : len(b)-1])
+}
 
 // func getMimeType(path string) (string, error) {
 // 	var (
