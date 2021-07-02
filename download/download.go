@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-30 15:39:17 krylon>
+// Time-stamp: <2021-07-02 15:07:52 krylon>
 
 // Package download downloads and archives web pages.
 package download
@@ -40,7 +40,7 @@ type Agent struct {
 	log       *log.Logger
 	lock      sync.RWMutex
 	active    bool
-	pageQ     chan *feed.Item
+	PageQ     chan *feed.Item
 	workerCnt int
 }
 
@@ -53,7 +53,7 @@ func NewAgent(cnt int) (*Agent, error) {
 	)
 
 	ag = &Agent{
-		pageQ:     make(chan *feed.Item, cnt),
+		PageQ:     make(chan *feed.Item, cnt),
 		workerCnt: cnt,
 	}
 
@@ -108,7 +108,7 @@ func (ag *Agent) worker(idx int) {
 		select {
 		case <-ticker.C:
 			continue
-		case item := <-ag.pageQ:
+		case item := <-ag.PageQ:
 			ag.processPage(item)
 		}
 	}
@@ -250,14 +250,25 @@ func (ag *Agent) processPage(i *feed.Item) {
 		dom.SetAttribute(node, "src", href)
 	}
 
-	for _, node := range dom.GetElementsByTagName(doc, "script") {
+	// for _, node := range dom.GetElementsByTagName(doc, "script") {
+	for _, node := range getAssets(doc) {
 		var (
-			src, localpath string
-			uri            *url.URL
+			src, localpath, tagName string
+			uri                     *url.URL
 		)
 
-		src = dom.GetAttribute(node, "src")
-		ag.log.Printf("[DEBUG] Process script %q\n",
+		switch tagName = dom.TagName(node); tagName {
+		case "script":
+			src = dom.GetAttribute(node, "src")
+		case "link":
+			src = dom.GetAttribute(node, "href")
+		default:
+			ag.log.Printf("[ERROR] Don't know how to handle Node %s\n",
+				tagName)
+			continue
+		}
+
+		ag.log.Printf("[DEBUG] Process asset %q\n",
 			src)
 
 		if src == "" {
@@ -266,7 +277,17 @@ func (ag *Agent) processPage(i *feed.Item) {
 			ag.log.Printf("[ERROR] Cannot parse URL %q: %s\n",
 				src,
 				err.Error())
-			dom.SetAttribute(node, "src", "")
+			switch tagName {
+			case "script":
+				//dom.SetAttribute(node, "src", "")
+				fallthrough
+			case "link":
+				node.Parent.RemoveChild(node)
+			default:
+				ag.log.Printf("[CANTHAPPEN] STILL Don't know how to handle %s\n",
+					tagName)
+			}
+
 			continue
 		} else if !uri.IsAbs() {
 			var old = uri
@@ -280,7 +301,8 @@ func (ag *Agent) processPage(i *feed.Item) {
 			ag.log.Printf("[ERROR] Cannot fetch %q: %s\n",
 				uri,
 				err.Error())
-			dom.SetAttribute(node, "src", "")
+			//dom.SetAttribute(node, "src", "")
+			node.Parent.RemoveChild(node)
 			continue
 		} else {
 			var basename = path.Base(localpath)
@@ -434,14 +456,29 @@ func (ag *Agent) fetchScript(href *url.URL, folder string) (string, error) {
 		ag.log.Printf("[ERROR] %s\n",
 			err.Error())
 		return "", err
-	} else if match[2] != "javascript" {
+	} /* else if match[2] != "javascript" {
 		err = fmt.Errorf("Unexpected content type for %q: %q",
 			astr,
 			resp.Header.Get("Content-Type"))
 		ag.log.Printf("[ERROR] %s\n",
 			err.Error())
 		return "", err
-	} else if _, err = io.Copy(fh, resp.Body); err != nil {
+	} else */
+
+	switch strings.ToLower(match[2]) {
+	case "javascript":
+		fallthrough
+	case "css":
+	default:
+		err = fmt.Errorf("Unexpected content type for %q: %q",
+			astr,
+			resp.Header.Get("Content-Type"))
+		ag.log.Printf("[ERROR] %s\n",
+			err.Error())
+		return "", err
+	}
+
+	if _, err = io.Copy(fh, resp.Body); err != nil {
 		ag.log.Printf("[ERROR] Cannot save %q to %s: %s\n",
 			astr,
 			localpath,
@@ -451,3 +488,15 @@ func (ag *Agent) fetchScript(href *url.URL, folder string) (string, error) {
 
 	return localpath, nil
 } // func (ag *Agent) fetchScript(href, folder string) (string, error)
+
+func getAssets(doc *html.Node) []*html.Node {
+	var nodes = dom.GetElementsByTagName(doc, "script")
+
+	for _, n := range dom.GetElementsByTagName(doc, "link") {
+		if dom.GetAttribute(n, "rel") == "stylesheet" {
+			nodes = append(nodes, n)
+		}
+	}
+
+	return nodes
+} // func getAssets(doc *html.Node) []*html.Node
