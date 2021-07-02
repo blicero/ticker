@@ -2,14 +2,19 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-22 17:29:52 krylon>
+// Time-stamp: <2021-07-02 09:03:00 krylon>
 
 package feed
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"math"
+	"os"
+	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 	"ticker/common"
 	"ticker/tag"
@@ -108,3 +113,32 @@ func (i *Item) HasTagNamed(name string) bool {
 
 	return i.tagMap[name]
 } // func (i *Item) HasTagNamed(name string) bool
+
+// IsDownloaded returns true if the Item's linked URL has been downloaded
+// to the local archive.
+func (i *Item) IsDownloaded() (result bool) {
+	var (
+		err        error
+		info       os.FileInfo
+		pageFolder = filepath.Join(
+			common.ArchiveDir,
+			strconv.FormatInt(i.ID, 10))
+	)
+
+	defer func() {
+		if x := recover(); x != nil {
+			result = false
+		}
+	}()
+
+	if info, err = os.Stat(pageFolder); err != nil && !errors.Is(err, fs.ErrNotExist) {
+		fmt.Printf("XXX Error checking if page %d (%q) has been downloaded to %s: %s\n",
+			i.ID,
+			i.Title,
+			pageFolder,
+			err.Error())
+		return false
+	}
+
+	return info.IsDir()
+} // func (i *Item) IsDownloaded() bool
