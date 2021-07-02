@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-07-01 00:29:21 krylon> */}}
+{{/* Time-stamp: <2021-07-01 04:19:12 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -37,6 +37,15 @@
           </div>
           <div class="row">
             {{ template "cluster" ($dot.ClusterFormData .ID) }}
+          </div>
+          <div class="row" id="download_item_{{ .ID }}">
+            {{ if .IsDownloaded }}
+            <a href="/archive/{{ .ID }}/index.html">Archive</a>
+            {{ else }}
+            <input type="button"
+                   value="Download"
+                   onclick="download_item({{ .ID }});" />
+            {{ end }}
           </div>
         </div>
       </td>

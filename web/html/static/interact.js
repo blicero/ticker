@@ -1,4 +1,4 @@
-// Time-stamp: <2021-06-19 17:20:33 krylon>
+// Time-stamp: <2021-07-01 18:47:03 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -1082,3 +1082,34 @@ function cluster_display_items (cluster_id) {
         console.error(`Error fetching Items for Cluster ${cluster_id}: ${rep}: ${stat} | ${xhr}`)
     }
 } // function cluster_display_items (cluster_id)
+
+function download_item (item_id) {
+    const url = '/ajax/download_item'
+    const div_id = `#download_item_${item_id}`
+    const div = $(div_id)[0]
+
+    const req = $.post(
+        url,
+        { ItemID: item_id },
+        (reply) => {
+            if (reply.Status) {
+                // Strictly speaking, at this point we just *requested* the
+                // server to download the Item, it might still fail.
+                // I'm thinking of using websockets to notify the frontend
+                // when the page has been downloaded successfully or when
+                // something goes wrong.
+                const content = `<a href="/archive/${item_id}/index.html">Archive</a>`
+                div.innerHTML = content
+            } else {
+                const msg = `Error requesting download of Item ${item_id}: ${reply.Message}`
+                console.error(msg)
+                alert(msg)
+            }
+        },
+        'json'
+    )
+
+    req.fail = (rep, stat, xhr) => {
+        console.error(`Error requesting download of ${item_id}: ${rep} / ${stat} / ${xhr}`)
+    }
+} // function download_item (item_id)

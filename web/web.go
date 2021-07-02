@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-22 21:09:42 krylon>
+// Time-stamp: <2021-07-02 13:43:11 krylon>
 
 package web
 
@@ -29,6 +29,7 @@ import (
 	"ticker/cluster"
 	"ticker/common"
 	"ticker/database"
+	"ticker/download"
 	"ticker/feed"
 	"ticker/logdomain"
 	"ticker/search"
@@ -47,6 +48,7 @@ var assets embed.FS
 
 const (
 	defaultPoolSize = 4
+	agentCnt        = 2
 )
 
 // Server implements the web interface
@@ -59,6 +61,7 @@ type Server struct {
 	tmpl      *template.Template
 	mimeTypes map[string]string
 	pool      *database.Pool
+	agent     *download.Agent
 	clsItem   *classifier.Classifier
 	clsTags   *advisor.Advisor
 	clsStamp  time.Time
@@ -74,10 +77,14 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 			Addr:   addr,
 			msgBuf: krylib.CreateMessageBuffer(),
 			mimeTypes: map[string]string{
-				".css": "text/css",
-				".map": "application/json",
-				".js":  "text/javascript",
-				".png": "image/png",
+				".css":  "text/css",
+				".map":  "application/json",
+				".js":   "text/javascript",
+				".png":  "image/png",
+				".jpg":  "image/jpeg",
+				".jpeg": "image/jpeg",
+				".webp": "image/webp",
+				".gif":  "image/gif",
 			},
 		}
 	)
@@ -86,6 +93,10 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 		return nil, err
 	} else if srv.pool, err = database.NewPool(defaultPoolSize); err != nil {
 		srv.log.Printf("[ERROR] Cannot create DB pool: %s\n",
+			err.Error())
+		return nil, err
+	} else if srv.agent, err = download.NewAgent(agentCnt); err != nil {
+		srv.log.Printf("[ERROR] Failed to create Agent: %s\n",
 			err.Error())
 		return nil, err
 	} else if srv.clsItem, err = classifier.New(); err != nil {
@@ -108,6 +119,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 		return nil, err
 	}
 
+	srv.agent.Start()
 	srv.clsStamp = time.Now()
 
 	const tmplFolder = "html/templates"
@@ -176,6 +188,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 
 	srv.router.HandleFunc("/classifier/train", srv.handleClassifierTrain)
 
+	srv.router.HandleFunc("/archive/{path:(?:.*)$}", srv.handleArchivedFile)
+
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
 	srv.router.HandleFunc("/ajax/rate_item", srv.handleRateItem)
@@ -195,6 +209,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/cluster_link_add", srv.handleClusterLinkAdd)
 	srv.router.HandleFunc("/ajax/cluster_link_del", srv.handleClusterLinkDel)
 	srv.router.HandleFunc("/ajax/cluster_items", srv.handleClusterItems)
+
+	srv.router.HandleFunc("/ajax/download_item", srv.handleItemDownload)
 
 	srv.router.HandleFunc("/ajax/shutdown", srv.handleShutdown)
 
@@ -1522,6 +1538,58 @@ func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request)
 /////////////////////////////////////////
 ////////////// Other ////////////////////
 /////////////////////////////////////////
+
+func (srv *Server) handleArchivedFile(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	var (
+		err                      error
+		fh                       *os.File
+		path, fullPath, mimeType string
+		match                    []string
+	)
+
+	vars := mux.Vars(r)
+	path = vars["path"]
+
+	fullPath = filepath.Join(common.ArchiveDir, path)
+
+	srv.log.Printf("[TRACE] Deliver local file %s\n", fullPath)
+
+	if fh, err = os.Open(fullPath); err != nil {
+		if errors.Is(err, fs.ErrNotExist) {
+			w.Header().Set("Content-Type", "text/plain")
+			w.WriteHeader(404)
+			w.Write([]byte(fmt.Sprintf("File %q was not found\n\n", path))) // nolint: errcheck
+			return
+		}
+		srv.log.Printf("[ERROR] Cannot open local archive file %s: %s\n",
+			fullPath,
+			err.Error())
+	}
+
+	defer fh.Close() // nolint: errcheck
+
+	if match = common.SuffixPattern.FindStringSubmatch(path); match == nil {
+		mimeType = "text/plain"
+	} else if mime, ok := srv.mimeTypes[match[1]]; ok {
+		mimeType = mime
+	} else {
+		srv.log.Printf("[ERROR] Did not find MIME type for %s\n", path)
+	}
+
+	w.Header().Set("Content-Type", mimeType)
+
+	if common.Debug {
+		w.Header().Set("Cache-Control", "no-store, max-age=0")
+	} else {
+		w.Header().Set("Cache-Control", "max-age=7200")
+	}
+
+	w.WriteHeader(200)
+	io.Copy(w, fh) // nolint: errcheck
+} // func (srv *Server) handleArchivedFile(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleCachedImg(w http.ResponseWriter, r *http.Request) {
 	// srv.log.Printf("[TRACE] Handle request for %s\n",
@@ -3249,6 +3317,73 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleClusterItems(w http.ResponseWriter, r *http.Request)
+
+func (srv *Server) handleItemDownload(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	var (
+		err         error
+		idStr, msg  string
+		replyBuffer []byte
+		itemID      int64
+		item        *feed.Item
+		db          *database.Database
+		resp        ajaxResponse
+	)
+
+	if err = r.ParseForm(); err != nil {
+		resp.Message = fmt.Sprintf("Cannot parse form data for %s %s: %s",
+			r.Method,
+			r.URL,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", resp.Message)
+		goto SERIALIZE_RESPONSE
+	}
+
+	idStr = r.FormValue("ItemID")
+
+	if itemID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
+		resp.Message = fmt.Sprintf("Cannot parse Item ID %q: %s",
+			idStr,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", err.Error())
+		goto SERIALIZE_RESPONSE
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if item, err = db.ItemGetByID(itemID); err != nil {
+		resp.Message = fmt.Sprintf("Error looking up Item #%d: %s",
+			itemID,
+			err.Error())
+		srv.log.Printf("[ERROR] %s\n", resp.Message)
+		goto SERIALIZE_RESPONSE
+	} else if item == nil {
+		resp.Message = fmt.Sprintf("Item #%d was not found in database", itemID)
+		srv.log.Printf("[ERROR] %s\n", resp.Message)
+		goto SERIALIZE_RESPONSE
+	}
+
+	srv.agent.PageQ <- item
+	resp.Status = true
+	resp.Message = fmt.Sprintf("Enqueued Item %d (%q) for download",
+		itemID,
+		item.URL)
+
+SERIALIZE_RESPONSE:
+	if replyBuffer, err = ffjson.Marshal(&resp); err != nil {
+		msg = fmt.Sprintf("Cannot serialize response: %q",
+			err.Error())
+		replyBuffer = errJSON(msg)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Size", strconv.FormatInt(int64(len(replyBuffer)), 10))
+	w.WriteHeader(200)
+	w.Write(replyBuffer) // nolint: errcheck
+} // func (srv *Server) handleItemDownload(w http.ResponseWrite, r *http.Request)
 
 func (srv *Server) handleShutdown(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
