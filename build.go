@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-28 23:31:57 krylon>
+// Time-stamp: <2021-07-03 22:06:21 krylon>
 
 // +build ignore
 
@@ -62,6 +62,7 @@ var candidates = map[string][]string{
 		"web",
 	},
 	"test": []string{
+		"blacklist",
 		"classifier",
 		"database",
 		"download",
@@ -72,6 +73,7 @@ var candidates = map[string][]string{
 		"web",
 	},
 	"vet": []string{
+		"blacklist",
 		"classifier",
 		"common",
 		"database",
@@ -86,6 +88,7 @@ var candidates = map[string][]string{
 		"web",
 	},
 	"lint": []string{
+		"blacklist",
 		"classifier",
 		"common",
 		"database",
