@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 03. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-03 22:05:33 krylon>
+// Time-stamp: <2021-07-04 13:36:57 krylon>
 
 package blacklist
 
@@ -38,5 +38,28 @@ var testCases = []blacklistTestCase{
 				match:  true,
 			},
 		},
+	},
+	blacklistTestCase{
+		patterns: []string{
+			"(?i)vgwort[.]de",
+			"(?i)ioam[.]",
+			"(?i)outbrain[.]",
+		},
+		samples: []itemTestCase{
+			itemTestCase{
+				sample: "https://www.vgwort.de/fuck-you.js",
+				match:  true,
+			},
+			itemTestCase{
+				sample: "https://en.wikipedia.org/wiki/Polar_bear",
+				match:  false,
+			},
+		},
+	},
+	blacklistTestCase{
+		patterns: []string{
+			"(?zebu",
+		},
+		err: true,
 	},
 }
