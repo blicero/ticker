@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 03. 07. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-04 12:57:51 krylon>
+// Time-stamp: <2021-07-04 14:15:35 krylon>
 
 package blacklist
 
@@ -33,3 +33,20 @@ func TestBlacklist(t *testing.T) {
 		}
 	}
 } // func TestBlacklist(t *testing.T)
+
+func TestDefaultList(t *testing.T) {
+	defer func() {
+		if x := recover(); x != nil {
+			t.Fatalf("Error creating default Blacklist: %s",
+				x)
+		}
+	}()
+
+	var bl = DefaultList()
+
+	if len(bl) != len(defaultPatterns) {
+		t.Errorf("Unexpected number of items in default Blacklist: %d (expected %d)",
+			len(bl),
+			len(defaultPatterns))
+	}
+} // func TestDefaultList(t *testing.T)
