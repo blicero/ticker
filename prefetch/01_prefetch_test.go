@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-04 16:09:58 krylon>
+// Time-stamp: <2021-07-04 18:10:08 krylon>
 
 package prefetch
 
@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"ticker/blacklist"
 	"ticker/common"
 	"ticker/database"
 	"ticker/feed"
@@ -43,9 +44,11 @@ func TestSanitize(t *testing.T) {
 			batchSize)
 	}
 
+	var bl = blacklist.DefaultList()
+
 	for _, i := range items {
 		var body string
-		if body, err = pre.sanitize(&i); err != nil {
+		if body, err = pre.sanitize(&i, bl); err != nil {
 			t.Errorf("Error sanitizing Item %d (%s): %s",
 				i.ID,
 				i.Title,

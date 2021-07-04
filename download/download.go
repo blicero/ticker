@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-02 15:07:52 krylon>
+// Time-stamp: <2021-07-04 18:30:09 krylon>
 
 // Package download downloads and archives web pages.
 package download
@@ -22,6 +22,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"ticker/blacklist"
 	"ticker/common"
 	"ticker/feed"
 	"ticker/logdomain"
@@ -102,19 +103,24 @@ func (ag *Agent) worker(idx int) {
 		}
 	}()
 
-	var ticker = time.NewTicker(wkInterval)
+	var (
+		bl     = blacklist.DefaultList()
+		ticker = time.NewTicker(wkInterval)
+	)
+
 	defer ticker.Stop()
+
 	for ag.IsActive() {
 		select {
 		case <-ticker.C:
 			continue
 		case item := <-ag.PageQ:
-			ag.processPage(item)
+			ag.processPage(item, bl)
 		}
 	}
 } // func (ag *Agent) worker(idx int)
 
-func (ag *Agent) processPage(i *feed.Item) {
+func (ag *Agent) processPage(i *feed.Item, bl blacklist.Blacklist) {
 	var (
 		err     error
 		resp    *http.Response
@@ -159,6 +165,9 @@ func (ag *Agent) processPage(i *feed.Item) {
 		os.RemoveAll(pageDir) // nolint: errcheck
 		return
 	}
+
+	// I should feed the response body directly to the HTML parser,
+	// storing it on disk has no advantages.
 
 	var (
 		fh       *os.File
@@ -235,7 +244,10 @@ func (ag *Agent) processPage(i *feed.Item) {
 				uri)
 		}
 
-		if localpath, err = ag.fetchImage(uri, pageDir); err != nil {
+		if bl.Match(uri.String()) {
+			node.Parent.RemoveChild(node)
+			continue
+		} else if localpath, err = ag.fetchImage(uri, pageDir); err != nil {
 			ag.log.Printf("[ERROR] Cannot fetch image %s: %s\n",
 				uri,
 				err.Error())
@@ -262,6 +274,11 @@ func (ag *Agent) processPage(i *feed.Item) {
 			src = dom.GetAttribute(node, "src")
 		case "link":
 			src = dom.GetAttribute(node, "href")
+		case "a":
+			src = dom.GetAttribute(node, "href")
+		case "video", "audio", "iframe":
+			node.Parent.RemoveChild(node)
+			continue
 		default:
 			ag.log.Printf("[ERROR] Don't know how to handle Node %s\n",
 				tagName)
@@ -297,11 +314,15 @@ func (ag *Agent) processPage(i *feed.Item) {
 				uri)
 		}
 
-		if localpath, err = ag.fetchScript(uri, pageDir); err != nil {
+		if bl.Match(uri.String()) {
+			node.Parent.RemoveChild(node)
+			ag.log.Printf("[DEBUG] URI %q is blacklisted.\n",
+				uri)
+			continue
+		} else if localpath, err = ag.fetchScript(uri, pageDir); err != nil {
 			ag.log.Printf("[ERROR] Cannot fetch %q: %s\n",
 				uri,
 				err.Error())
-			//dom.SetAttribute(node, "src", "")
 			node.Parent.RemoveChild(node)
 			continue
 		} else {
@@ -456,19 +477,11 @@ func (ag *Agent) fetchScript(href *url.URL, folder string) (string, error) {
 		ag.log.Printf("[ERROR] %s\n",
 			err.Error())
 		return "", err
-	} /* else if match[2] != "javascript" {
-		err = fmt.Errorf("Unexpected content type for %q: %q",
-			astr,
-			resp.Header.Get("Content-Type"))
-		ag.log.Printf("[ERROR] %s\n",
-			err.Error())
-		return "", err
-	} else */
+	}
 
 	switch strings.ToLower(match[2]) {
-	case "javascript":
-		fallthrough
-	case "css":
+	case "javascript", "css", "json":
+		// Proceed
 	default:
 		err = fmt.Errorf("Unexpected content type for %q: %q",
 			astr,
@@ -490,13 +503,14 @@ func (ag *Agent) fetchScript(href *url.URL, folder string) (string, error) {
 } // func (ag *Agent) fetchScript(href, folder string) (string, error)
 
 func getAssets(doc *html.Node) []*html.Node {
-	var nodes = dom.GetElementsByTagName(doc, "script")
+	return dom.GetAllNodesWithTag(doc, "a", "script", "iframe", "link", "video", "audio")
+	// var nodes = dom.GetElementsByTagName(doc, "script")
 
-	for _, n := range dom.GetElementsByTagName(doc, "link") {
-		if dom.GetAttribute(n, "rel") == "stylesheet" {
-			nodes = append(nodes, n)
-		}
-	}
+	// for _, n := range dom.GetElementsByTagName(doc, "link") {
+	// 	if dom.GetAttribute(n, "rel") == "stylesheet" {
+	// 		nodes = append(nodes, n)
+	// 	}
+	// }
 
-	return nodes
+	// return nodes
 } // func getAssets(doc *html.Node) []*html.Node

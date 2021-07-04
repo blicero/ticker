@@ -2,12 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 28. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-30 20:30:01 krylon>
+// Time-stamp: <2021-07-04 18:17:12 krylon>
 
 package download
 
 import (
 	"testing"
+	"ticker/blacklist"
 	"ticker/feed"
 )
 
@@ -37,5 +38,5 @@ func TestDownload(t *testing.T) {
 		URL: addr,
 	}
 
-	dl.processPage(&item)
+	dl.processPage(&item, blacklist.DefaultList())
 } // func TestDownload(t *testing.T)

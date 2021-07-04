@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 31. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-07 22:52:43 krylon>
+// Time-stamp: <2021-07-04 18:15:21 krylon>
 
 // Package prefetch processes items received via RSS/Atom feeds
 // and checks if they contain image links.
@@ -26,6 +26,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"ticker/blacklist"
 	"ticker/common"
 	"ticker/database"
 	"ticker/feed"
@@ -196,6 +197,8 @@ func (p *Prefetcher) worker() {
 	var ticker = time.NewTicker(delay)
 	defer ticker.Stop()
 
+	var bl = blacklist.DefaultList()
+
 	for p.IsRunning() {
 		var (
 			err  error
@@ -206,7 +209,7 @@ func (p *Prefetcher) worker() {
 		case <-ticker.C:
 			continue
 		case i := <-p.procQ:
-			if body, err = p.sanitize(&i); err != nil {
+			if body, err = p.sanitize(&i, bl); err != nil {
 				p.log.Printf("[ERROR] Cannot process item %d (%q): %s\n",
 					i.ID,
 					i.Title,
@@ -221,7 +224,7 @@ func (p *Prefetcher) worker() {
 	}
 } // func (p *Prefetcher) worker()
 
-func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
+func (p *Prefetcher) sanitize(i *feed.Item, bl blacklist.Blacklist) (string, error) {
 	var (
 		err error
 		rdr *strings.Reader
@@ -266,7 +269,9 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 				uri)
 		}
 
-		if localpath, err = p.fetchImage(uri.String()); err != nil {
+		if bl.Match(uri.String()) {
+			continue
+		} else if localpath, err = p.fetchImage(uri.String()); err != nil {
 			if err == errNoReplace {
 				continue
 			} else if err == errTooBig {
@@ -289,11 +294,15 @@ func (p *Prefetcher) sanitize(i *feed.Item) (string, error) {
 		dom.SetAttribute(node, "src", href)
 	}
 
-	for _, node := range dom.GetElementsByTagName(doc, "script") {
-		node.Parent.RemoveChild(node)
+	for _, node := range dom.GetElementsByTagName(doc, "a") {
+		if !bl.Match(dom.GetAttribute(node, "href")) {
+			dom.SetAttribute(node, "target", "_blank")
+		} else {
+			node.Parent.RemoveChild(node)
+		}
 	}
 
-	for _, node := range dom.GetElementsByTagName(doc, "iframe") {
+	for _, node := range dom.GetAllNodesWithTag(doc, "script", "iframe", "link", "video", "audio") {
 		node.Parent.RemoveChild(node)
 	}
 
