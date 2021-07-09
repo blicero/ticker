@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 31. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-04 18:15:21 krylon>
+// Time-stamp: <2021-07-05 16:17:38 krylon>
 
 // Package prefetch processes items received via RSS/Atom feeds
 // and checks if they contain image links.
@@ -295,11 +295,12 @@ func (p *Prefetcher) sanitize(i *feed.Item, bl blacklist.Blacklist) (string, err
 	}
 
 	for _, node := range dom.GetElementsByTagName(doc, "a") {
-		if !bl.Match(dom.GetAttribute(node, "href")) {
-			dom.SetAttribute(node, "target", "_blank")
-		} else {
-			node.Parent.RemoveChild(node)
-		}
+		// if !bl.Match(dom.GetAttribute(node, "href")) {
+		// 	dom.SetAttribute(node, "target", "_blank")
+		// } else {
+		// 	node.Parent.RemoveChild(node)
+		// }
+		dom.SetAttribute(node, "target", "_blank")
 	}
 
 	for _, node := range dom.GetAllNodesWithTag(doc, "script", "iframe", "link", "video", "audio") {

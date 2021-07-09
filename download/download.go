@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 23. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-04 18:30:09 krylon>
+// Time-stamp: <2021-07-09 17:32:23 krylon>
 
 // Package download downloads and archives web pages.
 package download
@@ -480,8 +480,11 @@ func (ag *Agent) fetchScript(href *url.URL, folder string) (string, error) {
 	}
 
 	switch strings.ToLower(match[2]) {
-	case "javascript", "css", "json":
+	case "javascript", "css", "json", "x-icon", "png":
 		// Proceed
+	case "html":
+		os.Remove(localpath) // nolint: errcheck
+		return "", nil
 	default:
 		err = fmt.Errorf("Unexpected content type for %q: %q",
 			astr,
