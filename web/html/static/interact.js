@@ -1,4 +1,4 @@
-// Time-stamp: <2021-07-01 18:47:03 krylon>
+// Time-stamp: <2021-07-11 22:24:09 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -955,7 +955,7 @@ function item_add_cluster (item_id, clu) {
                 const div_id = `#cluster_list_${item_id}`
                 const input_id = `#cluster_input_${item_id}`
                 const elt = `<span id="cluster_link_${item_id}_${clu.ID}">
-  ${clu.Name}
+  <a href="/cluster/${clu.ID}">${clu.Name}</a>
   (${clu.ID})
   <img id="item_${item_id}_${clu.ID}"
        src="/static/delete.png"

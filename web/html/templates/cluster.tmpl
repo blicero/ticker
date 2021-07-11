@@ -1,12 +1,14 @@
 {{ define "cluster" }}
 {{/* Created on 16. 06. 2021 */}}
-{{/* Time-stamp: <2021-07-01 00:17:48 krylon> */}}
+{{/* Time-stamp: <2021-07-11 21:09:55 krylon> */}}
 <div class="container-fluid">
   <div class="row" id="cluster_list_{{ .Item.ID }}">
     {{ $item := .Item }}
     {{ range .Clusters }}
     <span id="cluster_link_{{ $item.ID }}_{{ .ID }}">
-      {{ .Name }}
+      <a href="/cluster/{{ .ID }}">
+        {{ .Name }}
+      </a>
       ({{ .ID }})
       <img
       id="item_{{ $item.ID }}_cluster_{{ .ID }}"
