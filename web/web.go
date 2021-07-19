@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-11 22:00:34 krylon>
+// Time-stamp: <2021-07-19 18:12:15 krylon>
 
 package web
 
@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -85,6 +86,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 				".jpeg": "image/jpeg",
 				".webp": "image/webp",
 				".gif":  "image/gif",
+				".json": "application/json",
+				".html": "text/html",
 			},
 		}
 	)
@@ -190,6 +193,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/classifier/train", srv.handleClassifierTrain)
 
 	srv.router.HandleFunc("/archive/{path:(?:.*)$}", srv.handleArchivedFile)
+	srv.router.HandleFunc("/archive", srv.handleArchive)
 
 	srv.router.HandleFunc("/ajax/beacon", srv.handleBeacon)
 	srv.router.HandleFunc("/ajax/get_messages", srv.handleGetNewMessages)
@@ -212,6 +216,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/cluster_items", srv.handleClusterItems)
 
 	srv.router.HandleFunc("/ajax/download_item", srv.handleItemDownload)
+	srv.router.HandleFunc("/ajax/archive_delete/{id:(?:\\d+)$}", srv.handleArchiveDelete)
 
 	srv.router.HandleFunc("/ajax/shutdown", srv.handleShutdown)
 
@@ -1649,6 +1654,111 @@ func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request)
 	http.Redirect(w, r, r.Referer(), http.StatusFound)
 } // func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request)
 
+func (srv *Server) handleArchive(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	const tmplName = "archive"
+
+	var (
+		err     error
+		db      *database.Database
+		tmpl    *template.Template
+		dirh    *os.File
+		folders []string
+		msg     string
+		data    = tmplDataArchive{
+			tmplDataBase: srv.baseData("Archive", r),
+		}
+	)
+
+	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
+		msg = fmt.Sprintf("Cannot find Template %s",
+			tmplName)
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	db = srv.pool.Get()
+	defer srv.pool.Put(db)
+
+	if data.Feeds, err = db.FeedGetAll(); err != nil {
+		msg = fmt.Sprintf("Cannot get all Feeds: %s",
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	} else if dirh, err = os.Open(common.ArchiveDir); err != nil {
+		msg = fmt.Sprintf("Cannot open archive directory %s: %s",
+			common.ArchiveDir,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	defer dirh.Close() // nolint: errcheck
+
+	data.FeedMap = make(map[int64]feed.Feed, len(data.Feeds))
+	for _, f := range data.Feeds {
+		data.FeedMap[f.ID] = f
+	}
+
+	if folders, err = dirh.Readdirnames(0); err != nil {
+		msg = fmt.Sprintf("Cannot read archive directory %s: %s",
+			common.ArchiveDir,
+			err.Error())
+		srv.log.Println("[ERROR] " + msg)
+		srv.SendMessage(msg)
+		http.Redirect(w, r, r.Referer(), http.StatusFound)
+		return
+	}
+
+	for _, name := range folders {
+		var (
+			id   int64
+			item *feed.Item
+		)
+
+		if id, err = strconv.ParseInt(name, 10, 64); err != nil {
+			msg = fmt.Sprintf("Cannot parse Item ID %q: %s",
+				name,
+				err.Error())
+			srv.log.Println("[ERROR] " + msg)
+			srv.SendMessage(msg)
+			http.Redirect(w, r, r.Referer(), http.StatusFound)
+			return
+		} else if item, err = db.ItemGetByID(id); err != nil {
+			msg = fmt.Sprintf("Cannot fetch Item %d: %s",
+				id,
+				err.Error())
+			srv.log.Println("[ERROR] " + msg)
+			srv.SendMessage(msg)
+			http.Redirect(w, r, r.Referer(), http.StatusFound)
+			return
+		}
+
+		data.Items = append(data.Items, *item)
+	}
+
+	sort.Sort(itemList(data.Items))
+
+	data.Messages = srv.getMessages()
+	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Content-Type", "text/html")
+	if err = tmpl.Execute(w, &data); err != nil {
+		msg = fmt.Sprintf("Error rendering template %q: %s",
+			tmplName,
+			err.Error())
+		srv.SendMessage(msg)
+		srv.sendErrorMessage(w, msg)
+	}
+} // func (srv *Server) handleArchive(w http.ResponseWriter, r *http.Request)
+
 /////////////////////////////////////////
 ////////////// Other ////////////////////
 /////////////////////////////////////////
@@ -1669,7 +1779,7 @@ func (srv *Server) handleArchivedFile(w http.ResponseWriter, r *http.Request) {
 
 	fullPath = filepath.Join(common.ArchiveDir, path)
 
-	srv.log.Printf("[TRACE] Deliver local file %s\n", fullPath)
+	srv.log.Printf("[TRACE] Deliver archived Item %s\n", fullPath)
 
 	if fh, err = os.Open(fullPath); err != nil {
 		if errors.Is(err, fs.ErrNotExist) {
@@ -3014,17 +3124,17 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 				err.Error())
 		}
 
-		for _, item := range data.Items {
-			if data.Clusters[item.ID], err = db.ClusterGetByItem(item.ID); err != nil {
-				msg = fmt.Sprintf("Cannot fetch Clusters for Item %q (%d): %s",
-					item.Title,
-					item.ID,
-					err.Error())
-				srv.log.Println("[CRITICAL] " + msg)
-				srv.sendErrorMessage(w, msg)
-				return
-			}
+		// for _, item := range data.Items {
+		if data.Clusters[item.ID], err = db.ClusterGetByItem(item.ID); err != nil {
+			msg = fmt.Sprintf("Cannot fetch Clusters for Item %q (%d): %s",
+				item.Title,
+				item.ID,
+				err.Error())
+			srv.log.Println("[CRITICAL] " + msg)
+			srv.sendErrorMessage(w, msg)
+			return
 		}
+		// }
 	}
 
 	if err = tmpl.Execute(&buf, &data); err != nil {
@@ -3498,6 +3608,47 @@ SERIALIZE_RESPONSE:
 	w.WriteHeader(200)
 	w.Write(replyBuffer) // nolint: errcheck
 } // func (srv *Server) handleItemDownload(w http.ResponseWrite, r *http.Request)
+
+func (srv *Server) handleArchiveDelete(w http.ResponseWriter, r *http.Request) {
+	srv.log.Printf("[TRACE] Handle request for %s\n",
+		r.URL.EscapedPath())
+
+	var (
+		err              error
+		idStr, path, msg string
+		resp             ajaxResponse
+		replyBuffer      []byte
+	)
+
+	vars := mux.Vars(r)
+
+	idStr = vars["id"]
+
+	path = filepath.Join(common.ArchiveDir, idStr)
+
+	if err = os.RemoveAll(path); err != nil {
+		resp.Message = fmt.Sprintf("Cannot remove archive folder %s: %s",
+			path,
+			err.Error())
+		goto SERIALIZE_RESPONSE
+	}
+
+	resp.Status = true
+	resp.Message = fmt.Sprintf("Archived Item %s deleted",
+		idStr)
+
+SERIALIZE_RESPONSE:
+	if replyBuffer, err = ffjson.Marshal(&resp); err != nil {
+		msg = fmt.Sprintf("Cannot serialize response: %q",
+			err.Error())
+		replyBuffer = errJSON(msg)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Size", strconv.FormatInt(int64(len(replyBuffer)), 10))
+	w.WriteHeader(200)
+	w.Write(replyBuffer) // nolint: errcheck
+} // func (srv *Server) handleArchiveDelete(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleShutdown(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",

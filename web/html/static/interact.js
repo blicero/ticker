@@ -1113,3 +1113,55 @@ function download_item (item_id) {
         console.error(`Error requesting download of ${item_id}: ${rep} / ${stat} / ${xhr}`)
     }
 } // function download_item (item_id)
+
+let dl_item_id = 0
+
+function load_archived_page (page_id) {
+    const frameID = "#page_frame"
+    const frame   = $(frameID)[0]
+    const addr    = `/archive/${page_id}/index.html`
+    if (page_id != dl_item_id) {
+        dl_item_id = page_id
+        frame.src = addr
+    } else {
+        frame.src = 'about:blank'
+    }
+} // function load_archived_page(page_id)
+
+function archive_delete (item_id) {
+    const url = `/ajax/archive_delete/${item_id}`
+
+    const req = $.post(url,
+                       {},
+                       (reply) => {
+                           if (reply.Status) {
+                               const list_id = `#item_${item_id}`
+                               $(list_id).remove()
+                               if (dl_item_id == item_id) {
+                                   dl_item_id = 0
+                                   $('#page_frame')[0].src = 'about:blank'
+                               }
+                           } else {
+                               const msg = `Error deleting downloaded Item ${item_id}: ${reply.Message}`
+                               console.error(msg)
+                               alert(msg)
+                           }
+                       },
+                       'json')
+
+    req.fail = (rep, stat, xhr) => {
+        console.error(`Error requesting deletion of downloaded Item ${item_id}: ${rep} / ${stat} / ${xhr}`)
+    }
+} // function archive_delete(item_id)
+
+function page_frame_resize () {
+    const h = window.innerHeight
+    const w = window.innerWidth
+    const frameID = "#page_frame"
+    const frame = $(frameID)[0]
+
+    const msg = `Window size is ${w}x${h}`
+
+    console.log(msg)
+    alert(msg)
+} // function page_frame_resize ()

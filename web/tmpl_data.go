@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-07-11 21:21:04 krylon>
+// Time-stamp: <2021-07-16 13:47:34 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -150,6 +150,16 @@ type tmplDataClusterItems struct {
 	tmplDataItems
 	Cluster *cluster.Cluster
 }
+
+type tmplDataArchive tmplDataIndex
+
+func (d *tmplDataArchive) GetFeed(id int64) *feed.Feed {
+	if f, ok := d.FeedMap[id]; ok {
+		return &f
+	}
+
+	return nil
+} // func (d *tmplDataArchive) GetFeed(id int64) *feed.Feed
 
 // Local Variables:  //
 // compile-command: "go generate && go vet && go build -v -p 16 && gometalinter && go test -v" //

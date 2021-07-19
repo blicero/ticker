@@ -1,0 +1,54 @@
+{{ define "archive" }}
+{{/* Created on 16. 07. 2021 */}}
+{{/* Time-stamp: <2021-07-19 17:48:03 krylon> */}}
+<!DOCTYPE html>
+<html>
+  {{ template "head" . }}
+
+  <body>
+    {{ template "intro" . }}
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-auto align-self-start">
+          <ul>
+            {{ $dot := . }}
+            {{ range .Items }}
+            {{ $feed := $dot.GetFeed .FeedID }}
+            <li id="item_{{ .ID }}">
+              <a href="/feed/{{ $feed.ID }}">{{ $feed.Name }}</a>
+              <small>
+                {{ fmt_time_minute .Timestamp }}
+                &nbsp;
+                <input type="button"
+                       class="btn btn-link"
+                       onclick="archive_delete({{ .ID }});"
+                       value="Delete" />
+              </small>
+              <br />
+              <input type="button"
+                     class="btn btn-link"
+                     onclick="load_archived_page({{ .ID }});"
+                     value="{{ html .Title }}" />
+            </li>
+            {{ end }}
+          </ul>
+        </div>
+
+        <div id="page_div" class="col">
+          <iframe id="page_frame"
+                  name="page"
+                  sandbox=""
+                  width="100%"
+                  height="100%"
+                  onresize="page_frame_resize();" >
+          </iframe>
+        </div>
+      </div>
+      
+    </div>
+
+    {{ template "footer" }}
+  </body>
+</html>
+{{ end }}

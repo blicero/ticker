@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 09. 2019 by Benjamin Walkenhorst
 // (c) 2019 Benjamin Walkenhorst
-// Time-stamp: <2021-07-01 18:35:19 krylon>
+// Time-stamp: <2021-07-19 17:00:02 krylon>
 //
 // Helper functions for use by the HTTP request handlers
 
@@ -11,6 +11,9 @@ package web
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"ticker/common"
+	"ticker/feed"
 )
 
 func errJSON(msg string) []byte {
@@ -28,6 +31,12 @@ func jsonEscape(i string) string {
 	// Trim the beginning and trailing " character
 	return string(b[1 : len(b)-1])
 }
+
+type itemList []feed.Item
+
+func (il itemList) Len() int           { return len(il) }
+func (il itemList) Less(i, j int) bool { return il[i].Timestamp.After(il[j].Timestamp) }
+func (il itemList) Swap(i, j int)      { il[i], il[j] = il[j], il[i] }
 
 // func getMimeType(path string) (string, error) {
 // 	var (
@@ -53,6 +62,15 @@ func jsonEscape(i string) string {
 // }
 // func getMimeType(path string) (string, error)
 
+func (srv *Server) baseData(title string, r *http.Request) tmplDataBase {
+	return tmplDataBase{
+		Title:      title,
+		Debug:      common.Debug,
+		URL:        r.URL.String(),
+		TrainStamp: srv.trainStamp(),
+	}
+} // func (srv *Server) baseData(title string, r *http.Request) tmplDataBase
+
 // Local Variables:  //
-// compile-command: "go generate && go vet && go build -v -p 16 && gometalinter && go test -v" //
+// compile-command: "go generate && go vet && go build -v -p 16 && mygolint ticker/web && go test -v" //
 // End: //
