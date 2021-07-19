@@ -1,4 +1,4 @@
-// Time-stamp: <2021-07-11 22:24:09 krylon>
+// Time-stamp: <2021-07-19 19:18:12 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -9,7 +9,7 @@
 'use strict'
 
 function defined (x) {
-    return undefined !== x && x !== null
+    return undefined !== x && null !== x
 }
 
 function fmtDateNumber (n) {
@@ -538,7 +538,8 @@ function attach_tag (form_id, item_id) {
                            div.innerHTML += tag
 
                            const opt_id = `#${form_id}_opt_${tag_id}`
-                           $(opt_id).hide()
+                           //$(opt_id).hide()
+                           $(opt_id)[0].disabled = true
                            const form = $(id)[0]
                            for (const [idx, val] of Object.entries(form.options)) {
                                if (val.style.display != 'none') {
@@ -575,9 +576,10 @@ function quick_tag (item_id, tag_id, button_id) {
                            div.innerHTML += tag
 
                            const opt_id = `#${form_id}_opt_${tag_id}`
-                           $(opt_id).hide()
+                           // $(opt_id).hide()
+                           $(opt_id)[0].disabled = true
 
-                           $(button_id)[0].onclick = null;
+                           $(button_id)[0].onclick = null
                        },
                        'json')
 
@@ -603,7 +605,8 @@ function untag (item_id, tag_id) {
 
                            const sel_id = `tag_menu_item_${item_id}`
                            const opt_id = `#${sel_id}_opt_${tag_id}`
-                           $(opt_id).show()
+                           // $(opt_id).show()
+                           $(opt_id)[0].disabled = false
                        },
                        'json')
 

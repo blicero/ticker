@@ -1,12 +1,12 @@
 {{ define "tag_link_form" }}
 {{/* Created on 25. 02. 2021 */}}
-{{/* Time-stamp: <2021-06-10 19:00:38 krylon> */}}
+{{/* Time-stamp: <2021-07-19 12:36:30 krylon> */}}
 {{ $id := concat "tag_menu_item_" (i64str .Item.ID) }}
 <div class="tag_link_form">
   <select id="{{ $id }}" class="btn btn-secondary">
     {{ $item := .Item }}
     {{ range .Tags }}
-    <option id="{{ $id }}_opt_{{ .ID }}" {{ if ($item.HasTag .ID) }}style="display:none;" {{ end }}value="{{ .ID }}">{{ nbsp .Level }}{{ nbsp .Level }}{{ .Name }}</option>
+    <option id="{{ $id }}_opt_{{ .ID }}" {{ if ($item.HasTag .ID) }}disabled="" {{ end }}value="{{ .ID }}">{{ nbsp .Level }}{{ nbsp .Level }}{{ .Name }}</option>
     {{ end }}
   </select>
   <input type="button"
