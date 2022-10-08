@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-20 22:29:16 krylon>
+# Time-stamp: <2021-03-21 00:51:38 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,43 +13,43 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-20 Sa 18:54]
-   | Headline                               | Time      |          |          |         |       |      |
-   |----------------------------------------+-----------+----------+----------+---------+-------+------|
-   | *Total time*                           | *9d 0:46* |          |          |         |       |      |
-   |----------------------------------------+-----------+----------+----------+---------+-------+------|
-   | Ticker                                 | 9d 0:46   |          |          |         |       |      |
-   | \_  Main                               |           |     0:56 |          |         |       |      |
-   | \_    Shutdown                         |           |          |     0:56 |         |       |      |
-   | \_  Components [24/26]                 |           | 8d 23:50 |          |         |       |      |
-   | \_    Feed [6/6]                       |           |          |  1d 8:39 |         |       |      |
-   | \_      Homepage                       |           |          |          |    0:12 |       |      |
-   | \_      Rating [3/3]                   |           |          |          | 1d 5:11 |       |      |
-   | \_        Web Frontend                 |           |          |          |         | 12:09 |      |
-   | \_        Classifier                   |           |          |          |         | 16:25 |      |
-   | \_    Database [1/1]                   |           |          |    21:55 |         |       |      |
-   | \_      Due Feeds                      |           |          |          |    1:26 |       |      |
-   | \_    Reader [2/2]                     |           |          |    18:06 |         |       |      |
-   | \_      Timestamps                     |           |          |          |    0:15 |       |      |
-   | \_      Pseudo-duplicates              |           |          |          |    2:01 |       |      |
-   | \_    Web interface [7/8]              |           |          | 1d 23:24 |         |       |      |
-   | \_      Various small-ish improvements |           |          |          |    2:42 |       |      |
-   | \_      Embed                          |           |          |          |    3:00 |       |      |
-   | \_      Snazzy [3/3]                   |           |          |          |    4:04 |       |      |
-   | \_        Ooopsie [1/1]                |           |          |          |         |  0:51 |      |
-   | \_          Read later form            |           |          |          |         |       | 0:51 |
-   | \_        Subscribe                    |           |          |          |         |  2:35 |      |
-   | \_      Limit description length       |           |          |          |    1:32 |       |      |
-   | \_      Manage Feeds                   |           |          |          |   17:11 |       |      |
-   | \_    Tags [3/4]                       |           |          |  2d 3:35 |         |       |      |
-   | \_      Database                       |           |          |          |   10:59 |       |      |
-   | \_        Hierarchy                    |           |          |          |         |  8:58 |      |
-   | \_      Web interface                  |           |          |          | 1d 4:45 |       |      |
-   | \_      Suggestions                    |           |          |          |   10:01 |       |      |
-   | \_    Search [3/3]                     |           |          |  1d 0:23 |         |       |      |
-   | \_      Moar!                          |           |          |          |   20:53 |       |      |
-   | \_    Read Later [2/2]                 |           |          |    19:48 |         |       |      |
-   | \_      Web interface                  |           |          |          |   17:46 |       |      |
+   #+CAPTION: Clock summary at [2021-03-21 So 00:51]
+   | Headline                               | Time      |         |          |         |       |      |
+   |----------------------------------------+-----------+---------+----------+---------+-------+------|
+   | *Total time*                           | *9d 1:57* |         |          |         |       |      |
+   |----------------------------------------+-----------+---------+----------+---------+-------+------|
+   | Ticker                                 | 9d 1:57   |         |          |         |       |      |
+   | \_  Main                               |           |    0:56 |          |         |       |      |
+   | \_    Shutdown                         |           |         |     0:56 |         |       |      |
+   | \_  Components [24/26]                 |           | 9d 1:01 |          |         |       |      |
+   | \_    Feed [6/6]                       |           |         |  1d 8:39 |         |       |      |
+   | \_      Homepage                       |           |         |          |    0:12 |       |      |
+   | \_      Rating [3/3]                   |           |         |          | 1d 5:11 |       |      |
+   | \_        Web Frontend                 |           |         |          |         | 12:09 |      |
+   | \_        Classifier                   |           |         |          |         | 16:25 |      |
+   | \_    Database [1/1]                   |           |         |    21:55 |         |       |      |
+   | \_      Due Feeds                      |           |         |          |    1:26 |       |      |
+   | \_    Reader [2/2]                     |           |         |    18:06 |         |       |      |
+   | \_      Timestamps                     |           |         |          |    0:15 |       |      |
+   | \_      Pseudo-duplicates              |           |         |          |    2:01 |       |      |
+   | \_    Web interface [7/8]              |           |         | 1d 23:24 |         |       |      |
+   | \_      Various small-ish improvements |           |         |          |    2:42 |       |      |
+   | \_      Embed                          |           |         |          |    3:00 |       |      |
+   | \_      Snazzy [3/3]                   |           |         |          |    4:04 |       |      |
+   | \_        Ooopsie [1/1]                |           |         |          |         |  0:51 |      |
+   | \_          Read later form            |           |         |          |         |       | 0:51 |
+   | \_        Subscribe                    |           |         |          |         |  2:35 |      |
+   | \_      Limit description length       |           |         |          |    1:32 |       |      |
+   | \_      Manage Feeds                   |           |         |          |   17:11 |       |      |
+   | \_    Tags [3/4]                       |           |         |  2d 4:46 |         |       |      |
+   | \_      Database                       |           |         |          |   10:59 |       |      |
+   | \_        Hierarchy                    |           |         |          |         |  8:58 |      |
+   | \_      Web interface                  |           |         |          | 1d 4:45 |       |      |
+   | \_      Suggestions                    |           |         |          |   11:12 |       |      |
+   | \_    Search [3/3]                     |           |         |  1d 0:23 |         |       |      |
+   | \_      Moar!                          |           |         |          |   20:53 |       |      |
+   | \_    Read Later [2/2]                 |           |         |    19:48 |         |       |      |
+   | \_      Web interface                  |           |         |          |   17:46 |       |      |
    #+END:
 
 ** Questions
@@ -337,6 +337,7 @@
      :END:
 **** TODO Suggestions
      :LOGBOOK:
+     CLOCK: [2021-03-20 Sa 23:40]--[2021-03-21 So 00:51] =>  1:11
      CLOCK: [2021-03-11 Do 21:37]--[2021-03-12 Fr 00:50] =>  3:13
      CLOCK: [2021-03-11 Do 18:19]--[2021-03-11 Do 19:45] =>  1:26
      CLOCK: [2021-03-11 Do 16:30]--[2021-03-11 Do 18:08] =>  1:38
