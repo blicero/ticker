@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-03-21 00:51:38 krylon>
+# Time-stamp: <2021-05-15 23:48:07 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TODO: TODO(t) IMPLEMENT(i) TEST(e) RESEARCH(r) | DONE(d)
@@ -13,7 +13,7 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2021-03-21 So 00:51]
+   #+CAPTION: Clock summary at [2021-05-09 So 19:27]
    | Headline                               | Time      |         |          |         |       |      |
    |----------------------------------------+-----------+---------+----------+---------+-------+------|
    | *Total time*                           | *9d 1:57* |         |          |         |       |      |
@@ -60,7 +60,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [24/26]
+** Components [24/27]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -173,7 +173,7 @@
      it works.
      Simply skipping the Item if the headline already exists, is not a good
      idea, either, I should at least take the timestamps into consideration.
-*** Web interface [7/8]
+*** Web interface [7/9]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -193,6 +193,10 @@
      CLOCK: [2021-03-14 So 16:40]--[2021-03-14 So 16:54] =>  0:14
      CLOCK: [2021-03-13 Sa 15:23]--[2021-03-13 Sa 17:51] =>  2:28
      :END:
+***** TODO Shutdown
+      :LOGBOOK:
+      CLOCK: [2021-05-15 Sa 17:33]--[2021-05-15 Sa 23:48] =>  6:15
+      :END:
 **** DONE Embed
      CLOSED: [2021-03-05 Fr 23:03]
      :LOGBOOK:
