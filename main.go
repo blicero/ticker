@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-11 22:38:56 krylon>
+// Time-stamp: <2021-11-24 11:51:33 krylon>
 
 package main
 
@@ -11,7 +11,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
 	"ticker/common"
 	"ticker/prefetch"
@@ -70,23 +69,23 @@ func main() {
 			"Cannnot create web server: %s\n",
 			err.Error())
 		os.Exit(1)
-	} else if pre, err = prefetch.Create(runtime.NumCPU() * 2); err != nil {
-		fmt.Fprintf(
-			os.Stderr,
-			"Cannot create Prefetcher: %s\n",
-			err.Error())
-		os.Exit(1)
-	}
+	} // else if pre, err = prefetch.Create(runtime.NumCPU() * 2); err != nil {
+	// 	fmt.Fprintf(
+	// 		os.Stderr,
+	// 		"Cannot create Prefetcher: %s\n",
+	// 		err.Error())
+	// 	os.Exit(1)
+	// }
 
 	go forwardMsg(msgq, srv)
 
-	if err = pre.Start(); err != nil {
-		fmt.Fprintf(
-			os.Stderr,
-			"Failed to start Prefetcher: %s\n",
-			err.Error())
-		os.Exit(1)
-	}
+	// if err = pre.Start(); err != nil {
+	// 	fmt.Fprintf(
+	// 		os.Stderr,
+	// 		"Failed to start Prefetcher: %s\n",
+	// 		err.Error())
+	// 	os.Exit(1)
+	// }
 	go rdr.Loop()
 	go srv.ListenAndServe()
 
