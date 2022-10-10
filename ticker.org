@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2021-07-19 19:21:38 krylon>
+# Time-stamp: <2022-10-10 17:59:43 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -94,7 +94,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [40/48]
+** Components [42/48]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -534,10 +534,15 @@
      [2021-06-13 So 15:53]
      I think I'd like to reduce the display to just the three most likely
      suggestions that the Item is not already tagged with.
-*** Clusters [0/2]                                                  :feature:
+*** Clusters [2/2]                                                  :feature:
     I want to be able to group related Items together, e.g. if two feeds have
     Items covering the same event.
-**** TEST Backend
+
+    [2022-10-10 Mo 17:59]
+    This is not what I had in mind, I just re-created tags, but badly. :(
+    I'm going to try and start over.
+**** CANCELLED Backend
+     CLOSED: [2022-10-10 Mo 17:58]
      :LOGBOOK:
      CLOCK: [2021-06-16 Mi 15:59]--[2021-06-16 Mi 16:18] =>  0:19
      CLOCK: [2021-06-16 Mi 11:40]--[2021-06-16 Mi 15:51] =>  4:11
@@ -546,7 +551,8 @@
      of queries and associated methods. I added a really half-assed test, but
      I don't think that'll be sufficient. We'll come back to that later, won't
      we?
-**** TODO Frontend
+**** CANCELLED Frontend
+     CLOSED: [2022-10-10 Mo 17:58]
      :LOGBOOK:
      CLOCK: [2021-06-19 Sa 13:53]--[2021-06-19 Sa 18:57] =>  5:04
      CLOCK: [2021-06-18 Fr 18:21]--[2021-06-18 Fr 21:26] =>  3:05
