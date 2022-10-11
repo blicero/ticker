@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 12. 2018 by Benjamin Walkenhorst
 // (c) 2018 Benjamin Walkenhorst
-// Time-stamp: <2021-07-01 00:29:15 krylon>
+// Time-stamp: <2022-10-10 18:41:23 krylon>
 
 package web
 
@@ -15,8 +15,9 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
-	"ticker/common"
 	"time"
+
+	"github.com/blicero/ticker/common"
 
 	"github.com/mborgerson/GoTruncateHtml/truncatehtml"
 )

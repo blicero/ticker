@@ -2,11 +2,11 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 02. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-18 15:10:29 krylon>
+// Time-stamp: <2022-10-10 18:10:08 krylon>
 
 package database
 
-import "ticker/query"
+import "github.com/blicero/ticker/query"
 
 var dbQueries = map[query.ID]string{
 	query.FeedAdd: `
@@ -449,43 +449,4 @@ WHERE item_id = ?
 	query.ReadLaterDeleteRead: "DELETE FROM read_later WHERE COALESCE(read, 0) <> 0",
 	query.ReadLaterSetDeadine: "UPDATE read_later SET deadline = ? WHERE item_id = ?",
 	query.ReadLaterSetNote:    "UPDATE read_later SET note = ? WHERE item_id = ?",
-
-	query.ClusterCreate: `
-INSERT INTO cluster (name, description, timestamp) 
-             VALUES (?,    ?,           CAST(strftime('%s', 'now') AS INTEGER))`,
-	query.ClusterDelete:            "DELETE FROM cluster WHERE id = ?",
-	query.ClusterNameUpdate:        "UPDATE cluster SET name = ? WHERE id = ?",
-	query.ClusterDescriptionUpdate: "UPDATE cluster SET description = ? WHERE id = ?",
-	query.ClusterGetByID:           "SELECT name, description, timestamp FROM cluster WHERE id = ?",
-	query.ClusterGetByName:         "SELECT id, description, timestamp FROM cluster WHERE name = ?",
-	query.ClusterGetByItem: `
-SELECT
-    l.cluster_id,
-    c.name,
-    c.description,
-    c.timestamp
-FROM cluster_link l
-INNER JOIN cluster c ON l.cluster_id = c.id
-WHERE l.item_id = ?
-`,
-	query.ClusterGetItems: `
-SELECT
-    i.id,
-    i.feed_id,
-    i.link,
-    i.title,
-    i.description,
-    i.timestamp,
-    i.read,
-    i.rating
-FROM cluster c
-INNER JOIN cluster_link l ON c.id = l.cluster_id
-INNER JOIN item i ON l.item_id = i.id
-WHERE c.id = ?
-`,
-	query.ClusterGetAll:           "SELECT id, name, description, timestamp FROM cluster",
-	query.ClusterLinkAdd:          "INSERT INTO cluster_link (cluster_id, item_id) VALUES (?, ?)",
-	query.ClusterLinkDel:          "DELETE FROM cluster_link WHERE cluster_id = ? AND item_id = ?",
-	query.ClusterLinkGetByItem:    "SELECT id, cluster_id FROM cluster_link WHERE item_id = ?",
-	query.ClusterLinkGetByCluster: "SELECT id, item_id FROM cluster_link WHERE cluster_id = ?",
 }

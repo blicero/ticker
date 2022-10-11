@@ -9,7 +9,7 @@ package database
 import (
 	"fmt"
 	"testing"
-	"ticker/feed"
+	"github.com/blicero/ticker/feed"
 	"time"
 )
 

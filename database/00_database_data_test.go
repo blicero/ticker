@@ -7,8 +7,8 @@
 package database
 
 import (
-	"ticker/feed"
-	"ticker/tag"
+	"github.com/blicero/ticker/feed"
+	"github.com/blicero/ticker/tag"
 	"time"
 )
 

@@ -11,8 +11,8 @@ import (
 	"log"
 	"os"
 	"testing"
-	"ticker/common"
-	"ticker/logdomain"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/logdomain"
 	"time"
 )
 

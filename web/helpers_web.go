@@ -12,8 +12,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"ticker/common"
-	"ticker/feed"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/feed"
 )
 
 func errJSON(msg string) []byte {

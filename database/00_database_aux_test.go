@@ -6,7 +6,7 @@
 
 package database
 
-import "ticker/feed"
+import "github.com/blicero/ticker/feed"
 
 func feedEqual(f1, f2 *feed.Feed) bool {
 	if f1 == f2 {

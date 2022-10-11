@@ -8,7 +8,7 @@ package database
 
 import (
 	"testing"
-	"ticker/common"
+	"github.com/blicero/ticker/common"
 )
 
 func TestCreateDatabase(t *testing.T) {

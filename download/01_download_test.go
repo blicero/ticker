@@ -8,8 +8,8 @@ package download
 
 import (
 	"testing"
-	"ticker/blacklist"
-	"ticker/feed"
+	"github.com/blicero/ticker/blacklist"
+	"github.com/blicero/ticker/feed"
 )
 
 // TODO I tested the Downloader by manually inspecting the resulting archive

@@ -18,7 +18,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
-	"ticker/logdomain"
+	"github.com/blicero/ticker/logdomain"
 	"time"
 
 	"github.com/hashicorp/logutils"

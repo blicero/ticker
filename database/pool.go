@@ -10,8 +10,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"ticker/common"
-	"ticker/logdomain"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/logdomain"
 )
 
 type dblink struct {

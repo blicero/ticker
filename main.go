@@ -12,10 +12,10 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"ticker/common"
-	"ticker/prefetch"
-	"ticker/reader"
-	"ticker/web"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/prefetch"
+	"github.com/blicero/ticker/reader"
+	"github.com/blicero/ticker/web"
 )
 
 func main() {

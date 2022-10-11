@@ -12,8 +12,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"ticker/common"
-	"ticker/logdomain"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/logdomain"
 	"time"
 
 	"github.com/SlyMarbo/rss"

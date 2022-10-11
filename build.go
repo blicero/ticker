@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-03 22:06:21 krylon>
+// Time-stamp: <2022-10-10 22:56:31 krylon>
 
 // +build ignore
 
@@ -59,7 +59,7 @@ var candidates = map[string][]string{
 		"common",
 		"logdomain",
 		"query",
-		"web",
+		// "web",
 	},
 	"test": []string{
 		"blacklist",
@@ -126,6 +126,7 @@ func main() {
 		before, after, t1, t2 time.Time
 		minLevel              = "DEBUG"
 		stepsRaw              string
+		raceDetect            bool
 		steps                 map[string]bool
 		stepList              []string
 		lvlString             = make([]string, len(logLevels))
@@ -149,6 +150,8 @@ always be performed in the following order:
 %s
 For the brevity, the single value "all" will perform all steps except clean.
 This flag is not case-sensitive.`, strings.Join(orderedSteps, ", ")))
+
+	flag.BoolVar(&raceDetect, "race", false, "Build with race detector enabled")
 
 	flag.Parse()
 
@@ -261,9 +264,18 @@ This flag is not case-sensitive.`, strings.Join(orderedSteps, ", ")))
 
 		// Build the program itself:
 		var sWorkerCnt = strconv.FormatInt(int64(workerCnt), 10)
-		var cmd = exec.Command("go", "build", "-v", "-p", sWorkerCnt)
+
+		// The -tags flag is required so the build will succeed on Debian.
+		var args = []string{"build", "-v", "-tags", "pango_1_42,gtk_3_22", "-p", sWorkerCnt}
+
+		if raceDetect && ((runtime.GOOS == "linux" || runtime.GOOS == "freebsd") && runtime.GOARCH == "amd64") {
+			dbg.Println("[INFO] Building with race detection enabled.")
+			args = append(args, "-race")
+		}
+
+		var cmd = exec.Command("go", args...)
 		if output, err = cmd.CombinedOutput(); err != nil {
-			dbg.Printf("[ERROR] Error building ticker: %s\n%s\n",
+			dbg.Printf("[ERROR] Error building theseus: %s\n%s\n",
 				err.Error(),
 				output)
 			os.Exit(1)
@@ -366,7 +378,7 @@ func worker(n int, op string, pkgq <-chan string, errq chan<- error, wg *sync.Wa
 	defer wg.Done()
 
 	for folder := range pkgq {
-		pkg = "ticker/" + folder
+		pkg = "github.com/blicero/ticker/" + folder
 		dbg.Printf("[TRACE] Worker %d call %s on %s\n",
 			n,
 			op,
@@ -381,10 +393,6 @@ func worker(n int, op string, pkgq <-chan string, errq chan<- error, wg *sync.Wa
 
 		if op == "lint" {
 			cmd = exec.Command(lintCommand, pkg)
-			// cmd = exec.Command(
-			// 	lintCommand,
-			// 	"run",
-			// 	pkg)
 		} else if op == "test" {
 			if runtime.GOOS == "openbsd" || runtime.GOARCH == "386" || runtime.GOARCH == "arm" {
 				cmd = exec.Command("go", op, "-v", "-timeout", "30m", pkg)
@@ -460,10 +468,6 @@ func initLog(min string) error {
 		logName = "ticker.build "
 	)
 
-	// fmt.Printf("Creating Logger with minLevel = %q\n",
-	// 	min)
-	// fmt.Printf("LogLevels = %s\n", logLevels)
-
 	if fh, err = os.OpenFile(logFile, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0644); err != nil {
 		return fmt.Errorf("Error opening log file %s: %s\n",
 			logFile,
@@ -477,9 +481,6 @@ func initLog(min string) error {
 		MinLevel: logutils.LogLevel(min),
 		Writer:   writer,
 	}
-
-	// fmt.Printf("Logger.MinLevel: %q\n",
-	// 	filter.MinLevel)
 
 	dbg = log.New(filter, logName, log.Ldate|log.Ltime|log.Lshortfile)
 	return nil

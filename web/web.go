@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-19 18:12:15 krylon>
+// Time-stamp: <2022-10-10 21:25:03 krylon>
 
 package web
 
@@ -25,17 +25,17 @@ import (
 	"strings"
 	"sync"
 	"text/template"
-	"ticker/advisor"
-	"ticker/classifier"
-	"ticker/cluster"
-	"ticker/common"
-	"ticker/database"
-	"ticker/download"
-	"ticker/feed"
-	"ticker/logdomain"
-	"ticker/search"
-	"ticker/tag"
 	"time"
+
+	"github.com/blicero/ticker/advisor"
+	"github.com/blicero/ticker/classifier"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/database"
+	"github.com/blicero/ticker/download"
+	"github.com/blicero/ticker/feed"
+	"github.com/blicero/ticker/logdomain"
+	"github.com/blicero/ticker/search"
+	"github.com/blicero/ticker/tag"
 
 	"github.com/blicero/krylib"
 	"github.com/pquerna/ffjson/ffjson"
@@ -187,9 +187,6 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 
 	srv.router.HandleFunc("/later/all", srv.handleReadLaterAll)
 
-	srv.router.HandleFunc("/cluster/all", srv.handleClusterAll)
-	srv.router.HandleFunc("/cluster/{id:(?:\\d+)$}", srv.handleClusterDetails)
-
 	srv.router.HandleFunc("/classifier/train", srv.handleClassifierTrain)
 
 	srv.router.HandleFunc("/archive/{path:(?:.*)$}", srv.handleArchivedFile)
@@ -210,12 +207,8 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 	srv.router.HandleFunc("/ajax/feed_set_active/{id:(?:\\d+)}/{active:(?:true|false)$}", srv.handleFeedActiveToggle)
 	srv.router.HandleFunc("/ajax/items_by_tag/{id:(?:\\d+)$}", srv.handleItemsByTag)
 	srv.router.HandleFunc("/ajax/items_by_feed/{id:(?:\\d+)$}", srv.handleItemsByFeed)
-	srv.router.HandleFunc("/ajax/cluster_create", srv.handleClusterCreate)
-	srv.router.HandleFunc("/ajax/cluster_link_add", srv.handleClusterLinkAdd)
-	srv.router.HandleFunc("/ajax/cluster_link_del", srv.handleClusterLinkDel)
-	srv.router.HandleFunc("/ajax/cluster_items", srv.handleClusterItems)
 
-	srv.router.HandleFunc("/ajax/download_item", srv.handleItemDownload)
+	// srv.router.HandleFunc("/ajax/download_item", srv.handleItemDownload)
 	srv.router.HandleFunc("/ajax/archive_delete/{id:(?:\\d+)$}", srv.handleArchiveDelete)
 
 	srv.router.HandleFunc("/ajax/shutdown", srv.handleShutdown)
@@ -392,13 +385,6 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		srv.sendErrorMessage(w, msg)
 		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s\n",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
 	}
 
 	data.FeedMap = make(map[int64]feed.Feed, len(data.Feeds))
@@ -472,13 +458,6 @@ func (srv *Server) handleFeedAll(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s\n",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
 	}
 
 	data.Messages = srv.getMessages()
@@ -531,13 +510,6 @@ func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s\n",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
 		return
 	}
 
@@ -631,7 +603,6 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 				URL:        r.URL.String(),
 				TrainStamp: srv.trainStamp(),
 			},
-			Clusters: make(map[int64][]cluster.Cluster, 4),
 		}
 	)
 
@@ -701,13 +672,6 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load list of all Clusters: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
 	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
@@ -762,24 +726,6 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 				item.ID,
 				err.Error())
 		}
-
-		var clu []cluster.Cluster
-		if clu, err = db.ClusterGetByItem(item.ID); err != nil {
-			msg = fmt.Sprintf("Cannot fetch Clusters for Item %q (%d): %s",
-				item.Title,
-				item.ID,
-				err.Error())
-			srv.log.Println("[CRITICAL] " + msg)
-			srv.sendErrorMessage(w, msg)
-			return
-		} else if len(clu) > 0 {
-			// srv.log.Printf("[TRACE] Found %d Clusters for Item %q (%d)\n",
-			// 	len(clu),
-			// 	item.Title,
-			// 	item.ID)
-			data.Clusters[item.ID] = clu
-		}
-
 	}
 
 	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
@@ -903,27 +849,6 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 		srv.log.Printf("[ERROR] %s\n", msg)
 		srv.sendErrorMessage(w, msg)
 		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load list of all Clusters: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	}
-
-	data.Clusters = make(map[int64][]cluster.Cluster, len(data.Items))
-
-	for _, item := range data.Items {
-		if data.Clusters[item.ID], err = db.ClusterGetByItem(item.ID); err != nil {
-			msg = fmt.Sprintf("Cannot fetch Clusters for Item %q (%d): %s",
-				item.Title,
-				item.ID,
-				err.Error())
-			srv.log.Println("[CRITICAL] " + msg)
-			srv.sendErrorMessage(w, msg)
-			return
-		}
 	}
 
 	data.Messages = srv.getMessages()
@@ -1066,21 +991,6 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, r.Referer(), http.StatusFound)
 			return
 		}
-
-		data.Clusters = make(map[int64][]cluster.Cluster)
-
-		for _, item := range data.Items {
-			if data.Clusters[item.ID], err = db.ClusterGetByItem(item.ID); err != nil {
-				msg = fmt.Sprintf("Error looking up Clusters for Item %q (%d): %s",
-					item.Title,
-					item.ID,
-					err.Error())
-				srv.log.Println("[ERROR] " + msg)
-				srv.SendMessage(msg)
-				http.Redirect(w, r, r.Referer(), http.StatusFound)
-				return
-			}
-		}
 	}
 
 	if feeds, err = db.FeedGetAll(); err != nil {
@@ -1103,13 +1013,6 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s\n",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
 		return
 	}
 
@@ -1177,13 +1080,6 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 		srv.log.Println("[ERROR] " + msg)
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s\n",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
 		return
 	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		msg = fmt.Sprintf("Cannot find Template %s",
@@ -1367,13 +1263,6 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s\n",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
 	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		msg = fmt.Sprintf("Did not find template %s",
 			tmplName)
@@ -1446,13 +1335,6 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 		srv.SendMessage(msg)
 		http.Redirect(w, r, r.Referer(), http.StatusFound)
 		return
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s\n",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
 	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
 		msg = fmt.Sprintf("Did not find template %s",
 			tmplName)
@@ -1473,173 +1355,6 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 		srv.sendErrorMessage(w, msg)
 	}
 } // func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request)
-
-func (srv *Server) handleClusterAll(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
-
-	const tmplName = "cluster_all"
-
-	var (
-		err  error
-		tmpl *template.Template
-		db   *database.Database
-		msg  string
-		data = tmplDataClusterList{
-			tmplDataBase: tmplDataBase{
-				Debug:      common.Debug,
-				URL:        r.URL.String(),
-				Title:      "Read Later",
-				TrainStamp: srv.trainStamp(),
-			},
-		}
-	)
-
-	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
-		msg = fmt.Sprintf("Cannot find template %s", tmplName)
-		srv.log.Printf("[CANTHAPPEN] %s\n", msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	}
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if data.Clusters, err = db.ClusterGetAll(true); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	}
-
-	data.AllClusters = data.Clusters
-	data.Messages = srv.getMessages()
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
-	w.Header().Set("Content-Type", "text/html")
-	if err = tmpl.Execute(w, &data); err != nil {
-		msg = fmt.Sprintf("Error rendering template %q: %s",
-			tmplName,
-			err.Error())
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-	}
-} // func (srv *Server) handleClusterAll(w http.ResponseWriter, r *http.Request)
-
-func (srv *Server) handleClusterDetails(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
-
-	const tmplName = "cluster_details"
-
-	var (
-		err        error
-		tmpl       *template.Template
-		db         *database.Database
-		msg, idStr string
-		id         int64
-		data       = tmplDataClusterItems{
-			tmplDataItems: tmplDataItems{
-				tmplDataBase: tmplDataBase{
-					Debug:      common.Debug,
-					URL:        r.URL.String(),
-					Title:      "Read Later",
-					TrainStamp: srv.trainStamp(),
-				},
-			},
-		}
-	)
-
-	vars := mux.Vars(r)
-	idStr = vars["id"]
-
-	if id, err = strconv.ParseInt(idStr, 10, 64); err != nil {
-		msg = fmt.Sprintf("Cannot parse Cluster ID %q: %s",
-			idStr,
-			err.Error())
-		srv.log.Printf("[CANTHAPPEN] %s\n", msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	} else if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
-		msg = fmt.Sprintf("Cannot find template %s", tmplName)
-		srv.log.Printf("[CANTHAPPEN] %s\n", msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	}
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if data.Cluster, err = db.ClusterGetByID(id); err != nil {
-		msg = fmt.Sprintf("Cannot load Cluster %d: %s",
-			id,
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.Cluster == nil {
-		msg = fmt.Sprintf("Cannot find Cluster %d in database", id)
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.Items, err = db.ClusterGetItems(id); err != nil {
-		msg = fmt.Sprintf("Cannot load Items for Cluster %d (%s): %s",
-			id,
-			data.Cluster.Name,
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
-		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
-		msg = fmt.Sprintf("Cannot load all Tags: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
-		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.AllClusters, err = db.ClusterGetAll(true); err != nil {
-		msg = fmt.Sprintf("Cannot load all Clusters: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	}
-
-	data.Title = fmt.Sprintf("Details for Cluster %s (%d)",
-		data.Cluster.Name,
-		id)
-	data.Messages = srv.getMessages()
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
-	w.Header().Set("Content-Type", "text/html")
-	if err = tmpl.Execute(w, &data); err != nil {
-		msg = fmt.Sprintf("Error rendering template %q: %s",
-			tmplName,
-			err.Error())
-		srv.SendMessage(msg)
-		srv.sendErrorMessage(w, msg)
-	}
-} // func (srv *Server) handleClusterDetails(w http.ResponseWriter, r *http.Request)
 
 func (srv *Server) handleClassifierTrain(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",
@@ -2906,19 +2621,10 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
 		goto SEND_ERROR_MESSAGE
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load list of all Clusters: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
 	}
 
 	srv.clsLock.RLock()
 	defer srv.clsLock.RUnlock()
-
-	data.Clusters = make(map[int64][]cluster.Cluster, len(data.Items))
 
 	for idx, item := range data.Items {
 		var class string
@@ -2954,18 +2660,6 @@ func (srv *Server) handleItemsByTag(w http.ResponseWriter, r *http.Request) {
 				item.Title,
 				item.ID,
 				err.Error())
-		}
-
-		for _, item := range data.Items {
-			if data.Clusters[item.ID], err = db.ClusterGetByItem(item.ID); err != nil {
-				msg = fmt.Sprintf("Cannot fetch Clusters for Item %q (%d): %s",
-					item.Title,
-					item.ID,
-					err.Error())
-				srv.log.Println("[CRITICAL] " + msg)
-				srv.sendErrorMessage(w, msg)
-				return
-			}
 		}
 	}
 
@@ -3074,16 +2768,7 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 		msg = fmt.Sprintf("Cannot get all Feeds: %s",
 			err.Error())
 		goto SEND_ERROR_MESSAGE
-	} else if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Cannot load list of all Clusters: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
 	}
-
-	data.Clusters = make(map[int64][]cluster.Cluster, len(data.Items))
 
 	srv.clsLock.RLock()
 	defer srv.clsLock.RUnlock()
@@ -3123,18 +2808,6 @@ func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request) {
 				item.ID,
 				err.Error())
 		}
-
-		// for _, item := range data.Items {
-		if data.Clusters[item.ID], err = db.ClusterGetByItem(item.ID); err != nil {
-			msg = fmt.Sprintf("Cannot fetch Clusters for Item %q (%d): %s",
-				item.Title,
-				item.ID,
-				err.Error())
-			srv.log.Println("[CRITICAL] " + msg)
-			srv.sendErrorMessage(w, msg)
-			return
-		}
-		// }
 	}
 
 	if err = tmpl.Execute(&buf, &data); err != nil {
@@ -3170,444 +2843,6 @@ SEND_ERROR_MESSAGE:
 	w.WriteHeader(200)
 	w.Write([]byte(reply)) // nolint: errcheck
 } // func (srv *Server) handleItemsByFeed(w http.ResponseWriter, r *http.Request)
-
-func (srv *Server) handleClusterCreate(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
-
-	type cluCreateReply struct {
-		Status  bool
-		Message string
-		Cluster *cluster.Cluster
-	}
-
-	var (
-		err        error
-		msg, reply string
-		name, desc string
-		clu        *cluster.Cluster
-		db         *database.Database
-		rmsg       cluCreateReply
-		buf        []byte
-	)
-
-	if err = r.ParseForm(); err != nil {
-		msg = fmt.Sprintf("Error parsing form data: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	name = r.FormValue("Name")
-	desc = r.FormValue("Description")
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if clu, err = db.ClusterCreate(name, desc); err != nil {
-		msg = fmt.Sprintf("Cannot create Tag %q: %s",
-			name,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	rmsg = cluCreateReply{
-		Status:  true,
-		Message: "Success",
-		Cluster: clu,
-	}
-
-	if buf, err = json.Marshal(&rmsg); err != nil {
-		msg = fmt.Sprintf("Cannot serialize response: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write(buf) // nolint: errcheck
-	return
-
-SEND_ERROR_MESSAGE:
-	srv.log.Printf("[ERROR] %s\n", msg)
-	srv.SendMessage(msg)
-	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
-		msg)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write([]byte(reply)) // nolint: errcheck
-} // func (srv *Server) handleClusterCreate(w http.ResponseWriter, r *http.Request)
-
-func (srv *Server) handleClusterLinkAdd(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
-
-	var (
-		err               error
-		db                *database.Database
-		msg, reply, idStr string
-		itemID, clusterID int64
-	)
-
-	if err = r.ParseForm(); err != nil {
-		msg = fmt.Sprintf("Error parsing form data: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	idStr = r.FormValue("ItemID")
-	if itemID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
-		msg = fmt.Sprintf("Error parsing Item ID %q: %s",
-			idStr,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	idStr = r.FormValue("ClusterID")
-	if clusterID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
-		msg = fmt.Sprintf("Error parsing Cluster ID %q: %s",
-			idStr,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	srv.log.Printf("[DEBUG] Add Item #%d to Cluster #%d\n",
-		itemID,
-		clusterID)
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if err = db.ClusterLinkAdd(clusterID, itemID); err != nil {
-		msg = fmt.Sprintf("Error adding Item %d to Cluster %d: %s",
-			itemID,
-			clusterID,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	reply = `{ "Status": true, "Message": "Success" }`
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write([]byte(reply)) // nolint: errcheck
-	return
-
-SEND_ERROR_MESSAGE:
-	srv.log.Printf("[ERROR] %s\n", msg)
-	srv.SendMessage(msg)
-	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
-		msg)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write([]byte(reply)) // nolint: errcheck
-} // func (srv *Server) handleClusterLinkAdd(w http.ResponseWriter, r *http.Request)
-
-func (srv *Server) handleClusterLinkDel(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
-
-	var (
-		err               error
-		db                *database.Database
-		msg, reply, idStr string
-		itemID, clusterID int64
-	)
-
-	if err = r.ParseForm(); err != nil {
-		msg = fmt.Sprintf("Error parsing form data: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	idStr = r.FormValue("ItemID")
-	if itemID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
-		msg = fmt.Sprintf("Error parsing Item ID %q: %s",
-			idStr,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	idStr = r.FormValue("ClusterID")
-	if clusterID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
-		msg = fmt.Sprintf("Error parsing Cluster ID %q: %s",
-			idStr,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	srv.log.Printf("[DEBUG] Add Item #%d to Cluster #%d\n",
-		itemID,
-		clusterID)
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if err = db.ClusterLinkDel(clusterID, itemID); err != nil {
-		msg = fmt.Sprintf("Error adding Item %d to Cluster %d: %s",
-			itemID,
-			clusterID,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	reply = `{ "Status": true, "Message": "Success" }`
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write([]byte(reply)) // nolint: errcheck
-	return
-
-SEND_ERROR_MESSAGE:
-	srv.log.Printf("[ERROR] %s\n", msg)
-	srv.SendMessage(msg)
-	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s" }`,
-		msg)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write([]byte(reply)) // nolint: errcheck
-} // func (srv *Server) handleClusterLinkDel(w http.ResponseWriter, r *http.Request)
-
-func (srv *Server) handleClusterItems(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
-
-	const tmplName = "items"
-
-	var (
-		err               error
-		db                *database.Database
-		msg, reply, idStr string
-		clusterID         int64
-		tmpl              *template.Template
-		buf               bytes.Buffer
-		respData          ajaxResponseHTML
-		raw               []byte
-		data              = tmplDataItems{
-			tmplDataBase: tmplDataBase{
-				Title:      "Items",
-				Debug:      common.Debug,
-				URL:        r.URL.String(),
-				TrainStamp: srv.trainStamp(),
-			},
-			Clusters: make(map[int64][]cluster.Cluster, 4),
-		}
-	)
-
-	if tmpl = srv.tmpl.Lookup(tmplName); tmpl == nil {
-		msg = fmt.Sprintf("Cannot find Template %s", tmplName)
-		goto SEND_ERROR_MESSAGE
-	} else if err = r.ParseForm(); err != nil {
-		msg = fmt.Sprintf("Error parsing form data: %s",
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	idStr = r.FormValue("ClusterID")
-	if clusterID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
-		msg = fmt.Sprintf("Error parsing Cluster ID %q: %s",
-			idStr,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if data.AllClusters, err = db.ClusterGetAll(false); err != nil {
-		msg = fmt.Sprintf("Error getting all Clusters: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		goto SEND_ERROR_MESSAGE
-	} else if data.Items, err = db.ClusterGetItems(clusterID); err != nil {
-		msg = fmt.Sprintf("Error getting Items for Cluster %d: %s",
-			clusterID,
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		goto SEND_ERROR_MESSAGE
-	} else if data.TagSuggestions, err = srv.suggestTags(data.Items); err != nil {
-		msg = fmt.Sprintf("Cannot generate Tag suggestions: %s",
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", msg)
-		srv.sendErrorMessage(w, msg)
-		return
-	} else if data.AllTags, err = db.TagGetAllByHierarchy(); err != nil {
-		msg = fmt.Sprintf("Cannot load all Tags: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.TagHierarchy, err = db.TagGetHierarchy(); err != nil {
-		msg = fmt.Sprintf("Cannot load list of all Tags: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	} else if data.FeedMap, err = db.FeedGetMap(); err != nil {
-		msg = fmt.Sprintf("Cannot get all Feeds: %s",
-			err.Error())
-		srv.log.Println("[ERROR] " + msg)
-		srv.SendMessage(msg)
-		http.Redirect(w, r, r.Referer(), http.StatusFound)
-		return
-	}
-
-	srv.clsLock.RLock()
-	defer srv.clsLock.RUnlock()
-
-	for idx, item := range data.Items {
-		var class string
-
-		if !math.IsNaN(item.Rating) {
-			if item.Rating == 1 {
-				data.Items[idx].Rating = math.Inf(1)
-			} else if item.Rating == 0 {
-				data.Items[idx].Rating = math.Inf(-1)
-			} else {
-				msg = fmt.Sprintf("Unexpected Rating for Item %s (%d): %f",
-					item.Title,
-					item.ID,
-					item.Rating)
-				srv.log.Println("[ERROR] " + msg)
-				srv.SendMessage(msg)
-				http.Redirect(w, r, r.Referer(), http.StatusFound)
-				return
-			}
-
-			// continue
-		} else if class, err = srv.clsItem.Classify(&item); err != nil {
-			srv.log.Printf("[ERROR] Cannot classify Item %s (%d): %s\n",
-				item.Title,
-				item.ID,
-				err.Error())
-		} else if class == classifier.Good {
-			data.Items[idx].Rating = 100
-		} else if class == classifier.Bad {
-			data.Items[idx].Rating = -100
-		} else {
-			srv.log.Printf("[ERROR] Unexpected classification for Item %s (%d): %s\n",
-				item.Title,
-				item.ID,
-				err.Error())
-		}
-
-		var clu []cluster.Cluster
-		if clu, err = db.ClusterGetByItem(item.ID); err != nil {
-			msg = fmt.Sprintf("Cannot fetch Clusters for Item %q (%d): %s",
-				item.Title,
-				item.ID,
-				err.Error())
-			srv.log.Println("[CRITICAL] " + msg)
-			srv.sendErrorMessage(w, msg)
-			return
-		} else if len(clu) > 0 {
-			data.Clusters[item.ID] = clu
-		}
-
-	}
-
-	if err = tmpl.Execute(&buf, &data); err != nil {
-		msg = fmt.Sprintf("Failed to render HTML template %s: %s",
-			tmplName,
-			err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	respData = ajaxResponseHTML{
-		Status:  true,
-		Message: "Success",
-		HTML:    buf.String(),
-	}
-
-	if raw, err = ffjson.Marshal(&respData); err != nil {
-		msg = fmt.Sprintf("Cannot serialize response data: %s", err.Error())
-		goto SEND_ERROR_MESSAGE
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Content-Length", strconv.FormatInt(int64(len(raw)), 10))
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
-	w.WriteHeader(200)
-	w.Write(raw) // nolint: errcheck
-	return
-
-SEND_ERROR_MESSAGE:
-	srv.log.Printf("[ERROR] %s\n", msg)
-	srv.SendMessage(msg)
-	reply = fmt.Sprintf(`{ "Status": false, "Message": "%s", "HTML": "" }`,
-		msg)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	w.Write([]byte(reply)) // nolint: errcheck
-} // func (srv *Server) handleClusterItems(w http.ResponseWriter, r *http.Request)
-
-func (srv *Server) handleItemDownload(w http.ResponseWriter, r *http.Request) {
-	srv.log.Printf("[TRACE] Handle request for %s\n",
-		r.URL.EscapedPath())
-
-	var (
-		err         error
-		idStr, msg  string
-		replyBuffer []byte
-		itemID      int64
-		item        *feed.Item
-		db          *database.Database
-		resp        ajaxResponse
-	)
-
-	if err = r.ParseForm(); err != nil {
-		resp.Message = fmt.Sprintf("Cannot parse form data for %s %s: %s",
-			r.Method,
-			r.URL,
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", resp.Message)
-		goto SERIALIZE_RESPONSE
-	}
-
-	idStr = r.FormValue("ItemID")
-
-	if itemID, err = strconv.ParseInt(idStr, 10, 64); err != nil {
-		resp.Message = fmt.Sprintf("Cannot parse Item ID %q: %s",
-			idStr,
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", err.Error())
-		goto SERIALIZE_RESPONSE
-	}
-
-	db = srv.pool.Get()
-	defer srv.pool.Put(db)
-
-	if item, err = db.ItemGetByID(itemID); err != nil {
-		resp.Message = fmt.Sprintf("Error looking up Item #%d: %s",
-			itemID,
-			err.Error())
-		srv.log.Printf("[ERROR] %s\n", resp.Message)
-		goto SERIALIZE_RESPONSE
-	} else if item == nil {
-		resp.Message = fmt.Sprintf("Item #%d was not found in database", itemID)
-		srv.log.Printf("[ERROR] %s\n", resp.Message)
-		goto SERIALIZE_RESPONSE
-	}
-
-	srv.agent.PageQ <- item
-	resp.Status = true
-	resp.Message = fmt.Sprintf("Enqueued Item %d (%q) for download",
-		itemID,
-		item.URL)
-
-SERIALIZE_RESPONSE:
-	if replyBuffer, err = ffjson.Marshal(&resp); err != nil {
-		msg = fmt.Sprintf("Cannot serialize response: %q",
-			err.Error())
-		replyBuffer = errJSON(msg)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Content-Size", strconv.FormatInt(int64(len(replyBuffer)), 10))
-	w.WriteHeader(200)
-	w.Write(replyBuffer) // nolint: errcheck
-} // func (srv *Server) handleItemDownload(w http.ResponseWrite, r *http.Request)
 
 func (srv *Server) handleArchiveDelete(w http.ResponseWriter, r *http.Request) {
 	srv.log.Printf("[TRACE] Handle request for %s\n",

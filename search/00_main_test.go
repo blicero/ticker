@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"ticker/common"
+	"github.com/blicero/ticker/common"
 	"time"
 
 	"github.com/blicero/krylib"

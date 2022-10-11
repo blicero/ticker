@@ -7,7 +7,7 @@
 package search
 
 import (
-	"ticker/database"
+	"github.com/blicero/ticker/database"
 	"time"
 )
 

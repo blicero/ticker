@@ -8,9 +8,9 @@ package search
 
 import (
 	"testing"
-	"ticker/common"
-	"ticker/database"
-	"ticker/feed"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/database"
+	"github.com/blicero/ticker/feed"
 )
 
 func TestOpenDB(t *testing.T) {

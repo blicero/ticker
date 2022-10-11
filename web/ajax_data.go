@@ -2,11 +2,11 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 19. 06. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-19 17:30:28 krylon>
+// Time-stamp: <2022-10-10 22:56:23 krylon>
 
 package web
 
-//go:generate ffjson ajax_data.go
+// go : generate ffjson ajax_data.go
 
 // Types for AJAX responses
 
@@ -16,8 +16,8 @@ type ajaxResponse struct {
 	Message string
 }
 
-type ajaxResponseHTML struct {
-	Status  bool
-	Message string
-	HTML    string
-}
+// type ajaxResponseHTML struct {
+// 	Status  bool
+// 	Message string
+// 	HTML    string
+// }

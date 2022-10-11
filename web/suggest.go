@@ -7,8 +7,8 @@
 package web
 
 import (
-	"ticker/advisor"
-	"ticker/feed"
+	"github.com/blicero/ticker/advisor"
+	"github.com/blicero/ticker/feed"
 )
 
 const maxSuggestions = 5

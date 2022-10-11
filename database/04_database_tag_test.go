@@ -8,8 +8,8 @@ package database
 
 import (
 	"testing"
-	"ticker/feed"
-	"ticker/tag"
+	"github.com/blicero/ticker/feed"
+	"github.com/blicero/ticker/tag"
 )
 
 func processTag(t *tag.Tag) error {

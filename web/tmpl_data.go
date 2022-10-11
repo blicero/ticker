@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 06. 05. 2020 by Benjamin Walkenhorst
 // (c) 2020 Benjamin Walkenhorst
-// Time-stamp: <2021-07-16 13:47:34 krylon>
+// Time-stamp: <2022-10-10 18:11:52 krylon>
 //
 // This file contains data structures to be passed to HTML templates.
 
@@ -11,11 +11,10 @@ package web
 import (
 	"crypto/sha512"
 	"fmt"
-	"ticker/advisor"
-	"ticker/cluster"
-	"ticker/common"
-	"ticker/feed"
-	"ticker/tag"
+	"github.com/blicero/ticker/advisor"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/feed"
+	"github.com/blicero/ticker/tag"
 	"time"
 
 	"github.com/hashicorp/logutils"
@@ -53,7 +52,6 @@ type tmplDataBase struct {
 	URL            string
 	TrainStamp     time.Time
 	AllTags        []tag.Tag
-	AllClusters    []cluster.Cluster
 	TagHierarchy   []tag.Tag
 	TagSuggestions map[int64]map[string]advisor.SuggestedTag
 }
@@ -68,45 +66,19 @@ func (t *tmplDataBase) TagLinkData(i feed.Item) *tmplDataTagLinkData {
 
 type tmplDataIndex struct {
 	tmplDataBase
-	FeedMap  map[int64]feed.Feed
-	Feeds    []feed.Feed
-	Items    []feed.Item
-	Clusters map[int64][]cluster.Cluster
+	FeedMap map[int64]feed.Feed
+	Feeds   []feed.Feed
+	Items   []feed.Item
 }
 
 type tmplDataItems struct {
 	tmplDataBase
-	Items    []feed.Item
-	FeedMap  map[int64]feed.Feed
-	Clusters map[int64][]cluster.Cluster
-	Next     string
-	Prev     string
-	PageCnt  int64
+	Items   []feed.Item
+	FeedMap map[int64]feed.Feed
+	Next    string
+	Prev    string
+	PageCnt int64
 }
-
-type tmplDataClusterForm struct {
-	Item        feed.Item
-	Clusters    []cluster.Cluster
-	AllClusters []cluster.Cluster
-}
-
-// ClusterFormData returns the data required to populate the Cluster form for a specific Item.
-func (t *tmplDataItems) ClusterFormData(id int64) *tmplDataClusterForm {
-	var data = &tmplDataClusterForm{
-		Clusters:    t.Clusters[id],
-		AllClusters: t.AllClusters,
-	}
-
-	// ???
-	for _, i := range t.Items {
-		if i.ID == id {
-			data.Item = i
-			return data
-		}
-	}
-
-	return nil
-} // func (t *tmplDataItems) ClusterFormData(id int64) *tmplDataClusterForm
 
 // TagLinkData returns data for use in the tag_link_form template.
 func (t *tmplDataItems) TagLinkData(i feed.Item) *tmplDataTagLinkData {
@@ -139,16 +111,6 @@ type tmplDataReadLater struct {
 	tmplDataBase
 	Items   []feed.ReadLater
 	FeedMap map[int64]feed.Feed
-}
-
-type tmplDataClusterList struct {
-	tmplDataBase
-	Clusters []cluster.Cluster
-}
-
-type tmplDataClusterItems struct {
-	tmplDataItems
-	Cluster *cluster.Cluster
 }
 
 type tmplDataArchive tmplDataIndex

@@ -16,8 +16,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"ticker/common"
-	"ticker/tag"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/tag"
 	"time"
 
 	"github.com/jaytaylor/html2text"

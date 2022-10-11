@@ -8,7 +8,7 @@ package feed
 
 import (
 	"testing"
-	"ticker/common"
+	"github.com/blicero/ticker/common"
 	"time"
 
 	"github.com/SlyMarbo/rss"

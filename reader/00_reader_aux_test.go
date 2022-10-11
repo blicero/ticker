@@ -7,9 +7,9 @@
 package reader
 
 import (
-	"ticker/common"
-	"ticker/database"
-	"ticker/feed"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/database"
+	"github.com/blicero/ticker/feed"
 	"time"
 )
 

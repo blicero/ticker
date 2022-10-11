@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"net/url"
 	"testing"
-	"ticker/feed"
+	"github.com/blicero/ticker/feed"
 	"time"
 )
 

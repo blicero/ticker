@@ -8,7 +8,7 @@ package advisor
 
 import (
 	"testing"
-	"ticker/feed"
+	"github.com/blicero/ticker/feed"
 )
 
 var ad *Advisor

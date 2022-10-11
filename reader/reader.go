@@ -12,10 +12,10 @@ import (
 	"log"
 	"os"
 	"sync"
-	"ticker/common"
-	"ticker/database"
-	"ticker/feed"
-	"ticker/logdomain"
+	"github.com/blicero/ticker/common"
+	"github.com/blicero/ticker/database"
+	"github.com/blicero/ticker/feed"
+	"github.com/blicero/ticker/logdomain"
 	"time"
 )
 
