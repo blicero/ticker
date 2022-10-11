@@ -1,6 +1,6 @@
 {{ define "items" }}
 {{/* Created on 13. 02. 2021 */}}
-{{/* Time-stamp: <2021-07-01 04:19:12 krylon> */}}
+{{/* Time-stamp: <2022-10-11 15:18:06 krylon> */}}
 <script>
  $(document).ready(shrink_images);
 </script>
@@ -34,9 +34,6 @@
                    id="read_later_button_{{ .ID }}"
                    onclick="read_later_show({{ .ID }});" />
             {{ template "later_form" . }}
-          </div>
-          <div class="row">
-            {{ template "cluster" ($dot.ClusterFormData .ID) }}
           </div>
           <div class="row" id="download_item_{{ .ID }}">
             {{ if .IsDownloaded }}

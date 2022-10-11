@@ -1,5 +1,5 @@
 {{ define "head" }}
-{{/* Time-stamp: <2021-06-19 17:13:59 krylon> */}}
+{{/* Time-stamp: <2022-10-11 15:25:43 krylon> */}}
 <head>
   <title>{{ app_string }}@{{ hostname  }} - {{ .Title }}</title>
   
@@ -45,6 +45,7 @@
      }
    });
 
+   {{/*
    const clusterList = {
      {{ range .AllClusters }}
      "{{ js .Name }}": {
@@ -55,6 +56,7 @@
      },
      {{ end }}
    };
+   */}}
   </script>
 
   <link rel="stylesheet" type="text/css" href="/static/style.css" />
