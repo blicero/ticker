@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2022-10-11 15:42:46 krylon>
+# Time-stamp: <2022-10-11 18:01:02 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -14,17 +14,18 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2022-10-11 Di 15:42]
+   #+CAPTION: Clock summary at [2022-10-11 Di 17:58]
    | Headline                                          | Time        |          |          |          |          |      |
    |---------------------------------------------------+-------------+----------+----------+----------+----------+------|
-   | *Total time*                                      | *18d 20:51* |          |          |          |          |      |
+   | *Total time*                                      | *18d 21:59* |          |          |          |          |      |
    |---------------------------------------------------+-------------+----------+----------+----------+----------+------|
-   | Ticker                                            | 18d 20:51   |          |          |          |          |      |
+   | Ticker                                            | 18d 21:59   |          |          |          |          |      |
    | \_  Main                                          |             |     0:56 |          |          |          |      |
    | \_    Shutdown                                    |             |          |     0:56 |          |          |      |
-   | \_  Components [42/49]                            |             | 18d 2:18 |          |          |          |      |
-   | \_    Grouping [0/1]                              |             |          |     5:36 |          |          |      |
+   | \_  Components [43/50]                            |             | 18d 3:26 |          |          |          |      |
+   | \_    Grouping [1/2]                              |             |          |     6:44 |          |          |      |
    | \_      Remove old cluster stuff                  |             |          |          |     5:35 |          |      |
+   | \_      A new approach                            |             |          |          |     1:08 |          |      |
    | \_    Feed [7/7]                                  |             |          | 1d 14:32 |          |          |      |
    | \_      Homepage                                  |             |          |          |     0:12 |          |      |
    | \_      Rating [4/4]                              |             |          |          | 1d 11:04 |          |      |
@@ -96,24 +97,52 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [42/49]
+** Components [43/50]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
   :END:
-*** Grouping [0/1]                                                  :feature:
+*** Classifier [/]                                                  :feature:
+    I would like to try and improve the classifier.
+    If I can get this to work well enough, I might be able to run it
+    semi-automatically.
+*** Grouping [1/2]                                                  :feature:
     :LOGBOOK:
     CLOCK: [2022-10-10 Mo 18:06]--[2022-10-10 Mo 18:07] =>  0:01
     :END:
     After my first attempt at grouping related news items failed (I called it
     [[Clusters]]), I am ready for another attempt. I think I should think about
     the UI more thoroughly, though.
-**** TODO Remove old cluster stuff
+**** DONE Remove old cluster stuff
+     CLOSED: [2022-10-11 Di 16:04]
      :LOGBOOK:
      CLOCK: [2022-10-11 Di 15:05]--[2022-10-11 Di 15:42] =>  0:37
      CLOCK: [2022-10-10 Mo 18:07]--[2022-10-10 Mo 23:05] =>  4:58
      :END:
      This going to be tedious, but what are you gonna do, right?
+
+     [2022-10-11 Di 16:12]
+     Turns out it wasn't too bad. I whipped a small one-liner in Perl that
+     took care of this so quickly, I first thought it hadn't worked.
+**** MEDITATE A new approach
+     :LOGBOOK:
+     CLOCK: [2022-10-11 Di 16:49]--[2022-10-11 Di 17:57] =>  1:08
+     :END:
+     So, now that we've got the old cluster stuff removed, how do we build a
+     better replacement for it?
+     The first question, of course, should be: Do I really need this? I
+     haven't really used the old clusters other than for testing.
+     But it would be nice to be able to see other news items on a particular
+     matter, especially to see how different news outlets cover an issue from
+     several perspectives.
+     But that will be quite difficult to pull off. If I want to do it
+     manually, it's pretty hard to implement that in the UI. If I want to do
+     it automatically, that will be even harder.
+     Although it might be a good excuse to dabble in machine learning-kind-of
+     stuff.
+
+     [2022-10-11 Di 17:58]
+     I have brain fart at the moment, I'm coming back to this later.
 *** Feed [7/7]
     :LOGBOOK:
     CLOCK: [2021-02-06 Sa 17:57]--[2021-02-06 Sa 18:47] =>  0:50
