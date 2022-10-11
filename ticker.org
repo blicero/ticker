@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2022-10-11 00:38:02 krylon>
+# Time-stamp: <2022-10-11 15:42:46 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -14,17 +14,17 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2022-10-11 Di 00:38]
+   #+CAPTION: Clock summary at [2022-10-11 Di 15:42]
    | Headline                                          | Time        |          |          |          |          |      |
    |---------------------------------------------------+-------------+----------+----------+----------+----------+------|
-   | *Total time*                                      | *18d 20:14* |          |          |          |          |      |
+   | *Total time*                                      | *18d 20:51* |          |          |          |          |      |
    |---------------------------------------------------+-------------+----------+----------+----------+----------+------|
-   | Ticker                                            | 18d 20:14   |          |          |          |          |      |
+   | Ticker                                            | 18d 20:51   |          |          |          |          |      |
    | \_  Main                                          |             |     0:56 |          |          |          |      |
    | \_    Shutdown                                    |             |          |     0:56 |          |          |      |
-   | \_  Components [42/49]                            |             | 18d 1:41 |          |          |          |      |
-   | \_    Grouping [0/1]                              |             |          |     4:59 |          |          |      |
-   | \_      Remove old cluster stuff                  |             |          |          |     4:58 |          |      |
+   | \_  Components [42/49]                            |             | 18d 2:18 |          |          |          |      |
+   | \_    Grouping [0/1]                              |             |          |     5:36 |          |          |      |
+   | \_      Remove old cluster stuff                  |             |          |          |     5:35 |          |      |
    | \_    Feed [7/7]                                  |             |          | 1d 14:32 |          |          |      |
    | \_      Homepage                                  |             |          |          |     0:12 |          |      |
    | \_      Rating [4/4]                              |             |          |          | 1d 11:04 |          |      |
@@ -110,6 +110,7 @@
     the UI more thoroughly, though.
 **** TODO Remove old cluster stuff
      :LOGBOOK:
+     CLOCK: [2022-10-11 Di 15:05]--[2022-10-11 Di 15:42] =>  0:37
      CLOCK: [2022-10-10 Mo 18:07]--[2022-10-10 Mo 23:05] =>  4:58
      :END:
      This going to be tedious, but what are you gonna do, right?
