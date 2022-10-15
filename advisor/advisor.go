@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-19 20:05:01 krylon>
+// Time-stamp: <2022-10-15 17:34:03 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -14,6 +14,7 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+
 	"github.com/blicero/ticker/common"
 	"github.com/blicero/ticker/database"
 	"github.com/blicero/ticker/feed"
@@ -198,7 +199,7 @@ func (adv *Advisor) getLanguage(title, description string) (lng, fullText string
 
 	defer func() {
 		if x := recover(); x != nil {
-			if strings.Index(title, blString) == -1 {
+			if !strings.Contains(title, blString) {
 				var buf [2048]byte
 				var cnt = runtime.Stack(buf[:], false)
 				adv.log.Printf("[CRITICAL] Panic in getLanguage for Item %q: %s\n%s",
