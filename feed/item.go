@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 04. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-02 09:03:00 krylon>
+// Time-stamp: <2022-10-15 18:32:30 krylon>
 
 package feed
 
@@ -16,9 +16,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
+
 	"github.com/blicero/ticker/common"
 	"github.com/blicero/ticker/tag"
-	"time"
 
 	"github.com/jaytaylor/html2text"
 )
@@ -79,6 +80,10 @@ func (i *Item) Plaintext() string {
 
 	if tmp[1], err = html2text.FromString(i.Description); err != nil {
 		tmp[1] = i.Description
+	}
+
+	if tmp[1] == "Comments" { // Hacker News
+		tmp[1] = ""
 	}
 
 	tmp[0] = whitespace.ReplaceAllString(tmp[0], " ")
