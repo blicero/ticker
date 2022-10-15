@@ -9,6 +9,7 @@ require (
 	github.com/bbalet/stopwords v1.0.0
 	github.com/blicero/krylib v0.0.0-20210224100727-002c413214d3
 	github.com/blicero/shield v0.0.0-20221011200435-788bfada6e93 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/stemmer v0.0.0-20161207102402-66719a20c4b5
 	github.com/endeveit/guesslanguage v0.0.0-20141216121003-b9ec07401dcb
 	github.com/go-shiori/dom v0.0.0-20210510042244-c74b4cff1404
