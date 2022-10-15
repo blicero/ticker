@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-10 22:56:31 krylon>
+// Time-stamp: <2022-10-15 18:36:36 krylon>
 
 // +build ignore
 
@@ -31,8 +31,11 @@ import (
 	"github.com/hashicorp/logutils"
 )
 
-const logFile = "./dbg.build.log"
-const lintCommand = "mygolint"
+const (
+	appName     = "ticker"
+	logFile     = "./dbg.build.log"
+	lintCommand = "mygolint"
+)
 
 var logLevels = []logutils.LogLevel{
 	"TRACE",
@@ -73,6 +76,7 @@ var candidates = map[string][]string{
 		"web",
 	},
 	"vet": []string{
+		"advisor",
 		"blacklist",
 		"classifier",
 		"common",
@@ -88,6 +92,7 @@ var candidates = map[string][]string{
 		"web",
 	},
 	"lint": []string{
+		"advisor",
 		"blacklist",
 		"classifier",
 		"common",
@@ -275,7 +280,8 @@ This flag is not case-sensitive.`, strings.Join(orderedSteps, ", ")))
 
 		var cmd = exec.Command("go", args...)
 		if output, err = cmd.CombinedOutput(); err != nil {
-			dbg.Printf("[ERROR] Error building theseus: %s\n%s\n",
+			dbg.Printf("[ERROR] Error building %s: %s\n%s\n",
+				appName,
 				err.Error(),
 				output)
 			os.Exit(1)
