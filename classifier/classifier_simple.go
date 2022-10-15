@@ -25,8 +25,8 @@ type ClassifierSimple struct {
 	log *log.Logger
 }
 
-// SimpleNew creates a new Classifier.
-func SimpleNew() (*ClassifierSimple, error) {
+// NewSimple creates a new Classifier.
+func NewSimple() (*ClassifierSimple, error) {
 	var (
 		err error
 		c   = new(ClassifierSimple)
