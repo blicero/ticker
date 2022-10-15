@@ -2,19 +2,22 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 10. 2022 by Benjamin Walkenhorst
 // (c) 2022 Benjamin Walkenhorst
-// Time-stamp: <2022-10-15 16:47:35 krylon>
+// Time-stamp: <2022-10-15 19:08:56 krylon>
 
 package classifier
 
 import (
 	"log"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/blicero/shield"
 	"github.com/blicero/ticker/common"
 	"github.com/blicero/ticker/database"
 	"github.com/blicero/ticker/feed"
 	"github.com/blicero/ticker/logdomain"
+	"github.com/davecgh/go-spew/spew"
 	"github.com/endeveit/guesslanguage"
 )
 
@@ -56,6 +59,12 @@ func NewShield(pool *database.Pool) (*ClassifierShield, error) {
 		return nil, err
 	}
 
+	for k, v := range c.shield {
+		c.log.Printf("[DEBUG] Shield Classifier for %s: %s\n",
+			k,
+			spew.Sdump(v))
+	}
+
 	return c, nil
 } // func NewShield() (*ClassifierShield, error)
 
@@ -78,19 +87,18 @@ func (c *ClassifierShield) Train() error {
 
 	for _, i := range items {
 		var (
-			s           shield.Shield
-			lang, class string
-			body        = i.Plaintext()
+			s                 shield.Shield
+			lang, class, body string
 		)
 
-		if lang, err = guesslanguage.Guess(body); err != nil {
-			c.log.Printf("[ERROR] Cannot determine language of Item %q: %s\n",
-				i.Title,
-				err.Error())
-			lang = "en"
-		}
+		lang, body = c.getLanguage(&i)
 
-		s = c.shield[lang]
+		if s = c.shield[lang]; s == nil {
+			// c.log.Printf("[ERROR] Did not find Shield instance for language %s.\n%s\n\n",
+			// 	lang,
+			// 	body)
+			s = c.shield["en"]
+		}
 
 		if i.Rating >= 0.5 {
 			class = Good
@@ -113,16 +121,53 @@ func (c *ClassifierShield) Train() error {
 // Classify attempts to find a rating for a news item.
 func (c *ClassifierShield) Classify(item *feed.Item) (string, error) {
 	var (
-		err          error
-		rating, lang string
-		body         = item.Plaintext()
+		err                error
+		rating, lang, body string
 	)
 
-	if lang, err = guesslanguage.Guess(body); err != nil {
-		return "", err
-	} else if rating, err = c.shield[lang].Classify(body); err != nil {
+	lang, body = c.getLanguage(item)
+
+	if rating, err = c.shield[lang].Classify(body); err != nil {
 		return "", err
 	}
 
 	return rating, nil
 } // func (c *ClassifierShield) Classify(item *feed.Item) (string, error)
+
+func (c *ClassifierShield) getLanguage(item *feed.Item) (lng, fullText string) {
+	const (
+		defaultLang = "en"
+		blString    = "Lauren Boebert buried in ridicule after claim about 1930s Germany"
+	)
+
+	var (
+		err        error
+		lang, body string
+	)
+
+	body = item.Plaintext()
+
+	defer func() {
+		if x := recover(); x != nil {
+			if !strings.Contains(item.Title, blString) {
+				var buf [2048]byte
+				var cnt = runtime.Stack(buf[:], false)
+				c.log.Printf("[CRITICAL] Panic in getLanguage for Item %q: %s\n%s",
+					item.Title,
+					x,
+					string(buf[:cnt]))
+			}
+			lng = defaultLang
+			fullText = body
+		}
+	}()
+
+	if lang, err = guesslanguage.Guess(body); err != nil {
+		c.log.Printf("[ERROR] Cannot determine language of Item %q: %s\n",
+			item.Title,
+			err.Error())
+		lang = defaultLang
+	}
+
+	return lang, body
+} // func getLanguage(title, description string) (string, string)
