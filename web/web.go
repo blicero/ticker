@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-10 21:25:03 krylon>
+// Time-stamp: <2022-10-12 19:50:23 krylon>
 
 package web
 
@@ -63,7 +63,7 @@ type Server struct {
 	mimeTypes map[string]string
 	pool      *database.Pool
 	agent     *download.Agent
-	clsItem   *classifier.Classifier
+	clsItem   classifier.Classifier
 	clsTags   *advisor.Advisor
 	clsStamp  time.Time
 	clsLock   sync.RWMutex
@@ -102,7 +102,7 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 		srv.log.Printf("[ERROR] Failed to create Agent: %s\n",
 			err.Error())
 		return nil, err
-	} else if srv.clsItem, err = classifier.New(); err != nil {
+	} else if srv.clsItem, err = classifier.SimpleNew(); err != nil {
 		srv.log.Printf("[ERROR] Cannot create Classifier: %s\n",
 			err.Error())
 		srv.pool.Close()

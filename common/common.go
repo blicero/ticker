@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-07-23 17:19:55 krylon>
+// Time-stamp: <2022-10-13 16:55:39 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -18,8 +18,9 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
-	"github.com/blicero/ticker/logdomain"
 	"time"
+
+	"github.com/blicero/ticker/logdomain"
 
 	"github.com/hashicorp/logutils"
 	uuid "github.com/odeke-em/go-uuid"
@@ -42,6 +43,15 @@ const (
 	TimestampFormatSubSecond = "2006-01-02 15:04:05.0000 MST"
 	TimestampFormatDate      = "2006-01-02"
 )
+
+// Languages is the list of country codes for the languages we support.
+//
+// At this time, this only refers to the Classifier, but who knows... one
+// day we might support L10N in the user interface or something.
+var Languages = []string{
+	"de",
+	"en",
+}
 
 // LogLevels are the names of the log levels supported by the logger.
 var LogLevels = []logutils.LogLevel{
@@ -123,7 +133,10 @@ var DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName
 var CacheDir = filepath.Join(BaseDir, "cache")
 
 // ArchiveDir is the folder where downloaded/archived pages are stored.
-var ArchiveDir = filepath.Join("BaseDir", "archive")
+var ArchiveDir = filepath.Join(BaseDir, "archive")
+
+// ClassifierDir is the path to the Shield classifier's database.
+var ClassifierDir = filepath.Join(BaseDir, "classifier")
 
 // InitApp performs some basic preparations for the application to run.
 // Currently, this means creating the BaseDir folder.
@@ -132,6 +145,7 @@ func InitApp() error {
 
 	CacheDir = filepath.Join(BaseDir, "cache")
 	ArchiveDir = filepath.Join(BaseDir, "archive")
+	ClassifierDir = filepath.Join(BaseDir, "classifier")
 
 	if err = os.Mkdir(BaseDir, 0700); err != nil && !os.IsExist(err) {
 		return fmt.Errorf("Error creating BaseDir %s: %s", BaseDir, err.Error())
@@ -143,6 +157,19 @@ func InitApp() error {
 		return fmt.Errorf("Error creating ArchiveDir %s: %s",
 			ArchiveDir,
 			err.Error())
+	} else if err = os.Mkdir(ClassifierDir, 0700); err != nil && !os.IsExist(err) {
+		return fmt.Errorf("Error creating folder for classifier database %s: %s",
+			ClassifierDir,
+			err.Error())
+	}
+
+	for _, cc := range Languages {
+		var path = filepath.Join(ClassifierDir, cc)
+		if err = os.Mkdir(path, 0700); err != nil && !os.IsExist(err) {
+			return fmt.Errorf("Error creating folder %s: %s",
+				path,
+				err.Error())
+		}
 	}
 
 	LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppName)))
@@ -167,6 +194,7 @@ func SetBaseDir(path string) error {
 	LogPath = filepath.Join(BaseDir, fmt.Sprintf("%s.log", strings.ToLower(AppName)))
 	DbPath = filepath.Join(BaseDir, fmt.Sprintf("%s.db", strings.ToLower(AppName)))
 	CacheDir = filepath.Join(BaseDir, "cache")
+	ClassifierDir = filepath.Join(BaseDir, "classifier")
 
 	var (
 		err error

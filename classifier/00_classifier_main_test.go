@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 18. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-02-18 09:25:23 krylon>
+// Time-stamp: <2022-10-12 19:05:09 krylon>
 
 package classifier
 
@@ -10,8 +10,9 @@ import (
 	"fmt"
 	"os"
 	"testing"
-	"github.com/blicero/ticker/common"
 	"time"
+
+	"github.com/blicero/ticker/common"
 )
 
 func TestMain(m *testing.M) {
@@ -26,11 +27,6 @@ func TestMain(m *testing.M) {
 			baseDir,
 			err.Error())
 		os.Exit(1)
-		// } else if err = prepareDatabase(); err != nil {
-		// 	fmt.Printf("ERROR preparing database: %s\n",
-		// 		err.Error())
-		// 	fmt.Printf(">>> TEST DIRECTORY: %s\n", baseDir)
-		// 	os.Exit(1)
 	} else if result = m.Run(); result == 0 {
 		// If any test failed, we keep the test directory (and the
 		// database inside it) around, so we can manually inspect it
