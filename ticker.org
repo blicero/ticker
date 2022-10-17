@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2022-10-15 19:19:33 krylon>
+# Time-stamp: <2022-10-17 21:11:48 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -15,17 +15,17 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2022-10-15 Sa 19:19]
+   #+CAPTION: Clock summary at [2022-10-17 Mo 21:11]
    | Headline                                          | Time        |           |          |          |          |      |
    |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
-   | *Total time*                                      | *19d 10:41* |           |          |          |          |      |
+   | *Total time*                                      | *19d 13:19* |           |          |          |          |      |
    |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
-   | Ticker                                            | 19d 10:41   |           |          |          |          |      |
+   | Ticker                                            | 19d 13:19   |           |          |          |          |      |
    | \_  Main                                          |             |      0:56 |          |          |          |      |
    | \_    Shutdown                                    |             |           |     0:56 |          |          |      |
-   | \_  Components [43/51]                            |             | 18d 16:08 |          |          |          |      |
-   | \_    Classifier [0/1]                            |             |           |    12:42 |          |          |      |
-   | \_      Shield                                    |             |           |          |    12:08 |          |      |
+   | \_  Components [44/51]                            |             | 18d 18:46 |          |          |          |      |
+   | \_    Classifier [1/1]                            |             |           |    15:20 |          |          |      |
+   | \_      Shield                                    |             |           |          |    14:46 |          |      |
    | \_    Grouping [1/2]                              |             |           |     6:44 |          |          |      |
    | \_      Remove old cluster stuff                  |             |           |          |     5:35 |          |      |
    | \_      A new approach                            |             |           |          |     1:08 |          |      |
@@ -80,7 +80,7 @@
    | \_    Blacklist                                   |             |           |    15:26 |          |          |      |
    | \_      Use Blacklist                             |             |           |          |     8:28 |          |      |
    | \_  Tedious tasks                                 |             |     14:57 |          |          |          |      |
-   | \_    Performance [2/2]                           |             |           |    14:57 |          |          |      |
+   | \_    Performance [2/3]                           |             |           |    14:57 |          |          |      |
    | \_      Advisor                                   |             |           |          |     4:06 |          |      |
    | \_      Profiling                                 |             |           |          |     7:01 |          |      |
    | \_  Bugs                                          |             |      2:40 |          |          |          |      |
@@ -100,20 +100,22 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [43/51]
+** Components [44/51]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
   :END:
-*** Classifier [0/1]                                                :feature:
+*** Classifier [1/1]                                                :feature:
     :LOGBOOK:
     CLOCK: [2022-10-12 Mi 18:26]--[2022-10-12 Mi 19:00] =>  0:34
     :END:
     I would like to try and improve the classifier.
     If I can get this to work well enough, I might be able to run it
     semi-automatically.
-**** EXPERIMENT Shield
+**** DONE Shield
+     CLOSED: [2022-10-17 Mo 21:11]
      :LOGBOOK:
+     CLOCK: [2022-10-17 Mo 18:33]--[2022-10-17 Mo 21:11] =>  2:38
      CLOCK: [2022-10-15 Sa 17:25]--[2022-10-15 Sa 19:19] =>  1:54
      CLOCK: [2022-10-15 Sa 15:41]--[2022-10-15 Sa 17:20] =>  1:39
      CLOCK: [2022-10-14 Fr 19:44]--[2022-10-14 Fr 21:19] =>  1:35
@@ -749,12 +751,17 @@
      CLOCK: [2021-07-04 So 13:47]--[2021-07-04 So 22:15] =>  8:28
      :END:
 ** Tedious tasks
-*** Performance [2/2]
+*** Performance [2/3]
     :LOGBOOK:
     CLOCK: [2021-05-19 Mi 21:16]--[2021-05-20 Do 01:06] =>  3:50
     :END:
     After running the application on my Raspberry Pi and my home server, I
     have noticed that performance is not super awesome.
+**** TODO Caching
+     So far ([2022-10-17 Mo]), I have left *a lot* of room for optimization on
+     the table. Specifically, I don't do very much caching, which I should
+     really look into. The new Shield classifier uses a database for
+     persistence, so I could change the re-training part.
 **** DONE Advisor
      CLOSED: [2021-05-23 So 20:40]
      :LOGBOOK:
