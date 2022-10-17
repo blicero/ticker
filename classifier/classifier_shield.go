@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 10. 2022 by Benjamin Walkenhorst
 // (c) 2022 Benjamin Walkenhorst
-// Time-stamp: <2022-10-17 20:22:13 krylon>
+// Time-stamp: <2022-10-17 21:52:54 krylon>
 
 package classifier
 
@@ -130,11 +130,16 @@ func (c *ClassifierShield) Classify(item *feed.Item) (string, error) {
 	var (
 		err                error
 		rating, lang, body string
+		s                  shield.Shield
 	)
 
 	lang, body = c.getLanguage(item)
 
-	if rating, err = c.shield[lang].Classify(body); err != nil {
+	if s = c.shield[lang]; s == nil {
+		s = c.shield["en"]
+	}
+
+	if rating, err = s.Classify(body); err != nil {
 		return "", err
 	}
 
