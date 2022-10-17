@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 10. 2022 by Benjamin Walkenhorst
 // (c) 2022 Benjamin Walkenhorst
-// Time-stamp: <2022-10-15 19:08:56 krylon>
+// Time-stamp: <2022-10-17 20:22:13 krylon>
 
 package classifier
 
@@ -17,7 +17,6 @@ import (
 	"github.com/blicero/ticker/database"
 	"github.com/blicero/ticker/feed"
 	"github.com/blicero/ticker/logdomain"
-	"github.com/davecgh/go-spew/spew"
 	"github.com/endeveit/guesslanguage"
 )
 
@@ -59,11 +58,11 @@ func NewShield(pool *database.Pool) (*ClassifierShield, error) {
 		return nil, err
 	}
 
-	for k, v := range c.shield {
-		c.log.Printf("[DEBUG] Shield Classifier for %s: %s\n",
-			k,
-			spew.Sdump(v))
-	}
+	// for k, v := range c.shield {
+	// 	c.log.Printf("[DEBUG] Shield Classifier for %s: %s\n",
+	// 		k,
+	// 		spew.Sdump(v))
+	// }
 
 	return c, nil
 } // func NewShield() (*ClassifierShield, error)
@@ -75,6 +74,17 @@ func (c *ClassifierShield) Train() error {
 		items []feed.Item
 		db    *database.Database
 	)
+
+	for k, v := range c.shield {
+		c.log.Printf("[DEBUG] Reset Shield instance for %s\n",
+			k)
+		if err = v.Reset(); err != nil {
+			c.log.Printf("[ERROR] Cannot reset Shield/%s: %s\n",
+				k,
+				err.Error())
+			return err
+		}
+	}
 
 	db = c.pool.Get()
 	defer c.pool.Put(db)
@@ -94,9 +104,6 @@ func (c *ClassifierShield) Train() error {
 		lang, body = c.getLanguage(&i)
 
 		if s = c.shield[lang]; s == nil {
-			// c.log.Printf("[ERROR] Did not find Shield instance for language %s.\n%s\n\n",
-			// 	lang,
-			// 	body)
 			s = c.shield["en"]
 		}
 

@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-06-14 13:34:14 krylon>
+// Time-stamp: <2022-10-17 20:32:40 krylon>
 
 package web
 
@@ -11,7 +11,7 @@ import (
 	"github.com/blicero/ticker/feed"
 )
 
-const maxSuggestions = 5
+const maxSuggestions = 10
 
 func (srv *Server) suggestTags(items []feed.Item) (map[int64]map[string]advisor.SuggestedTag, error) {
 	// var (

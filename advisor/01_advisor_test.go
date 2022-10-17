@@ -2,12 +2,13 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 27. 05. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2021-05-27 14:15:12 krylon>
+// Time-stamp: <2022-10-17 19:54:51 krylon>
 
 package advisor
 
 import (
 	"testing"
+
 	"github.com/blicero/ticker/feed"
 )
 
@@ -76,7 +77,7 @@ Right-wing agitator Ammon Bundy is banned from the Idaho Capitol and its grounds
 
 	var lng, txt string
 
-	lng, txt = ad.getLanguage(item.Title, item.Description)
+	lng, txt = ad.getLanguage(&item)
 
 	t.Logf("Test Item has language %s, %d characters long",
 		lng,
