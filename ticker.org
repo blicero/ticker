@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2022-10-17 21:11:48 krylon>
+# Time-stamp: <2022-10-18 01:41:00 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -15,12 +15,12 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2022-10-17 Mo 21:11]
+   #+CAPTION: Clock summary at [2022-10-18 Di 01:40]
    | Headline                                          | Time        |           |          |          |          |      |
    |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
-   | *Total time*                                      | *19d 13:19* |           |          |          |          |      |
+   | *Total time*                                      | *19d 16:41* |           |          |          |          |      |
    |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
-   | Ticker                                            | 19d 13:19   |           |          |          |          |      |
+   | Ticker                                            | 19d 16:41   |           |          |          |          |      |
    | \_  Main                                          |             |      0:56 |          |          |          |      |
    | \_    Shutdown                                    |             |           |     0:56 |          |          |      |
    | \_  Components [44/51]                            |             | 18d 18:46 |          |          |          |      |
@@ -83,7 +83,8 @@
    | \_    Performance [2/3]                           |             |           |    14:57 |          |          |      |
    | \_      Advisor                                   |             |           |          |     4:06 |          |      |
    | \_      Profiling                                 |             |           |          |     7:01 |          |      |
-   | \_  Bugs                                          |             |      2:40 |          |          |          |      |
+   | \_  Bugs                                          |             |      6:02 |          |          |          |      |
+   | \_    Broken order of tags in menu                |             |           |     3:22 |          |          |      |
    | \_    Panic in Language Guesser                   |             |           |     2:40 |          |          |      |
    #+END:
 
@@ -783,6 +784,11 @@
      That did not work out well /at all/. I think the problem is that I pull
      in C code via SQLite. :-(
 ** Bugs
+*** TODO Broken order of tags in menu
+    :LOGBOOK:
+    CLOCK: [2022-10-17 Mo 22:18]--[2022-10-18 Di 01:40] =>  3:22
+    :END:
+    Weird, it works perfectly fine if I run ticker on my laptop.
 *** DONE Panic in Language Guesser
     CLOSED: [2021-05-27 Do 14:21]
     :LOGBOOK:
