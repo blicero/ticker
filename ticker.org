@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2022-10-18 01:41:00 krylon>
+# Time-stamp: <2022-10-18 17:06:07 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -15,7 +15,7 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2022-10-18 Di 01:40]
+   #+CAPTION: Clock summary at [2022-10-18 Di 17:06]
    | Headline                                          | Time        |           |          |          |          |      |
    |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
    | *Total time*                                      | *19d 16:41* |           |          |          |          |      |
@@ -784,11 +784,18 @@
      That did not work out well /at all/. I think the problem is that I pull
      in C code via SQLite. :-(
 ** Bugs
-*** TODO Broken order of tags in menu
+*** DONE Broken order of tags in menu
+    CLOSED: [2022-10-18 Di 17:04]
     :LOGBOOK:
     CLOCK: [2022-10-17 Mo 22:18]--[2022-10-18 Di 01:40] =>  3:22
     :END:
     Weird, it works perfectly fine if I run ticker on my laptop.
+
+    Even weirder, I could not reproduce the problem on my laptop or a spare
+    Raspberry Pi, not even when I copied the entire dataset from my server.
+
+    THEN I just rebuilt the project from scratch on my server, and voila -
+    problem disappeared, just like that. I hate it when that happens.
 *** DONE Panic in Language Guesser
     CLOSED: [2021-05-27 Do 14:21]
     :LOGBOOK:
