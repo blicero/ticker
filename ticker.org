@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2022-10-18 17:06:07 krylon>
+# Time-stamp: <2022-10-22 00:23:20 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -15,20 +15,20 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2022-10-18 Di 17:06]
+   #+CAPTION: Clock summary at [2022-10-22 Sa 00:23]
    | Headline                                          | Time        |           |          |          |          |      |
    |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
-   | *Total time*                                      | *19d 16:41* |           |          |          |          |      |
+   | *Total time*                                      | *19d 22:27* |           |          |          |          |      |
    |---------------------------------------------------+-------------+-----------+----------+----------+----------+------|
-   | Ticker                                            | 19d 16:41   |           |          |          |          |      |
+   | Ticker                                            | 19d 22:27   |           |          |          |          |      |
    | \_  Main                                          |             |      0:56 |          |          |          |      |
    | \_    Shutdown                                    |             |           |     0:56 |          |          |      |
-   | \_  Components [44/51]                            |             | 18d 18:46 |          |          |          |      |
+   | \_  Components [45/52]                            |             | 18d 19:02 |          |          |          |      |
    | \_    Classifier [1/1]                            |             |           |    15:20 |          |          |      |
    | \_      Shield                                    |             |           |          |    14:46 |          |      |
-   | \_    Grouping [1/2]                              |             |           |     6:44 |          |          |      |
+   | \_    Grouping [2/2]                              |             |           |     7:00 |          |          |      |
    | \_      Remove old cluster stuff                  |             |           |          |     5:35 |          |      |
-   | \_      A new approach                            |             |           |          |     1:08 |          |      |
+   | \_      A new approach                            |             |           |          |     1:24 |          |      |
    | \_    Feed [7/7]                                  |             |           | 1d 14:32 |          |          |      |
    | \_      Homepage                                  |             |           |          |     0:12 |          |      |
    | \_      Rating [4/4]                              |             |           |          | 1d 11:04 |          |      |
@@ -40,8 +40,8 @@
    | \_    Reader [2/2]                                |             |           |    18:06 |          |          |      |
    | \_      Timestamps                                |             |           |          |     0:15 |          |      |
    | \_      Pseudo-duplicates                         |             |           |          |     2:01 |          |      |
-   | \_    Web interface [19/20]                       |             |           | 4d 15:52 |          |          |      |
-   | \_      Handling Images [5/5]                     |             |           |          | 1d 19:56 |          |      |
+   | \_    Web interface [19/21]                       |             |           | 4d 15:52 |          |          |      |
+   | \_      Handling Images [5/6]                     |             |           |          | 1d 19:56 |          |      |
    | \_        Size matters                            |             |           |          |          |     2:45 |      |
    | \_          Scale                                 |             |           |          |          |          | 0:56 |
    | \_          Check first                           |             |           |          |          |          | 1:49 |
@@ -79,9 +79,9 @@
    | \_      Web interface                             |             |           |          |    17:46 |          |      |
    | \_    Blacklist                                   |             |           |    15:26 |          |          |      |
    | \_      Use Blacklist                             |             |           |          |     8:28 |          |      |
-   | \_  Tedious tasks                                 |             |     14:57 |          |          |          |      |
-   | \_    Performance [2/3]                           |             |           |    14:57 |          |          |      |
-   | \_      Advisor                                   |             |           |          |     4:06 |          |      |
+   | \_  Tedious tasks                                 |             |     20:27 |          |          |          |      |
+   | \_    Performance [1/3]                           |             |           |    20:27 |          |          |      |
+   | \_      Advisor                                   |             |           |          |     9:36 |          |      |
    | \_      Profiling                                 |             |           |          |     7:01 |          |      |
    | \_  Bugs                                          |             |      6:02 |          |          |          |      |
    | \_    Broken order of tags in menu                |             |           |     3:22 |          |          |      |
@@ -101,7 +101,7 @@
     :LOGBOOK:
     CLOCK: [2021-02-17 Mi 19:25]--[2021-02-17 Mi 20:21] =>  0:56
     :END:
-** Components [44/51]
+** Components [45/52]
    :PROPERTIES:
    :COOKIE_DATA: todo recursive
    :VISIBILITY: children
@@ -131,7 +131,7 @@
      I forked the one with the LevelDB backend and added a primitive tokenizer
      for German (because that is my native language), now I have to see if I
      can make it work.
-*** Grouping [1/2]                                                  :feature:
+*** Grouping [2/2]                                                  :feature:
     :LOGBOOK:
     CLOCK: [2022-10-10 Mo 18:06]--[2022-10-10 Mo 18:07] =>  0:01
     :END:
@@ -149,8 +149,10 @@
      [2022-10-11 Di 16:12]
      Turns out it wasn't too bad. I whipped a small one-liner in Perl that
      took care of this so quickly, I first thought it hadn't worked.
-**** MEDITATE A new approach
+**** SUSPENDED A new approach
+     CLOSED: [2022-10-18 Di 18:23]
      :LOGBOOK:
+     CLOCK: [2022-10-18 Di 18:07]--[2022-10-18 Di 18:23] =>  0:16
      CLOCK: [2022-10-11 Di 16:49]--[2022-10-11 Di 17:57] =>  1:08
      :END:
      So, now that we've got the old cluster stuff removed, how do we build a
@@ -168,6 +170,16 @@
 
      [2022-10-11 Di 17:58]
      I have brain fart at the moment, I'm coming back to this later.
+
+     [2022-10-18 Di 18:07]
+     Now that I replaced the old classifier and advisor and feel like the
+     Shield-based advisor is working much better than the old one, I can
+     approach the problem of grouping Items with new confidence.
+     ...
+     But thinking about, this is really hard. Especially if I have news Items
+     in several languages, a purely textual analysis is not going to be very
+     helpful. I think I'll put this on the backburner again, at least for a
+     while.
 *** Feed [7/7]
     :LOGBOOK:
     CLOCK: [2021-02-06 Sa 17:57]--[2021-02-06 Sa 18:47] =>  0:50
@@ -287,7 +299,7 @@
      it works.
      Simply skipping the Item if the headline already exists, is not a good
      idea, either, I should at least take the timestamps into consideration.
-*** Web interface [19/20]
+*** Web interface [19/21]
     :LOGBOOK:
     CLOCK: [2021-03-05 Fr 15:20]--[2021-03-05 Fr 15:49] =>  0:29
     CLOCK: [2021-02-18 Do 18:20]--[2021-02-18 Do 19:20] =>  1:00
@@ -304,9 +316,14 @@
 **** CANCELLED Fartscroll                                           :feature:
      CLOSED: [2021-06-07 Mo 19:48]
      That was a lot less funny than I imagined it would be. Very annoying.
-**** Handling Images [5/5]
+**** Handling Images [5/6]
      Sometimes, item bodies contain images, which makes loading slow, and it
      also can make the layout awkward when these images are large in size.
+***** TODO Spring cleaning
+      After a while, the amount of data acquired by the prefetcher grows
+      pretty large (by my standards), and over time it will grow
+      indefinitely. So I should look into ways to keep this growth in check,
+      either by reducing the amount of data I download or deleting old data.
 ***** DONE Size matters                                            :optimize:
       CLOSED: [2021-06-09 Mi 22:14]
       Turns out some of the images are pretty big, and already they amount to
@@ -752,7 +769,7 @@
      CLOCK: [2021-07-04 So 13:47]--[2021-07-04 So 22:15] =>  8:28
      :END:
 ** Tedious tasks
-*** Performance [2/3]
+*** Performance [1/3]
     :LOGBOOK:
     CLOCK: [2021-05-19 Mi 21:16]--[2021-05-20 Do 01:06] =>  3:50
     :END:
@@ -763,13 +780,24 @@
      the table. Specifically, I don't do very much caching, which I should
      really look into. The new Shield classifier uses a database for
      persistence, so I could change the re-training part.
-**** DONE Advisor
-     CLOSED: [2021-05-23 So 20:40]
+**** TODO [#A] Advisor
      :LOGBOOK:
+     CLOCK: [2022-10-21 Fr 22:56]--[2022-10-22 Sa 00:23] =>  1:27
+     CLOCK: [2022-10-21 Fr 15:34]--[2022-10-21 Fr 16:50] =>  1:16
+     CLOCK: [2022-10-20 Do 16:38]--[2022-10-20 Do 17:55] =>  1:17
+     CLOCK: [2022-10-19 Mi 18:25]--[2022-10-19 Mi 18:25] =>  0:00
+     CLOCK: [2022-10-18 Di 18:42]--[2022-10-18 Di 20:12] =>  1:30
      CLOCK: [2021-05-23 So 16:34]--[2021-05-23 So 20:40] =>  4:06
      :END:
      I moved the Classifiers to the web.Server so they don't get re-trained on
      every request. Big performance gain.
+
+     [2022-10-18 Di 18:29]
+     The Shield-based advisor *and* classifier I use now use a database for
+     persistency. That means retraining them should be entirely unnecessary
+     now, I just need to make sure I train them on a News Item when I rate or
+     tag them and undo it accordingly.
+     That would speed up startup *a lot*.
 **** CANCELLED Profiling
      CLOSED: [2021-05-23 So 12:05]
      :LOGBOOK:
