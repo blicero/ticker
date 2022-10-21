@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 10. 2022 by Benjamin Walkenhorst
 // (c) 2022 Benjamin Walkenhorst
-// Time-stamp: <2022-10-17 21:52:54 krylon>
+// Time-stamp: <2022-10-21 16:43:38 krylon>
 
 package classifier
 
@@ -124,6 +124,54 @@ func (c *ClassifierShield) Train() error {
 
 	return nil
 } // func (c *ClassifierShield) Train() error
+
+func (c *ClassifierShield) Learn(class string, item *feed.Item) error {
+	var (
+		err        error
+		lang, body string
+		s          shield.Shield
+	)
+
+	lang, body = c.getLanguage(item)
+
+	if s = c.shield[lang]; s == nil {
+		s = c.shield["en"]
+	}
+
+	if err = s.Learn(class, body); err != nil {
+		c.log.Printf("[ERROR] Failed to learn Item %d (%s): %s\n",
+			item.ID,
+			item.Title,
+			err.Error())
+		return err
+	}
+
+	return nil
+} // func (c *ClassifierShield) Learn(class string, item *feed.Item) error
+
+func (c *ClassifierShield) Unlearn(class string, item *feed.Item) error {
+	var (
+		err        error
+		lang, body string
+		s          shield.Shield
+	)
+
+	lang, body = c.getLanguage(item)
+
+	if s = c.shield[lang]; s == nil {
+		s = c.shield["en"]
+	}
+
+	if err = s.Forget(class, body); err != nil {
+		c.log.Printf("[ERROR] Failed to learn Item %d (%s): %s\n",
+			item.ID,
+			item.Title,
+			err.Error())
+		return err
+	}
+
+	return nil
+} // func (c *ClassifierShield) Unlearn(class string, item *feed.Item) error
 
 // Classify attempts to find a rating for a news item.
 func (c *ClassifierShield) Classify(item *feed.Item) (string, error) {

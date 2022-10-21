@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-17 20:53:32 krylon>
+// Time-stamp: <2022-10-21 23:52:10 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -159,6 +159,55 @@ func (adv *Advisor) Train() error {
 
 	return nil
 } // func (adv *Advisor) Train() error
+
+// Learn adds a single item to the Advisor's training corpus.
+func (adv *Advisor) Learn(t *tag.Tag, i *feed.Item) error {
+	var (
+		err       error
+		lng, body string
+		s         shield.Shield
+	)
+
+	lng, body = adv.getLanguage(i)
+
+	if s = adv.shield[lng]; s == nil {
+		s = adv.shield["en"]
+	}
+
+	if err = s.Learn(t.Name, body); err != nil {
+		adv.log.Printf("[ERROR] Failed to learn Item %d (%q): %s\n",
+			i.ID,
+			i.Title,
+			err.Error())
+		return err
+	}
+
+	return nil
+} // func (adv *Advisor) Learn(t *tag.Tag, i *feed.Item) error
+
+func (adv *Advisor) Unlearn(t *tag.Tag, i *feed.Item) error {
+	var (
+		err       error
+		lng, body string
+		s         shield.Shield
+	)
+
+	lng, body = adv.getLanguage(i)
+
+	if s = adv.shield[lng]; s == nil {
+		s = adv.shield["en"]
+	}
+
+	if err = s.Forget(t.Name, body); err != nil {
+		adv.log.Printf("[ERROR] Failed to learn Item %d (%q): %s\n",
+			i.ID,
+			i.Title,
+			err.Error())
+		return err
+	}
+
+	return nil
+} // func (adv *Advisor) Unlearn(t *tag.Tag, i *feed.Item) error
 
 type suggList []SuggestedTag
 

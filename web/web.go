@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-15 17:31:10 krylon>
+// Time-stamp: <2022-10-22 00:08:27 krylon>
 
 package web
 
@@ -107,20 +107,20 @@ func Create(addr string, keepAlive bool) (*Server, error) {
 			err.Error())
 		srv.pool.Close()
 		return nil, err
-	} else if err = srv.clsItem.Train(); err != nil {
-		srv.log.Printf("[ERROR] Cannot train Classifier: %s\n",
-			err.Error())
-		srv.pool.Close()
-		return nil, err
+		// } else if err = srv.clsItem.Train(); err != nil {
+		// 	srv.log.Printf("[ERROR] Cannot train Classifier: %s\n",
+		// 		err.Error())
+		// 	srv.pool.Close()
+		// 	return nil, err
 	} else if srv.clsTags, err = advisor.NewAdvisor(); err != nil {
 		srv.log.Printf("[ERROR] Cannot create Advisor: %s\n",
 			err.Error())
 		return nil, err
-	} else if err = srv.clsTags.Train(); err != nil {
-		srv.log.Printf("[ERROR] Cannot train Advisor: %s\n",
-			err.Error())
-		return nil, err
-	}
+	} // else if err = srv.clsTags.Train(); err != nil {
+	// 	srv.log.Printf("[ERROR] Cannot train Advisor: %s\n",
+	// 		err.Error())
+	// 	return nil, err
+	// }
 
 	srv.agent.Start()
 	srv.clsStamp = time.Now()
@@ -2124,6 +2124,7 @@ func (srv *Server) handleTagLinkCreate(w http.ResponseWriter, r *http.Request) {
 		db                          *database.Database
 		tagStr, itemStr, msg, reply string
 		itemID, tagID               int64
+		item                        *feed.Item
 		t                           *tag.Tag
 	)
 
@@ -2151,7 +2152,15 @@ func (srv *Server) handleTagLinkCreate(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if err = db.TagLinkCreate(itemID, tagID); err != nil {
+	if item, err = db.ItemGetByID(itemID); err != nil {
+		msg = fmt.Sprintf("Failed to fetch Item #%d from database: %s",
+			itemID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if item == nil {
+		msg = fmt.Sprintf("Did not find Item #%d in database", itemID)
+		goto SEND_ERROR_MESSAGE
+	} else if err = db.TagLinkCreate(itemID, tagID); err != nil {
 		msg = fmt.Sprintf("Cannot Attach Tag %d to Item %d: %s",
 			tagID,
 			itemID,
@@ -2162,6 +2171,11 @@ func (srv *Server) handleTagLinkCreate(w http.ResponseWriter, r *http.Request) {
 			tagID,
 			err.Error())
 		goto SEND_ERROR_MESSAGE
+	} else if err = srv.clsTags.Learn(t, item); err != nil {
+		srv.log.Printf("[ERROR] Failed to learn Tag %s for Item %q: %s\n",
+			t.Name,
+			item.Title,
+			err.Error())
 	}
 
 	srv.log.Printf("[DEBUG] Attach Tag %d to Item %d successfully.\n",
@@ -2196,6 +2210,8 @@ func (srv *Server) handleTagLinkDelete(w http.ResponseWriter, r *http.Request) {
 		db                          *database.Database
 		tagStr, itemStr, msg, reply string
 		itemID, tagID               int64
+		item                        *feed.Item
+		t                           *tag.Tag
 	)
 
 	if err = r.ParseForm(); err != nil {
@@ -2222,12 +2238,36 @@ func (srv *Server) handleTagLinkDelete(w http.ResponseWriter, r *http.Request) {
 	db = srv.pool.Get()
 	defer srv.pool.Put(db)
 
-	if err = db.TagLinkDelete(itemID, tagID); err != nil {
+	if item, err = db.ItemGetByID(itemID); err != nil {
+		msg = fmt.Sprintf("Failed to fetch Item #%d from database: %s",
+			itemID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if item == nil {
+		msg = fmt.Sprintf("Did not find Item #%d in database",
+			itemID)
+		goto SEND_ERROR_MESSAGE
+	} else if t, err = db.TagGetByID(tagID); err != nil {
+		msg = fmt.Sprintf("Failed to load Tag #%d: %s",
+			tagID,
+			err.Error())
+		goto SEND_ERROR_MESSAGE
+	} else if t == nil {
+		msg = fmt.Sprintf("Did not find Tag #%d in database",
+			tagID)
+		goto SEND_ERROR_MESSAGE
+	} else if err = db.TagLinkDelete(itemID, tagID); err != nil {
 		msg = fmt.Sprintf("Cannot Attach Tag %d to Item %d: %s",
 			tagID,
 			itemID,
 			err.Error())
 		goto SEND_ERROR_MESSAGE
+	} else if err = srv.clsTags.Unlearn(t, item); err != nil {
+		srv.log.Printf("[ERROR] Failed to unlearn Tag %s for Item %s (%d): %s\n",
+			t.Name,
+			item.Title,
+			item.ID,
+			err.Error())
 	}
 
 	srv.log.Printf("[DEBUG] Detach Tag %d from Item %d successfully.\n",
