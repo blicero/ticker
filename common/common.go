@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 01. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-17 21:03:23 krylon>
+// Time-stamp: <2022-10-22 17:16:33 krylon>
 
 // Package common contains definitions used throughout the application
 package common
@@ -36,7 +36,7 @@ import (
 // application.
 const (
 	AppName                  = "Ticker"
-	Version                  = "0.17.0"
+	Version                  = "0.17.1"
 	Debug                    = true
 	TimestampFormatMinute    = "2006-01-02 15:04"
 	TimestampFormat          = "2006-01-02 15:04:05"
