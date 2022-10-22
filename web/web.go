@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-22 00:08:27 krylon>
+// Time-stamp: <2022-10-22 16:38:25 krylon>
 
 package web
 
@@ -1869,11 +1869,11 @@ func (srv *Server) handleUnrateItem(w http.ResponseWriter, r *http.Request) {
 		r.RemoteAddr)
 
 	var (
-		err               error
-		db                *database.Database
-		idStr, msg, reply string
-		id                int64
-		item              *feed.Item
+		err                       error
+		db                        *database.Database
+		idStr, msg, reply, rating string
+		id                        int64
+		item                      *feed.Item
 	)
 
 	vars := mux.Vars(r)
@@ -1897,6 +1897,23 @@ func (srv *Server) handleUnrateItem(w http.ResponseWriter, r *http.Request) {
 		goto SEND_ERROR_MESSAGE
 	} else if item == nil {
 		msg = fmt.Sprintf("No such Item: %d", id)
+		goto SEND_ERROR_MESSAGE
+	} else if !item.IsRated() {
+		msg = fmt.Sprintf("Item %q (%d) is not rated",
+			item.Title,
+			item.ID)
+		goto SEND_ERROR_MESSAGE
+	} else if item.Rating > 0.5 {
+		rating = classifier.Good
+	} else {
+		rating = classifier.Bad
+	}
+
+	if err = srv.clsItem.Unlearn(rating, item); err != nil {
+		msg = fmt.Sprintf("Error unlearning rating for Item %q (%d): %s",
+			item.Title,
+			item.ID,
+			err.Error())
 		goto SEND_ERROR_MESSAGE
 	} else if err = db.ItemRatingClear(item); err != nil {
 		msg = fmt.Sprintf("Cannot clear Rating of Item %d (%q): %s",

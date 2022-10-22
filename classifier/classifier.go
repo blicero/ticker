@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 12. 10. 2022 by Benjamin Walkenhorst
 // (c) 2022 Benjamin Walkenhorst
-// Time-stamp: <2022-10-12 19:20:09 krylon>
+// Time-stamp: <2022-10-22 16:37:04 krylon>
 
 // Package classifier implements semi-automatic rating of news items.
 package classifier
@@ -29,4 +29,6 @@ var nonword = regexp.MustCompile(`\W+`)
 type Classifier interface {
 	Train() error
 	Classify(item *feed.Item) (string, error)
+	Learn(class string, item *feed.Item) error
+	Unlearn(class string, item *feed.Item) error
 }
