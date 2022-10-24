@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-24 19:54:04 krylon>
+// Time-stamp: <2022-10-24 20:34:07 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -241,18 +241,15 @@ func (adv *Advisor) Suggest(item *feed.Item, n int) map[string]SuggestedTag {
 	var list = make(suggList, 0, len(res))
 
 	for c, r := range res {
-		var t = adv.tags[c]
-
-		if t == nil || t.ID == 0 {
+		if t, ok := adv.tags[c]; ok {
+			var s = SuggestedTag{Tag: t, Score: r * 100}
+			list = append(list, s)
+		} else {
 			adv.log.Printf("[CRITICAL] Invalid tag suggested for Item %q (%d):\n%#v\n",
 				item.Title,
 				item.ID,
 				res)
-			continue
 		}
-
-		var s = SuggestedTag{Tag: t, Score: r * 100}
-		list = append(list, s)
 	}
 
 	sort.Sort(list)
