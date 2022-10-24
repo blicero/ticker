@@ -1,5 +1,5 @@
 {{ define "intro" }}
-{{/* Time-stamp: <2022-10-11 15:14:51 krylon> */}}
+{{/* Time-stamp: <2022-10-24 21:20:18 krylon> */}}
 <h1 id="page_title">{{ .Title }}</h1>
 <hr />
 
@@ -24,7 +24,7 @@
 <div class="debug container-fluid">
   {{ app_string }} running on {{ hostname }} (built on {{ app_build }})<br />
   Template rendered on <time>{{ now }}</time><br />
-  Classifier was last trained on {{ fmt_time .TrainStamp }}<br />
+  {{/* Classifier was last trained on {{ fmt_time .TrainStamp }}<br /> */}}
   <div id="beacon" class="debug" onclick="beaconToggle();">
     Beacon
   </div>
