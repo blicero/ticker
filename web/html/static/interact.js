@@ -1,4 +1,4 @@
-// Time-stamp: <2021-07-19 19:18:12 krylon>
+// Time-stamp: <2022-10-24 18:58:09 krylon>
 // -*- mode: javascript; coding: utf-8; -*-
 // Copyright 2015-2020 Benjamin Walkenhorst <krylon@gmx.net>
 //
@@ -584,7 +584,9 @@ function quick_tag (item_id, tag_id, button_id) {
                        'json')
 
     req.fail(function (reply, status_text, xhr) {
-        console.log(`Error attaching Tag to Item: ${status_text} // ${reply}`)
+        const msg = `Error attaching Tag to Item: ${status_text} // ${reply}`
+        console.log(msg)
+        alert(msg)
     })
 } // function quick_tag (item_id, tag_id)
 
