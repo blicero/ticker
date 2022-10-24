@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-24 19:51:03 krylon>
+// Time-stamp: <2022-10-24 19:54:04 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -265,27 +265,6 @@ func (adv *Advisor) Suggest(item *feed.Item, n int) map[string]SuggestedTag {
 	return sugg
 } // func (adv *Advisor) Suggest(item *feed.Item) map[string]float64
 
-// func (adv *Advisor) tokenize(item *feed.Item) []string {
-// 	var (
-// 		body, lang string
-// 	)
-
-// 	lang, body = adv.getLanguage(item)
-
-// 	body = stopwords.CleanString(body, lang, true)
-
-// 	var words = nonword.Split(body, -1)
-
-// 	var tokens = make([]string, len(words))
-
-// 	for i, w := range words {
-// 		var s = stemWord(w, lang)
-// 		tokens[i] = s
-// 	}
-
-// 	return tokens
-// } // func (c *Advisor) tokenize(item *feed.Item) []string
-
 func (adv *Advisor) getLanguage(item *feed.Item) (lng, fullText string) {
 	const (
 		defaultLang = "en"
@@ -333,16 +312,3 @@ func (adv *Advisor) getLanguage(item *feed.Item) (lng, fullText string) {
 
 	return lang, body
 } // func getLanguage(title, description string) (string, string)
-
-// func stemWord(word, lang string) string {
-// 	switch lang {
-// 	case "de":
-// 		return german.Stemmer.Stem(word)
-// 	case "en":
-// 		return porter2.Stemmer.Stem(word)
-// 	default:
-// 		// I will try this first, if it does now work out,
-// 		// I return word verbatim.
-// 		return porter2.Stemmer.Stem(word)
-// 	}
-// } // func stem_word(word, lang string) string
