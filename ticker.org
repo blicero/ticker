@@ -1,5 +1,5 @@
 # -*- mode: org; fill-column: 78; -*-
-# Time-stamp: <2022-10-22 17:09:30 krylon>
+# Time-stamp: <2022-10-24 22:00:51 krylon>
 #
 #+TAGS: optimize(o) refactor(r) bug(b) feature(f) architecture(a)
 #+TAGS: web(w) database(d) javascript(j)
@@ -15,15 +15,15 @@
   based on suggested ratings.
 ** Clocktable
    #+BEGIN: clocktable :scope file :maxlevel 20
-   #+CAPTION: Clock summary at [2022-10-22 Sa 17:09]
+   #+CAPTION: Clock summary at [2022-10-24 Mo 22:00]
    | Headline                                          | Time       |           |          |          |          |      |
    |---------------------------------------------------+------------+-----------+----------+----------+----------+------|
-   | *Total time*                                      | *20d 0:12* |           |          |          |          |      |
+   | *Total time*                                      | *20d 3:12* |           |          |          |          |      |
    |---------------------------------------------------+------------+-----------+----------+----------+----------+------|
-   | Ticker                                            | 20d 0:12   |           |          |          |          |      |
+   | Ticker                                            | 20d 3:12   |           |          |          |          |      |
    | \_  Main                                          |            |      0:56 |          |          |          |      |
    | \_    Shutdown                                    |            |           |     0:56 |          |          |      |
-   | \_  Components [45/52]                            |            | 18d 19:02 |          |          |          |      |
+   | \_  Components [45/52]                            |            | 18d 19:03 |          |          |          |      |
    | \_    Classifier [1/1]                            |            |           |    15:20 |          |          |      |
    | \_      Shield                                    |            |           |          |    14:46 |          |      |
    | \_    Grouping [2/2]                              |            |           |     7:00 |          |          |      |
@@ -40,12 +40,13 @@
    | \_    Reader [2/2]                                |            |           |    18:06 |          |          |      |
    | \_      Timestamps                                |            |           |          |     0:15 |          |      |
    | \_      Pseudo-duplicates                         |            |           |          |     2:01 |          |      |
-   | \_    Web interface [19/21]                       |            |           | 4d 15:52 |          |          |      |
-   | \_      Handling Images [5/6]                     |            |           |          | 1d 19:56 |          |      |
+   | \_    Web interface [19/21]                       |            |           | 4d 15:53 |          |          |      |
+   | \_      Handling Images [5/6]                     |            |           |          | 1d 19:57 |          |      |
    | \_        Size matters                            |            |           |          |          |     2:45 |      |
    | \_          Scale                                 |            |           |          |          |          | 0:56 |
    | \_          Check first                           |            |           |          |          |          | 1:49 |
    | \_        Prefetch images and such                |            |           |          |          | 1d 17:11 |      |
+   | \_        Spring cleaning                         |            |           |          |          |     0:01 |      |
    | \_      Various small-ish improvements [3/3]      |            |           |          |    12:08 |          |      |
    | \_        Display time the Classifier was last... |            |           |          |          |     1:14 |      |
    | \_        Make Tag suggestions clickable links    |            |           |          |          |     1:57 |      |
@@ -83,7 +84,8 @@
    | \_    Performance [2/3]                           |            |           |    22:12 |          |          |      |
    | \_      Advisor                                   |            |           |          |    11:21 |          |      |
    | \_      Profiling                                 |            |           |          |     7:01 |          |      |
-   | \_  Bugs                                          |            |      6:02 |          |          |          |      |
+   | \_  Bugs                                          |            |      9:01 |          |          |          |      |
+   | \_    Empty tag in suggestions                    |            |           |     2:59 |          |          |      |
    | \_    Broken order of tags in menu                |            |           |     3:22 |          |          |      |
    | \_    Panic in Language Guesser                   |            |           |     2:40 |          |          |      |
    #+END:
@@ -319,11 +321,6 @@
 **** Handling Images [5/6]
      Sometimes, item bodies contain images, which makes loading slow, and it
      also can make the layout awkward when these images are large in size.
-***** TODO Spring cleaning
-      After a while, the amount of data acquired by the prefetcher grows
-      pretty large (by my standards), and over time it will grow
-      indefinitely. So I should look into ways to keep this growth in check,
-      either by reducing the amount of data I download or deleting old data.
 ***** DONE Size matters                                            :optimize:
       CLOSED: [2021-06-09 Mi 22:14]
       Turns out some of the images are pretty big, and already they amount to
@@ -384,6 +381,14 @@
       [2021-06-06 So 14:56]
       Yeah, there was a syntax error in the function that calculates the image
       size, so they were not resized. FIXED now.
+***** TODO Spring cleaning
+      :LOGBOOK:
+      CLOCK: [2022-10-24 Mo 18:58]--[2022-10-24 Mo 18:59] =>  0:01
+      :END:
+      After a while, the amount of data acquired by the prefetcher grows
+      pretty large (by my standards), and over time it will grow
+      indefinitely. So I should look into ways to keep this growth in check,
+      either by reducing the amount of data I download or deleting old data.
 **** Various small-ish improvements [3/3]
      :LOGBOOK:
      CLOCK: [2021-03-14 So 16:40]--[2021-03-14 So 16:54] =>  0:14
@@ -814,7 +819,14 @@
      [2021-05-23 So 12:04]
      That did not work out well /at all/. I think the problem is that I pull
      in C code via SQLite. :-(
-** Bugs
+** Bugs                                                                 :bug:
+*** DONE Empty tag in suggestions
+    CLOSED: [2022-10-24 Mo 22:00]
+    :LOGBOOK:
+    CLOCK: [2022-10-24 Mo 19:01]--[2022-10-24 Mo 22:00] =>  2:59
+    :END:
+    Lately, I have noticed that the list of suggested tags sometimes contains
+    a Tag with ID 0, which obviously doesn't exist. What's up with that?
 *** DONE Broken order of tags in menu
     CLOSED: [2022-10-18 Di 17:04]
     :LOGBOOK:
