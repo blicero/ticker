@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-21 23:52:10 krylon>
+// Time-stamp: <2022-10-24 19:51:03 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -35,9 +35,8 @@ type SuggestedTag struct {
 
 // Advisor can suggest Tags for News Items.
 type Advisor struct {
-	db  *database.Database
-	log *log.Logger
-	//cls  bayesian.Classifier
+	db     *database.Database
+	log    *log.Logger
 	shield map[string]shield.Shield
 	tags   map[string]tag.Tag
 }
@@ -243,6 +242,15 @@ func (adv *Advisor) Suggest(item *feed.Item, n int) map[string]SuggestedTag {
 
 	for c, r := range res {
 		var t = adv.tags[c]
+
+		if t == nil || t.ID == 0 {
+			adv.log.Printf("[CRITICAL] Invalid tag suggested for Item %q (%d):\n%#v\n",
+				item.Title,
+				item.ID,
+				res)
+			continue
+		}
+
 		var s = SuggestedTag{Tag: t, Score: r * 100}
 		list = append(list, s)
 	}
