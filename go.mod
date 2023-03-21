@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/SlyMarbo/rss v1.0.1
 	github.com/anmitsu/go-shlex v0.0.0-20200514113438-38f4b401e2be
-	github.com/blicero/krylib v0.0.0-20210224100727-002c413214d3
+	github.com/blicero/krylib v0.0.0-20230308180103-2ef208d8985d
 	github.com/blicero/shield v0.0.0-20221011200435-788bfada6e93
 	github.com/endeveit/guesslanguage v0.0.0-20141216121003-b9ec07401dcb
 	github.com/go-shiori/dom v0.0.0-20210510042244-c74b4cff1404

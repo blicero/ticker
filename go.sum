@@ -8,6 +8,8 @@ github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394 h1:OYA+5W64v3OgClL+I
 github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394/go.mod h1:Q8n74mJTIgjX4RBBcHnJ05h//6/k6foqmgE45jTQtxg=
 github.com/blicero/krylib v0.0.0-20210224100727-002c413214d3 h1:6C7cqJt6gQkOm8VSk+ySVuoKXiueWNLm6k/cu3ZB8iA=
 github.com/blicero/krylib v0.0.0-20210224100727-002c413214d3/go.mod h1:LB2iExiByXSIkuHK9FXP3UmEr+9KZ3+ZQ6XhtETG+T8=
+github.com/blicero/krylib v0.0.0-20230308180103-2ef208d8985d h1:DDdGKdGf1NVImKRy4PdpIqoVgdQkdKyK9Y1VDsAcI24=
+github.com/blicero/krylib v0.0.0-20230308180103-2ef208d8985d/go.mod h1:gdk/cGEYmmPxCWUnKDJNE1FytWYGaNjDMdtWQFtpSjA=
 github.com/blicero/shield v0.0.0-20221011200435-788bfada6e93 h1:4ljyYCg1E05xhf/ao542nBeZ8uYp1Jd4SlV8X/rtTlg=
 github.com/blicero/shield v0.0.0-20221011200435-788bfada6e93/go.mod h1:I0xnAeY2tYWgVsiPXkoTMaOPMgCrHDnGluaThxnLLmo=
 github.com/endeveit/guesslanguage v0.0.0-20141216121003-b9ec07401dcb h1:z95fAkb3aRK1ufsrcpS4/yiIEtpipJjTgJfivhLU4Gc=
