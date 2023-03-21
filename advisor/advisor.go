@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-24 20:34:07 krylon>
+// Time-stamp: <2023-03-21 11:18:39 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -252,10 +252,11 @@ func (adv *Advisor) Suggest(item *feed.Item, n int) map[string]SuggestedTag {
 		}
 	}
 
+	var cnt = krylib.Min(len(list), n)
 	sort.Sort(list)
-	sugg = make(map[string]SuggestedTag, n)
+	sugg = make(map[string]SuggestedTag, cnt)
 
-	for _, s := range list[:n] {
+	for _, s := range list[:cnt] {
 		sugg[s.Tag.Name] = s
 	}
 
