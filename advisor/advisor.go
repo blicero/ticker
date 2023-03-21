@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2023-03-21 11:18:39 krylon>
+// Time-stamp: <2023-03-21 11:27:21 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -22,6 +22,7 @@ import (
 	"github.com/blicero/ticker/logdomain"
 	"github.com/blicero/ticker/tag"
 
+	"github.com/blicero/krylib"
 	"github.com/endeveit/guesslanguage"
 )
 
