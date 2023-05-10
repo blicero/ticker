@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 10. 03. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2023-03-21 11:27:21 krylon>
+// Time-stamp: <2023-05-10 16:35:48 krylon>
 
 // Package advisor provides suggestions on what Tags one might want to attach
 // to news Items.
@@ -257,8 +257,10 @@ func (adv *Advisor) Suggest(item *feed.Item, n int) map[string]SuggestedTag {
 	sort.Sort(list)
 	sugg = make(map[string]SuggestedTag, cnt)
 
-	for _, s := range list[:cnt] {
-		sugg[s.Tag.Name] = s
+	if cnt > 0 {
+		for _, s := range list[:cnt] {
+			sugg[s.Tag.Name] = s
+		}
 	}
 
 	return sugg
