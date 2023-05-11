@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2022-10-22 16:38:25 krylon>
+// Time-stamp: <2023-05-10 16:59:20 krylon>
 
 package web
 
@@ -721,10 +721,13 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 		} else if class == classifier.Bad {
 			data.Items[idx].Rating = -100
 		} else {
-			srv.log.Printf("[ERROR] Unexpected classification for Item %s (%d): %s\n",
-				item.Title,
+			srv.log.Printf("[ERROR] Could not find classification for Item %d (%s)\n",
 				item.ID,
-				err.Error())
+				item.Title)
+			// srv.log.Printf("[ERROR] Unexpected classification for Item %s (%d): %s\n",
+			// 	item.Title,
+			// 	item.ID,
+			// 	err.Error())
 		}
 	}
 
