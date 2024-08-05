@@ -2,7 +2,7 @@
 // -*- mode: go; coding: utf-8; -*-
 // Created on 11. 02. 2021 by Benjamin Walkenhorst
 // (c) 2021 Benjamin Walkenhorst
-// Time-stamp: <2023-05-10 16:59:20 krylon>
+// Time-stamp: <2024-08-05 18:56:11 krylon>
 
 package web
 
@@ -50,6 +50,7 @@ var assets embed.FS
 const (
 	defaultPoolSize = 4
 	agentCnt        = 2
+	cacheControl    = "max-age=3600, public"
 )
 
 // Server implements the web interface
@@ -394,7 +395,7 @@ func (srv *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -462,7 +463,7 @@ func (srv *Server) handleFeedAll(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -515,7 +516,7 @@ func (srv *Server) handleFeedForm(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -740,7 +741,7 @@ func (srv *Server) handleItems(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -856,7 +857,7 @@ func (srv *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -1026,7 +1027,7 @@ func (srv *Server) handleSearchMore(w http.ResponseWriter, r *http.Request) {
 
 	data.Messages = srv.getMessages()
 
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -1094,7 +1095,7 @@ func (srv *Server) handleTagList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Messages = srv.getMessages()
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -1277,7 +1278,7 @@ func (srv *Server) handleTagDetails(w http.ResponseWriter, r *http.Request) {
 
 	data.Title = fmt.Sprintf("Details for Tag %s", data.Tag.Name)
 	data.Messages = srv.getMessages()
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
 			tmplName,
@@ -1348,7 +1349,7 @@ func (srv *Server) handleReadLaterAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data.Messages = srv.getMessages()
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	w.Header().Set("Content-Type", "text/html")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
@@ -1466,7 +1467,7 @@ func (srv *Server) handleArchive(w http.ResponseWriter, r *http.Request) {
 	sort.Sort(itemList(data.Items))
 
 	data.Messages = srv.getMessages()
-	w.Header().Set("Cache-Control", "no-store, max-age=0")
+	w.Header().Set("Cache-Control", cacheControl)
 	w.Header().Set("Content-Type", "text/html")
 	if err = tmpl.Execute(w, &data); err != nil {
 		msg = fmt.Sprintf("Error rendering template %q: %s",
@@ -1526,7 +1527,7 @@ func (srv *Server) handleArchivedFile(w http.ResponseWriter, r *http.Request) {
 	if common.Debug {
 		w.Header().Set("Cache-Control", "no-store, max-age=0")
 	} else {
-		w.Header().Set("Cache-Control", "max-age=7200")
+		w.Header().Set("Cache-Control", cacheControl)
 	}
 
 	w.WriteHeader(200)
@@ -1582,7 +1583,7 @@ func (srv *Server) handleCachedImg(w http.ResponseWriter, r *http.Request) {
 	if common.Debug {
 		w.Header().Set("Cache-Control", "no-store, max-age=0")
 	} else {
-		w.Header().Set("Cache-Control", "max-age=7200")
+		w.Header().Set("Cache-Control", cacheControl)
 	}
 	w.Header().Set("Content-Type", imgType)
 	w.WriteHeader(200)
@@ -1609,7 +1610,7 @@ func (srv *Server) handleFavIco(w http.ResponseWriter, request *http.Request) {
 	if !common.Debug {
 		w.Header().Set("Cache-Control", "max-age=7200")
 	} else {
-		w.Header().Set("Cache-Control", "no-store, max-age=0")
+		w.Header().Set("Cache-Control", cacheControl)
 	}
 
 	var (
@@ -1657,7 +1658,7 @@ func (srv *Server) handleStaticFile(w http.ResponseWriter, request *http.Request
 	if common.Debug {
 		w.Header().Set("Cache-Control", "no-store, max-age=0")
 	} else {
-		w.Header().Set("Cache-Control", "max-age=7200")
+		w.Header().Set("Cache-Control", cacheControl)
 	}
 
 	var (
